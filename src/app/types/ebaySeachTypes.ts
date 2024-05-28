@@ -1,17 +1,17 @@
 export type EbaySearch = {
     q: string,
-    gtin: string,
-    charity_ids: string,
-    fieldgroups: string,
-    compatibility_filter: CompatibilityFilter,
-    auto_correct: string,
-    category_ids: string,
-    filter: FilterField,
-    sort: SortField,
-    limit: string,
-    offset: string,
-    aspect_filter: AspectFilter,
-    epid: string
+    gtin?: string,
+    charity_ids?: string,
+    fieldgroups?: string,
+    compatibility_filter?: CompatibilityFilter,
+    auto_correct?: string,
+    category_ids?: string,
+    filter?: FilterField,
+    sort?: SortField,
+    limit?: string,
+    offset?: string,
+    aspect_filter?: AspectFilter,
+    epid?: string
 }
 
 type CompatibilityFilter = "Not implemented for vehicle requirements"

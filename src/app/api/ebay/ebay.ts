@@ -1,11 +1,10 @@
 import EbayAuthToken from "ebay-oauth-nodejs-client"
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import { EbaySearch, EbaySearchReturn } from "@/app/types/ebaySeachTypes";
-import { Jim_Nightshade } from "next/font/google";
 import { EbayGetItemReturn, ebayGetItem } from "@/app/types/ebayGetItemTypes";
 
-class Ebay {
-    static scopes = [];
+export class Ebay {
+    static scopes = ["https://api.ebay.com/oauth/api_scope"];
     token: string;
     axios: AxiosInstance;
     private constructor (token: string) {
@@ -17,9 +16,17 @@ class Ebay {
                 "Authorization": `Bearer ${this.token}`
             }
         })
+        async function responseErrorHandler(res: AxiosError) {
+            if (res.status != 200) {
+                throw new Error(JSON.stringify(await res.toJSON()))
+            }
+        }
+        this.axios.interceptors.response.use((res: AxiosResponse) => {
+            return res
+        }, responseErrorHandler)
     }
 
-    async initialise () {
+    static async initialise () {
         const ebayAuth = new EbayAuthToken(
             {
                 clientId: process.env.CLIENT_ID!,
@@ -27,30 +34,23 @@ class Ebay {
                 redirectUri: process.env.REDIRECT_URI!,
             }
         )
-        const token = await ebayAuth.getApplicationToken("PRODUCTION", Ebay.scopes)
-        return new Ebay(token);
+        let token = await ebayAuth.getApplicationToken("PRODUCTION", Ebay.scopes)
+        token = JSON.parse(token);
+        return new Ebay(token.access_token);
     }
 
     async search( options: EbaySearch): Promise<EbaySearchReturn> {
         const res = await this.axios.get("/buy/browse/v1/item_summary/search", {
             params: options
         })
-        if (res.status != 200) {
-            throw new Error(res.statusText);
-        } else {
-            return res.data;
-        }
+        return res.data;
     }
 
     async getItem( options: ebayGetItem ): Promise<EbayGetItemReturn> {
         const res = await this.axios.get("/buy/browse/v1/item", {
             params: options
         })
-        if (res.status != 200) {
-            throw new Error(res.statusText);
-        } else {
-            return res.data;
-        }
+        return res.data
     }
 
 }
