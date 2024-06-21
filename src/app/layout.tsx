@@ -14,9 +14,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const style = {
+    width: "100vw",
+    height: "100vh",
+    border: "1px solid red"
+  }
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className} style={style}>{children}</body>
     </html>
   );
 }

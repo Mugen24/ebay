@@ -1,6 +1,6 @@
 export type ebayGetItem = {
     item_id: string,
-    fieldgroups: "PRODUCT" | "COMPACT" | "ADDITIONAL_SELLER_DETAILS"
+    fieldgroups?: "PRODUCT" | "COMPACT" | "ADDITIONAL_SELLER_DETAILS"
 }
 
 export interface EbayGetItemReturn {

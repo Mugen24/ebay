@@ -35,8 +35,8 @@ export class Ebay {
             }
         )
         let token = await ebayAuth.getApplicationToken("PRODUCTION", Ebay.scopes)
-        token = JSON.parse(token);
-        return new Ebay(token.access_token);
+        const parsed_token= JSON.parse(token);
+        return new Ebay(parsed_token.access_token);
     }
 
     async search( options: EbaySearch): Promise<EbaySearchReturn> {
