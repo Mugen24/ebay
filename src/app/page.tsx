@@ -1,12 +1,27 @@
 "use client"
 
 import { MutableRefObject, forwardRef, useRef } from "react"
-import { EbaySearchReturn } from "./types/ebaySeachTypes";
+import { EbaySearchReturn, CategoryDistribution} from "./types/ebaySeachTypes";
 
 
 async function sendSearch(formRef: MutableRefObject<any>) {
     // fetch("http://localhost:3000/api/search")
     console.log(formRef.current)
+}
+
+async function categoryRefinements(category_refinements: CategoryDistribution[]) {
+    category_refinements = category_refinements.toSorted((a, b) => {
+        return Number(b.matchCount) - Number(a.matchCount)
+    })
+    // category_refinements = category_refinements.slice(0, 3)
+
+    return category_refinements.map((cat: CategoryDistribution) => {
+        return {
+            categoryName: cat.categoryName,
+            categoryId: cat.categoryId,
+            matchCount: cat.matchCount
+        }
+    })
 }
 
 
@@ -18,13 +33,23 @@ function _SearchBar({ onClick }, ref: any) {
         }
 
         let q = searchInputRef.current.value;
-        fetch(`http://localhost:3000/api/ebay/search?q=${q}&limit=3&fieldgroups=CATEGORY_REFINEMENTS`)
+        fetch(`http://localhost:3000/api/ebay/search?q=${q}&limit=3&fieldgroups=CATEGORY_REFINEMENTS,ASPECT_REFINEMENTS`)
         .then(value => {
             return value.json()
         })
         .then(value => {
             let ebaySearchReturn: EbaySearchReturn = value
-            console.log(ebaySearchReturn)
+            let mainCategoryPromise = categoryRefinements(ebaySearchReturn.refinement.categoryDistributions)
+            mainCategoryPromise.then(value => {
+                console.log(value)
+                value.forEach((v) => {
+                    if (v.categoryId == ebaySearchReturn.refinement.dominantCategoryId) {
+                        console.log("Dominant")
+                        console.log(v.categoryName)
+                    }
+                })
+            })
+            // console.log(ebaySearchReturn)
         })
         .catch()
     }
