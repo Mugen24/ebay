@@ -1,5 +1,5 @@
 export type EbaySearch = {
-    q: string,
+    q?: string,
     gtin?: string,
     charity_ids?: string,
     fieldgroups?: string,

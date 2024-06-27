@@ -1,61 +1,19 @@
 "use client"
 
-import { MutableRefObject, forwardRef, useRef } from "react"
-import { EbaySearchReturn, CategoryDistribution} from "./types/ebaySeachTypes";
+import { MutableRefObject, ReactHTMLElement, SetStateAction, forwardRef, useEffect, useRef, useState } from "react"
+import { Category, CategoryDistribution, EbaySearch, EbaySearchReturn, ItemSummary} from "./types/ebaySeachTypes";
+import axios, { Axios, AxiosInstance } from "axios";
+import { baseAxios } from "./EbayAxios";
+import { formToJSON } from "axios";
+import { Ebay } from "./api/ebay/ebay";
+import { EbayItem } from "./EbayItem";
 
-
-async function sendSearch(formRef: MutableRefObject<any>) {
-    // fetch("http://localhost:3000/api/search")
-    console.log(formRef.current)
-}
-
-async function categoryRefinements(category_refinements: CategoryDistribution[]) {
-    category_refinements = category_refinements.toSorted((a, b) => {
-        return Number(b.matchCount) - Number(a.matchCount)
-    })
-    // category_refinements = category_refinements.slice(0, 3)
-
-    return category_refinements.map((cat: CategoryDistribution) => {
-        return {
-            categoryName: cat.categoryName,
-            categoryId: cat.categoryId,
-            matchCount: cat.matchCount
-        }
-    })
-}
-
-
-function _SearchBar({ onClick }, ref: any) {
+function _SearchBar({ onClick }: {onClick: () => void }, ref: any) {
     let searchInputRef = useRef(null);
-    function preSearch() {
-        if (searchInputRef.current === null) {
-            return
-        }
-
-        let q = searchInputRef.current.value;
-        fetch(`http://localhost:3000/api/ebay/search?q=${q}&limit=3&fieldgroups=CATEGORY_REFINEMENTS,ASPECT_REFINEMENTS`)
-        .then(value => {
-            return value.json()
-        })
-        .then(value => {
-            let ebaySearchReturn: EbaySearchReturn = value
-            let mainCategoryPromise = categoryRefinements(ebaySearchReturn.refinement.categoryDistributions)
-            mainCategoryPromise.then(value => {
-                console.log(value)
-                value.forEach((v) => {
-                    if (v.categoryId == ebaySearchReturn.refinement.dominantCategoryId) {
-                        console.log("Dominant")
-                        console.log(v.categoryName)
-                    }
-                })
-            })
-            // console.log(ebaySearchReturn)
-        })
-        .catch()
-    }
     return (
         <form ref={ref}>
-            <input ref={searchInputRef} type="text" name="q" onInput={preSearch}></input>
+            <div id="Category"></div>
+            <input ref={searchInputRef} type="text" name="q"></input>
             <input type="button" onClick={onClick} defaultValue="Enter"/>
         </form>
     )
@@ -63,29 +21,87 @@ function _SearchBar({ onClick }, ref: any) {
 
 const SearchBar = forwardRef(_SearchBar)
 
+function SideBar(
+        { ebayAxios, searchUrl, getCategories, setEbayItems}: 
+        { 
+            ebayAxios: MutableRefObject<Axios>,
+            searchUrl: MutableRefObject<string>,
+            getCategories: () => CategoryDistribution[],
+            setEbayItems: (rawReponse: EbaySearchReturn) => void
+        }
+    ) {
+
+    function refineCategoryItemCall(categories_id: string) {
+        return () => {
+            ebayAxios.current.get(searchUrl.current + `&categories_id=${categories_id}`)
+            .then((value) => setEbayItems(JSON.parse(value.data)))
+        }
+    }
+
+    const reactCategories = []
+    if (getCategories !== undefined) {
+        const categories = getCategories();
+        for (const cat of categories) {
+            reactCategories.push(
+                <div><a key={cat.categoryId} onClick={refineCategoryItemCall(cat.categoryId)}>{cat.categoryName}</a></div>
+            )
+        }
+    }
+    return (
+        <div>
+            {reactCategories}
+        </div>
+    )
+}
+
 
 export default function main () {
     const style = {
         height: "100px"
     }
     const formRef = useRef(null)
+    const refAxios: MutableRefObject<Axios> = useRef(new Axios(baseAxios))
+    const refOldSearchUrl: MutableRefObject<string> = useRef("")
+    const [ ebayItems, _setEbayItems ]: [ EbayItem[] | undefined, any] = useState()
+    const [ categories, _setCategories ]  = useState([])
+
+    function setEbayItems(rawReponse: EbaySearchReturn) {
+        const itemSummaries = rawReponse.itemSummaries;
+        console.log(rawReponse)
+        _setEbayItems(itemSummaries.map(value => EbayItem.fromItemSummary(value)))
+    }
+
+
+    function getCategories() {
+        return categories as CategoryDistribution[]
+    }
 
     function getForm() {
+        const searchOptionals: EbaySearch = {
+            fieldgroups: "CATEGORY_REFINEMENTS,ASPECT_REFINEMENTS"
+        }
+
+
         if (formRef.current === null) {
             return
         }
 
-        console.log("hello")
-        const queries = new FormData(formRef.current)
-        for (let [key, value] of queries.entries()) {
-            console.log(key)
-            console.log(value)
-        }
+        const queries = formToJSON(new FormData(formRef.current))
+        const searchQueries = new URLSearchParams(Object.assign({}, queries, searchOptionals))
+
+
+        refOldSearchUrl.current = `/api/ebay/search?${searchQueries.toString()}`
+        refAxios.current.get(refOldSearchUrl.current)
+        .then((value) => {
+            const ebaySearchReturn: EbaySearchReturn = JSON.parse(value.data);
+            _setCategories(ebaySearchReturn.refinement.categoryDistributions)
+        })
     }
 
     return (
         <div style={style}>
             <SearchBar onClick={getForm} ref={formRef}/>
+            <SideBar setEbayItems={setEbayItems} ebayAxios={refAxios} getCategories={getCategories} searchUrl={refOldSearchUrl}></SideBar>
         </div>
     )
 }
