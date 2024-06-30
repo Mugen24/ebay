@@ -1,4 +1,4 @@
-export type EbaySearch = {
+export interface EbaySearch extends Object {
     q?: string,
     gtin?: string,
     charity_ids?: string,
@@ -6,7 +6,7 @@ export type EbaySearch = {
     compatibility_filter?: CompatibilityFilter,
     auto_correct?: string,
     category_ids?: string,
-    filter?: FilterField,
+    filter?: string,
     sort?: SortField,
     limit?: string,
     offset?: string,

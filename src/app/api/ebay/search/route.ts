@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
     if (!isEbaySearch(searchOptions)) {
         is_error = true
         error_reason = "Not EbaySearch"
+        console.log(searchOptions)
     }
 
 

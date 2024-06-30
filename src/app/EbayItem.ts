@@ -1,4 +1,9 @@
-import { Category, CategoryDistribution, EbaySearchReturn, Image, ItemSummary } from "./types/ebaySeachTypes";
+import { Key } from "react";
+import { Category, CategoryDistribution, EbaySearch, EbaySearchReturn, Image, ItemSummary } from "./types/ebaySeachTypes";
+import { Axios } from "axios";
+import { baseAxios } from "./EbayAxios";
+import { url } from "inspector";
+import { URLSearchParamsToJson } from "./utils";
 
 type ebayLink = string;
 type CategoryId = string;
@@ -50,3 +55,90 @@ export class EbayUtils {
 }
 
 
+
+export class EbaySearchConfig {
+    _data: EbaySearch
+    _tempData: EbaySearch
+    constructor (res: EbaySearch) {
+        this._data = {
+            q: res.q
+        }
+
+        this._tempData = Object.fromEntries(Object.entries(res).filter(([key]) => {
+            return !(key in Object.keys(this._data))
+        }))
+
+    }
+
+    addEntry <Key extends keyof EbaySearch> (key: Key, value: EbaySearch[Key]) {
+        this._data[key] = value
+    }
+    addTempEntry <Key extends keyof EbaySearch> (key: Key, value: EbaySearch[Key]) {
+        this._tempData[key] = value
+    }
+    flushTempEntries () {
+        this._tempData = {}
+    }
+    toJson() {
+        return Object.assign({}, this._data, this._tempData)
+    }
+}
+
+
+export class AxiosSearch {
+    axios: Axios
+    searchConfig: EbaySearchConfig | undefined
+    constructor () {
+        this.axios = new Axios(baseAxios)
+        this.searchConfig = undefined
+    }
+
+    setParams (request: EbaySearch) {
+        this.searchConfig = new EbaySearchConfig(request)
+    }
+
+    addEntry (key: keyof EbaySearch, value: any) {
+        this.searchConfig?.addEntry(key, value)
+    }
+
+    addTempEntry (key: keyof EbaySearch, value: any) {
+        this.searchConfig?.addTempEntry(key, value)
+    }
+
+    flushTempEntry () {
+        this.searchConfig?.flushTempEntries()
+    }
+
+    search () {
+        if (this.searchConfig === undefined) {
+            throw new Error("Item Params has not been set up")
+        }
+        //Add some default value
+        if (this.searchConfig._data["filter"] === undefined) {
+            this.searchConfig.addTempEntry("filter", "conditions:{USED|UNSPECIFIED}")
+        } else {
+            this.searchConfig.addTempEntry("filter", this.searchConfig._data["filter"]+",conditions:{USED|UNSPECIFIED}")
+        }
+
+        // console.log(this.searchConfig.toJson())
+        return this.axios.request({
+            url: "/api/ebay/search",
+            params: this.searchConfig.toJson()
+        }).then (value => {
+            this.flushTempEntry()
+            return value
+        })
+    }
+    searchRaw(url: string) {
+        // console.log(this.searchConfig.toJson())
+        const newUrl = new URL(url);
+
+        return this.axios.request({
+            url: "/api/ebay/search",
+            params: URLSearchParamsToJson(newUrl.searchParams)
+        }).then (value => {
+            this.flushTempEntry()
+            return value
+        })
+    }
+}

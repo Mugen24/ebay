@@ -13,6 +13,7 @@ export class Ebay {
             baseURL: "https://api.ebay.com",
             headers: {
                 "X-EBAY-C-ENDUSERCTX": "contextualLocation=country=AU,zip=2166",
+                "X-EBAY-C-MARKETPLACE-ID": "EBAY_AU",
                 "Authorization": `Bearer ${this.token}`
             }
         })

@@ -5,3 +5,11 @@ export function formToJson(form: FormData) {
     }
     return jsonForm
 }
+
+export function URLSearchParamsToJson(params: URLSearchParams) {
+    const data: Record<string, any> = {}
+    for (const [key, value] of params) {
+        data[key] = value
+    }
+    return data
+}
