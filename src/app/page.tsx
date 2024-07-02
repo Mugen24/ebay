@@ -1,9 +1,12 @@
 "use client"
 
-import { MutableRefObject, useRef, useState } from "react"
-import { EbaySearch } from "./types/ebaySeachTypes";
+import { Dispatch, MutableRefObject, SetStateAction, useEffect, useRef, useState } from "react"
+import { EbaySearch, EbaySearchReturn } from "./types/ebaySeachTypes";
 import { formToJSON } from "axios";
 import { useRouter } from "next/navigation";
+import { PollingQueries } from "./server";
+import { ItemsContainer } from "./items/page";
+import { clearInterval, setInterval } from "timers";
 
 export function SearchBar({ formRef, onclick }: {
     onclick: () => void
@@ -19,6 +22,29 @@ export function SearchBar({ formRef, onclick }: {
 }
 
 
+function SavedSearchDashboard() {
+    const [searches, setSearches]: [EbaySearchReturn[], Dispatch<SetStateAction<EbaySearchReturn[]>>] = useState([] as EbaySearchReturn[]);
+    useEffect(() => {
+        async function pollSavedSearches() {
+            const responses = await PollingQueries();
+            setSearches(responses);
+        }
+        pollSavedSearches();
+        const interval = setInterval(pollSavedSearches, 5 * 60 * 100)
+        return clearInterval(interval)
+    }, [])
+
+    const searchedComponents = []
+    for (const search of searches) {
+        searchedComponents.push(<ItemsContainer getSearchResponse={search}/>)
+    }
+    return (
+        <div id="savedSearches">
+            {searchedComponents}
+        </div>
+    )
+}
+
 
 export default function main () {
     const style = {
@@ -27,6 +53,7 @@ export default function main () {
 
     const refSearchForm: MutableRefObject<HTMLFormElement| null> = useRef(null)
     const itemRouter = useRouter()
+
 
 
 
@@ -45,6 +72,7 @@ export default function main () {
     return (
         <div style={style}>
             <SearchBar formRef={refSearchForm} onclick={onclick}/>
+            <SavedSearchDashboard></SavedSearchDashboard>
         </div>
     )
 }

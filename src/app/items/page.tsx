@@ -65,6 +65,7 @@ function Item({ ebayItem }: { ebayItem: ItemSummary }) {
             <p>{ebayItem.price.convertedFromCurrency} {ebayItem.price.convertedFromValue}</p>
             <p>{ebayItem.price.currency}: {ebayItem.price.value}</p>
             <p>Conditions: {ebayItem.condition}</p>
+            <p>date: {ebayItem.itemCreationDate}</p>
             {/* <p>Shipping</p>
             <p>{ebayItem.shippingOptions[0]?.shippingCostType}</p>
             <p>{ebayItem.shippingOptions[0]?.shippingCost.convertedFromCurrency}:{ebayItem.shippingOptions[0].shippingCost.convertedFromValue}</p>
