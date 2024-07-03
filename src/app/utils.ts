@@ -1,6 +1,8 @@
 import { ItemSummary } from "./types/ebaySeachTypes"
 import config from "./data/searchConfig.json"
+import path from "path";
 
+export const PATH = path.resolve("src/app/data/searchConfig.json");
 export function formToJson(form: FormData) {
     const jsonForm: Record<string, FormDataEntryValue> = {}
     for (const [key, value] of form.entries()) {

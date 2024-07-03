@@ -1,6 +1,6 @@
 "use client"
 
-import { Dispatch, MutableRefObject, SetStateAction, useEffect, useRef, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
 import { EbaySearch, EbaySearchReturn } from "./types/ebaySeachTypes";
 import { formToJSON } from "axios";
 import { useRouter } from "next/navigation";
@@ -8,14 +8,27 @@ import { PollingQueries } from "./server";
 import { ItemsContainer } from "./items/page";
 import { clearInterval, setInterval } from "timers";
 
-export function SearchBar({ formAction }: {
-    formAction: () => void
+export function SearchBar({ }: {
 }) {
 
+    const refSearchForm = useRef(null);
+    const router = useRouter();
+    function onclick() {
+        if (refSearchForm.current === null) {
+            throw new Error("Ref is null")
+        }
+
+        const queries: EbaySearch = formToJSON(new FormData(refSearchForm.current))
+        queries["fieldgroups"] = "ASPECT_REFINEMENTS,CATEGORY_REFINEMENTS,MATCHING_ITEMS"
+        console.log(queries)
+        const params = new URLSearchParams(queries as Record<string, any>)
+        router.push(`/items` + "?" + params.toString())
+    }
+
     return (
-        <form action={formAction}>
+        <form ref={refSearchForm}>
             <input type="text" name="q"></input>
-            <input type="submit" defaultValue="Enter"/>
+            <input type="button" defaultValue="Enter" onClick={onclick}/>
         </form>
     )
 }
@@ -35,7 +48,7 @@ function SavedSearchDashboard() {
 
     const searchedComponents = []
     for (const search of searches) {
-        searchedComponents.push(<ItemsContainer getSearchResponse={search}/>)
+        searchedComponents.push(<ItemsContainer key={search.next} getSearchResponse={search}/>)
     }
     return (
         <div id="savedSearches">
@@ -45,32 +58,14 @@ function SavedSearchDashboard() {
 }
 
 
-export default function main () {
+export default function app() {
     const style = {
         height: "100px"
     }
 
-    const refSearchForm: MutableRefObject<HTMLFormElement| null> = useRef(null)
-    const itemRouter = useRouter()
-
-
-
-
-    function onclick() {
-        if (refSearchForm.current === null) {
-            throw new Error("Ref is null")
-        }
-
-        const queries: EbaySearch = formToJSON(new FormData(refSearchForm.current))
-        queries["fieldgroups"] = "ASPECT_REFINEMENTS,CATEGORY_REFINEMENTS,MATCHING_ITEMS"
-        console.log(queries)
-        const params = new URLSearchParams(queries as Record<string, any>)
-        itemRouter.push(`/items` + "?" + params.toString())
-    }
-
     return (
         <div style={style}>
-            <SearchBar formRef={refSearchForm} onclick={onclick}/>
+            <SearchBar/>
             <SavedSearchDashboard></SavedSearchDashboard>
         </div>
     )

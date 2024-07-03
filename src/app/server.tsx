@@ -1,20 +1,22 @@
 "use server"
 import { writeFile } from "fs/promises";
-import { Ebay, EbaySearchConfig } from "./api/ebay/ebay"
-import config from "./data/searchConfig.json"
-import { checkNewListing } from "./utils";
 import path from "path";
+import { Ebay } from "./api/ebay/ebay";
+import config from "./data/searchConfig.json";
+import { checkNewListing } from "./utils";
+import { EbaySearchConfig } from "./EbayItem";
+import { EbaySearch } from "./types/ebaySeachTypes";
 
 const PATH = path.resolve("src/app/data/searchConfig.json");
 
 export async function PollingQueries() {
     console.log(config)
     const responses = []
-    for (const searchParam of config["searchParams"]) {
+    for (const searchParam of Object.values(config["searchParams"])) {
         const ebay = await Ebay.authenticate();
 
         const config = new EbaySearchConfig()
-        config.setParams(searchParam)
+        config.setParams(searchParam as EbaySearch)
 
         const res = await ebay.search(config)
         res.itemSummaries= res.itemSummaries.filter((value) => {

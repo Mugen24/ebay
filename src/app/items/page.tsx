@@ -1,36 +1,29 @@
 "use client"
 
-import { ChangeEventHandler, EventHandler, MutableRefObject, SelectHTMLAttributes, useEffect, useRef, useState } from "react"
+import { ChangeEvent, MutableRefObject, useEffect, useRef, useState } from "react"
 import { EbaySearch, EbaySearchReturn, ItemSummary } from "../types/ebaySeachTypes";
-import axios, { Axios, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import { baseAxios } from "../EbayAxios";
-import { formToJSON } from "axios";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { SearchBar } from "../page";
-import { EbaySearchConfig } from "../api/ebay/ebay";
-import { handleSort, handleType, refineCategoryItemCall } from "./actions";
+import { ebaySearch, handleSort, handleType, refineCategoryItemCall, saveParamsToConfig, search, searchRaw } from "./actions";
+import { EbaySearchConfig } from "../EbayItem";
 
 function SideBar(
         { setSearchResponse, itemConfig, categories}: 
         { 
             setSearchResponse: (res: EbaySearchReturn) => void
-            itemConfig: EbaySearchConfig,
-            categories: EbaySearchReturn["refinement"]["categoryDistributions"]
+            itemConfig: MutableRefObject<EbaySearchConfig>,
+            categories: MutableRefObject<EbaySearchReturn["refinement"]["categoryDistributions"]>
         }
     ) {
     
-    const categoriesResponse = useRef<EbaySearchReturn["refinement"]["categoryDistributions"]>([])
 
     const reactCategories = []
-    if (categories !== undefined) {
-        categoriesResponse.current = categories
-    }     
-
-    for (const cat of categoriesResponse.current) {
+    for (const cat of categories.current) {
         reactCategories.push(
     <div key={cat.categoryId}>
                 <a onClick={() => {
-                    refineCategoryItemCall(cat.categoryId, itemConfig)
+                    itemConfig.current.addEntry("category_ids", cat.categoryId)
+                    ebaySearch(itemConfig.current.toJson())
                     .then(
                         data => {
                             setSearchResponse(data)
@@ -53,7 +46,7 @@ function Item({ ebayItem }: { ebayItem: ItemSummary }) {
     return (
         <div className="ebay-item">
             <img src={ebayItem.image.imageUrl} alt={ebayItem.title}/>
-            <p>{ebayItem.title}</p>
+            <a href={ebayItem.itemWebUrl}><p>{ebayItem.title}</p></a>
             <p>{ebayItem.buyingOptions}</p>
             <p>{ebayItem.price.convertedFromCurrency} {ebayItem.price.convertedFromValue}</p>
             <p>{ebayItem.price.currency}: {ebayItem.price.value}</p>
@@ -86,18 +79,18 @@ export function ItemsContainer({getSearchResponse}: {getSearchResponse: EbaySear
 
 
 function Filter({searchConfig, setSearchResponse}: {
-    searchConfig: EbaySearchConfig,
+    searchConfig: () => MutableRefObject<EbaySearchConfig>,
     setSearchResponse: (res: EbaySearchReturn) => void
 }) {
     function _handleType(data: string) {
-        handleType(data, searchConfig.toJson())
+        handleType(data, searchConfig().current.toJson())
         .then(value => {
             setSearchResponse(value)
         })
     }
 
-    function _handleSort(event: ChangeEventHandler<HTMLSelectElement>) {
-        handleSort(event.ta as string, searchConfig.toJson())
+    function _handleSort(event: ChangeEvent<HTMLSelectElement>) {
+        handleSort(event.target.value as string, searchConfig().current.toJson())
         .then(value => {
             setSearchResponse(value)
         })
@@ -114,16 +107,17 @@ function Filter({searchConfig, setSearchResponse}: {
             <option value={"endingSoonest"}>Time: Ending Soonest</option>
             <option value={"price"}>Price + Postage: Lowest First</option>
         </select>
+
+        <button onClick={() => {saveParamsToConfig(searchConfig().current.toJson())}}>Save Search</button>
     </>
     )
 }
 
 export default function Dashboard () {
-    const [ searchResponse, setSearchResponse ] = useState<AxiosResponse>()
-    const categoriesResponse = useRef<AxiosResponse>()
-    const searchParams = useSearchParams()
-    const refSearchForm = useRef<HTMLFormElement>(null)
-
+    const [ searchResponse, setSearchResponse ] = useState<EbaySearchReturn>()
+    const searchParams = useSearchParams();
+    const searchConfig = useRef<EbaySearchConfig>(new EbaySearchConfig());
+    const categoriesResponse = useRef<EbaySearchReturn["refinement"]["categoryDistributions"]>([]);
 
     useEffect(() => {
         const params: Record<keyof EbaySearch | any, any> = {};
@@ -135,29 +129,33 @@ export default function Dashboard () {
             console.log("No params")
             return
         }
-        axiosSearch.current.setParams(params as EbaySearch)
-        axiosSearch.current.search()
+
+        // setSearchConfig(new EbaySearchConfig())
+        searchConfig.current.setParams(params as EbaySearch)
+
+        ebaySearch(searchConfig.current.toJson())
         .then(value => {
             setSearchResponse(value)
+            categoriesResponse.current = value.refinement.categoryDistributions;
         })
     }, [searchParams])
 
     return (
         <div>
-            <SearchBar formRef={refSearchForm} onclick={onclick}/>
+            <SearchBar/>
             {
                 categoriesResponse.current !== undefined ? (
-                    <SideBar ebayAxios={axiosSearch} categoriesResponse={categoriesResponse} setSearchResponse={setSearchResponse}></SideBar>
+                    <SideBar setSearchResponse={setSearchResponse} itemConfig={searchConfig} categories={categoriesResponse}></SideBar>
                 ) : null
             }
             {
                 searchResponse !== undefined ? (
                     <>
                         <div>
-                            <Filter axiosSearch={axiosSearch} setSearchResponse={setSearchResponse}/>
-                            <ItemsContainer getSearchResponse={searchResponse.data}></ItemsContainer>
+                            <Filter searchConfig={ () => searchConfig} setSearchResponse={setSearchResponse} />
+                            <ItemsContainer getSearchResponse={searchResponse}></ItemsContainer>
                             <button onClick={() => {
-                                axiosSearch.current.searchRaw(searchResponse.data.next)
+                                searchRaw(searchResponse.next)
                                 .then(value => {
                                     setSearchResponse(value)
                                 })

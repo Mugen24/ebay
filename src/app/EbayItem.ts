@@ -56,3 +56,70 @@ export class EbayUtils {
 
 
 
+export class _EbaySearchConfig {
+    _data: EbaySearch
+    _tempData: EbaySearch
+    constructor (res: EbaySearch) {
+        this._data = {
+            q: res.q,
+            category_ids: res.category_ids,
+        }
+
+        this._tempData = Object.fromEntries(Object.entries(res).filter(([key]) => {
+            return !(key in Object.keys(this._data))
+        }))
+
+    }
+
+    addEntry <Key extends keyof EbaySearch> (key: Key, value: EbaySearch[Key]) {
+        this._data[key] = value
+    }
+    addTempEntry <Key extends keyof EbaySearch> (key: Key, value: EbaySearch[Key]) {
+        this._tempData[key] = value
+    }
+    flushTempEntries () {
+        this._tempData = {}
+    }
+    toJson() {
+        return Object.assign({}, this._data, this._tempData)
+    }
+}
+
+export class EbaySearchConfig{
+    searchConfig: _EbaySearchConfig | undefined
+    constructor () {
+        this.searchConfig = undefined
+    }
+
+    setParams (request: EbaySearch) {
+        this.searchConfig = new _EbaySearchConfig(request)
+    }
+
+    addEntry (key: keyof EbaySearch, value: any) {
+        this.searchConfig?.addEntry(key, value)
+    }
+
+    addTempEntry (key: keyof EbaySearch, value: any) {
+        this.searchConfig?.addTempEntry(key, value)
+    }
+
+    flushTempEntry () {
+        this.searchConfig?.flushTempEntries()
+    }
+
+    //Remove tempEntry after being called
+    toJson () {
+        if (this.searchConfig === undefined) {
+            throw new Error("Item Params has not been set up")
+        }
+        //Add some default value
+        if (this.searchConfig._data["filter"] === undefined) {
+            this.searchConfig.addTempEntry("filter", "conditions:{USED|UNSPECIFIED}")
+        } else {
+            this.searchConfig.addTempEntry("filter", this.searchConfig._data["filter"]+",conditions:{USED|UNSPECIFIED}")
+        }
+        const data = this.searchConfig?.toJson();
+        this.flushTempEntry()
+        return data;
+    }
+}
