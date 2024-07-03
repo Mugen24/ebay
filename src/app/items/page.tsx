@@ -97,7 +97,7 @@ function Filter({searchConfig, setSearchResponse}: {
     }
 
     function _handleSort(event: ChangeEventHandler<HTMLSelectElement>) {
-        handleSort(event.value as string, searchConfig.toJson())
+        handleSort(event.ta as string, searchConfig.toJson())
         .then(value => {
             setSearchResponse(value)
         })
