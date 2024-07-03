@@ -6,7 +6,7 @@ import { URLSearchParams } from "url"
 const fetch = axios.create({
     baseURL: process.env.BASE_URL
 })
-const ebay = await Ebay.initialise()
+const ebay = await Ebay.authenticate()
 const _ = (async function () {
 })()
 

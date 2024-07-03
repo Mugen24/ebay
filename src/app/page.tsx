@@ -8,15 +8,14 @@ import { PollingQueries } from "./server";
 import { ItemsContainer } from "./items/page";
 import { clearInterval, setInterval } from "timers";
 
-export function SearchBar({ formRef, onclick }: {
-    onclick: () => void
-    formRef: MutableRefObject<HTMLFormElement | null>
+export function SearchBar({ formAction }: {
+    formAction: () => void
 }) {
 
     return (
-        <form ref={formRef}>
+        <form action={formAction}>
             <input type="text" name="q"></input>
-            <input type="button" onClick={onclick} defaultValue="Enter"/>
+            <input type="submit" defaultValue="Enter"/>
         </form>
     )
 }

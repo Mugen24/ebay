@@ -3,6 +3,8 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import { EbaySearch, EbaySearchReturn, ItemSummary } from "@/app/types/ebaySeachTypes";
 import { EbayGetItemReturn, ebayGetItem } from "@/app/types/ebayGetItemTypes";
 import { freemem } from "os";
+import config from "../../data/searchConfig.json"
+import { URLSearchParamsToJson } from "@/app/utils";
 
 export class Ebay {
     static scopes = ["https://api.ebay.com/oauth/api_scope"];
@@ -28,7 +30,7 @@ export class Ebay {
         }, responseErrorHandler)
     }
 
-    static async initialise () {
+    static async authenticate () {
         const ebayAuth = new EbayAuthToken(
             {
                 clientId: process.env.CLIENT_ID!,
@@ -41,10 +43,12 @@ export class Ebay {
         return new Ebay(parsed_token.access_token);
     }
 
-    async search( options: EbaySearch): Promise<EbaySearchReturn> {
-        const res = await this.axios.get("/buy/browse/v1/item_summary/search", {
-            params: options
-        })
+    async search( config: EbaySearchConfig): Promise<EbaySearchReturn> {
+        const res = await this.axios.get("/buy/browse/v1/item_summary/search", 
+            {
+                params: config.toJson()
+            }
+        )
         return res.data;
     }
 
@@ -55,21 +59,73 @@ export class Ebay {
         return res.data
     }
 
-    //fromDate instead of just Date.now() in case of checking  
-    //date from the past
-    static checkNewListing(item: ItemSummary, fromDate?: Date) {
-        if (fromDate === undefined) {
-            fromDate = new Date(Date.now())
-        }
-        fromDate.setHours(0)
-
-        const itemDate = new Date(item.itemCreationDate);
-        const minnuteOffset = itemDate.getTimezoneOffset();
-
-        //Offset the UTC time
-        return (itemDate.getTime() + (minnuteOffset * 60) >= fromDate.getTime())
-    }
 }
 
 
 
+export class _EbaySearchConfig {
+    _data: EbaySearch
+    _tempData: EbaySearch
+    constructor (res: EbaySearch) {
+        this._data = {
+            q: res.q
+        }
+
+        this._tempData = Object.fromEntries(Object.entries(res).filter(([key]) => {
+            return !(key in Object.keys(this._data))
+        }))
+
+    }
+
+    addEntry <Key extends keyof EbaySearch> (key: Key, value: EbaySearch[Key]) {
+        this._data[key] = value
+    }
+    addTempEntry <Key extends keyof EbaySearch> (key: Key, value: EbaySearch[Key]) {
+        this._tempData[key] = value
+    }
+    flushTempEntries () {
+        this._tempData = {}
+    }
+    toJson() {
+        return Object.assign({}, this._data, this._tempData)
+    }
+}
+
+export class EbaySearchConfig{
+    searchConfig: _EbaySearchConfig | undefined
+    constructor () {
+        this.searchConfig = undefined
+    }
+
+    setParams (request: EbaySearch) {
+        this.searchConfig = new _EbaySearchConfig(request)
+    }
+
+    addEntry (key: keyof EbaySearch, value: any) {
+        this.searchConfig?.addEntry(key, value)
+    }
+
+    addTempEntry (key: keyof EbaySearch, value: any) {
+        this.searchConfig?.addTempEntry(key, value)
+    }
+
+    flushTempEntry () {
+        this.searchConfig?.flushTempEntries()
+    }
+
+    //Remove tempEntry after being called
+    toJson () {
+        if (this.searchConfig === undefined) {
+            throw new Error("Item Params has not been set up")
+        }
+        //Add some default value
+        if (this.searchConfig._data["filter"] === undefined) {
+            this.searchConfig.addTempEntry("filter", "conditions:{USED|UNSPECIFIED}")
+        } else {
+            this.searchConfig.addTempEntry("filter", this.searchConfig._data["filter"]+",conditions:{USED|UNSPECIFIED}")
+        }
+        const data = this.searchConfig?.toJson();
+        this.flushTempEntry()
+        return data;
+    }
+}
