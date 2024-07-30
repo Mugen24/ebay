@@ -1,40 +1,50 @@
 "use client"
 
-import { ChangeEvent, MutableRefObject, useEffect, useRef, useState } from "react"
-import { EbaySearch, EbaySearchReturn, ItemSummary } from "../types/ebaySeachTypes";
+import { ChangeEvent, useEffect, useRef, useState } from "react"
+import { CategoryDistribution, EbaySearch, EbaySearchReturn, ItemSummary, SortField } from "../types/ebaySeachTypes";
 import { useSearchParams } from "next/navigation";
 import { SearchBar } from "../page";
-import { ebaySearch, handleSort, handleType, refineCategoryItemCall, saveParamsToConfig, search, searchRaw } from "./actions";
-import { EbaySearchConfig } from "../ebay/EbayItem";
+import { EbaySaverState } from "../ebay/Ebay";
+import React from "react";
+
+export function Category_button({cat, ebaySaverState}: 
+    {
+        cat: CategoryDistribution,
+        ebaySaverState: EbaySaverState
+    }
+    ) 
+
+{
+
+    return (
+        <div key={cat.categoryId}>
+            <a onClick={() => {
+                ebaySaverState.data["category_ids"] = cat.categoryName 
+                }
+            }>
+
+            {cat.categoryName}
+
+            </a>
+        </div>
+    )
+}
 
 function SideBar(
-        { setSearchResponse, itemConfig, categories}: 
+        { categories, ebaySaverState }: 
         { 
-            setSearchResponse: (res: EbaySearchReturn) => void
-            itemConfig: MutableRefObject<EbaySearchConfig>,
-            categories: MutableRefObject<EbaySearchReturn["refinement"]["categoryDistributions"]>
+            categories: EbaySearchReturn["refinement"]["categoryDistributions"],
+            ebaySaverState: EbaySaverState
         }
     ) {
     
 
     const reactCategories = []
-    for (const cat of categories.current) {
+    for (const cat of categories) {
         reactCategories.push(
-    <div key={cat.categoryId}>
-                <a onClick={() => {
-                    itemConfig.current.addEntry("category_ids", cat.categoryId)
-                    ebaySearch(itemConfig.current.toJson())
-                    .then(
-                        data => {
-                            setSearchResponse(data)
-                        })
-                    }}>
-                    {cat.categoryName}
-                </a>
-            </div>
+            <Category_button cat={cat} ebaySaverState={ebaySaverState}></Category_button>
         )
     }
-
     return (
         <div>
             {reactCategories}
@@ -61,10 +71,6 @@ function Item({ ebayItem }: { ebayItem: ItemSummary }) {
 }
 
 export function ItemsContainer({getSearchResponse}: {getSearchResponse: EbaySearchReturn}) {
-    if (getSearchResponse.itemSummaries === undefined) {
-        console.log("No item found");
-    }
-
     const ebayItems = [];
     for (const item of getSearchResponse.itemSummaries) {
         ebayItems.push(<Item key={item.itemId} ebayItem={item}/>)
@@ -78,46 +84,50 @@ export function ItemsContainer({getSearchResponse}: {getSearchResponse: EbaySear
 }
 
 
-function Filter({searchConfig, setSearchResponse}: {
-    searchConfig: () => MutableRefObject<EbaySearchConfig>,
-    setSearchResponse: (res: EbaySearchReturn) => void
+function Filter({ebaySaverState}: {
+    ebaySaverState: EbaySaverState,
 }) {
-    function _handleType(data: string) {
-        handleType(data, searchConfig().current.toJson())
-        .then(value => {
-            setSearchResponse(value)
-        })
+
+
+    const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
+        if (event.target instanceof Element) {
+            const params = event.target.nodeValue;
+            ebaySaverState["data"]["filter"] = `buyingOptions:{${params}}`
+        }
     }
 
-    function _handleSort(event: ChangeEvent<HTMLSelectElement>) {
-        handleSort(event.target.value as string, searchConfig().current.toJson())
-        .then(value => {
-            setSearchResponse(value)
-        })
+    const sortOptionsHandler: (event: React.ChangeEvent<HTMLSelectElement>) => void = (event) => {
+        // if (event.target instanceof Element) {
+        //     const params = event.target.nodeValue;
+        //     ebaySaverState["data"]["sort"] = params as SortField;
+        // }
+        if (event.target instanceof HTMLSelectElement) {
+            const choice = event.target.value;
+            ebaySaverState["data"]["sort"] = choice as SortField;
+        }
     }
+
+
     return (
     <>
-        <button onClick={() => {_handleType("buyingOptions:{FIXED_PRICE|BEST_OFFER|AUCTION}")}}>All</button>
-        <button onClick={() => {_handleType("buyingOptions:{AUCTION}")}}>AUCTION</button>
-        <button onClick={() => {_handleType("buyingOptions:{FIXED_PRICE|BEST_OFFER}")}}>Buy It Now</button>
+        <button value="FIXED_PRICE|BEST_OFFER|AUCTION" onClick={buyingOptionsHandler}>All</button>
+        <button value="AUCTION" onClick={buyingOptionsHandler}>AUCTION</button>
+        <button value="FIXED_PRICE|BEST_OFFER" onClick={buyingOptionsHandler}>Buy It Now</button>
 
         <label htmlFor="sort-options">Sort</label>
-        <select name="sort-options" id="sort-options" onChange={_handleSort}>
+        <select name="sort-options" id="sort-options" onChange={sortOptionsHandler}>
             <option value={"newlyListed"}>Time: Newly Listed</option>
             <option value={"endingSoonest"}>Time: Ending Soonest</option>
             <option value={"price"}>Price + Postage: Lowest First</option>
         </select>
 
-        <button onClick={() => {saveParamsToConfig(searchConfig().current.toJson())}}>Save Search</button>
+        <button onClick={ebaySaverState.saveToConfig}>Save Search</button>
     </>
     )
 }
 
-export default function Dashboard () {
-    const [ searchResponse, setSearchResponse ] = useState<EbaySearchReturn>()
-    const searchParams = useSearchParams();
-    const searchConfig = useRef<EbaySearchConfig>(new EbaySearchConfig());
-    const categoriesResponse = useRef<EbaySearchReturn["refinement"]["categoryDistributions"]>([]);
+export default function Gallery() {
+    const [searchParams , setSearchParams]= useState(new EbaySaverState(useSearchParams()));
 
     useEffect(() => {
         const params: Record<keyof EbaySearch | any, any> = {};

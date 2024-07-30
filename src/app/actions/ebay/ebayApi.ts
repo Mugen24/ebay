@@ -1,9 +1,10 @@
+'use server'
 import EbayAuthToken from "ebay-oauth-nodejs-client"
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import { EbaySearch, EbaySearchReturn } from "@/app/types/ebaySeachTypes";
-import { EbayGetItemReturn, ebayGetItem } from "@/app/types/ebayGetItemTypes";
-import { EbaySearchConfig } from "@/app/EbayItem";
-export class Ebay {
+import { EbayGetItemReturn, EbayGetItem } from "@/app/types/ebayGetItemTypes";
+
+export class EbayApi {
     static scopes = ["https://api.ebay.com/oauth/api_scope"];
     token: string;
     axios: AxiosInstance;
@@ -35,12 +36,12 @@ export class Ebay {
                 redirectUri: process.env.REDIRECT_URI!,
             }
         )
-        let token = await ebayAuth.getApplicationToken("PRODUCTION", Ebay.scopes)
+        let token = await ebayAuth.getApplicationToken("PRODUCTION", EbayApi.scopes)
         const parsed_token= JSON.parse(token);
-        return new Ebay(parsed_token.access_token);
+        return new EbayApi(parsed_token.access_token);
     }
 
-    async search( config: EbaySearchConfig | string ): Promise<EbaySearchReturn> {
+    async search( config: EbaySearch | string ): Promise<EbaySearchReturn> {
         let res: AxiosResponse;
         //config is url returned by EbaySeachReturn[next]
         if (typeof config === "string") {
@@ -49,14 +50,14 @@ export class Ebay {
         else {
             res = await this.axios.get("/buy/browse/v1/item_summary/search", 
                 {
-                    params: config.toJson()
+                    params: config
                 }
             )
         }
         return res.data;
     }
 
-    async getItem( options: ebayGetItem ): Promise<EbayGetItemReturn> {
+    async getItem( options: EbayGetItem ): Promise<EbayGetItemReturn> {
         const res = await this.axios.get("/buy/browse/v1/item", {
             params: options
         })

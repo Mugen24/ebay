@@ -1,4 +1,4 @@
-export type ebayGetItem = {
+export type EbayGetItem = {
     item_id: string,
     fieldgroups?: "PRODUCT" | "COMPACT" | "ADDITIONAL_SELLER_DETAILS"
 }

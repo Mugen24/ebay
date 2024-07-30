@@ -16,7 +16,7 @@ export interface EbaySearch extends Object {
 
 type CompatibilityFilter = "Not implemented for vehicle requirements"
 type FilterField = "filter by price bid etc. https://developer.ebay.com/api-docs/buy/static/ref-buy-browse-filters.html"
-type SortField = "price" | "distance" | "newlyListed" | "endingSoonest"
+export type SortField = "price" | "distance" | "newlyListed" | "endingSoonest"
 type AspectFilter = "Not implemented https://developer.ebay.com/api-docs/buy/browse/resources/item_summary/methods/search#uri.aspect_filter"
 
 export interface EbaySearchReturn {

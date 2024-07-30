@@ -1,10 +1,10 @@
 "use server"
 import { writeFile } from "fs/promises";
 import path from "path";
-import { Ebay } from "./api/ebay/ebay";
+import { Ebay } from "./actions/ebay/ebayApi";
 import config from "./data/searchConfig.json";
 import { checkNewListing } from "./utils";
-import { EbaySearchConfig } from "./ebay/EbayItem";
+import { EbaySearchConfig } from "./components/EbayItem";
 import { EbaySearch } from "./types/ebaySeachTypes";
 
 const PATH = path.resolve("src/app/data/searchConfig.json");
