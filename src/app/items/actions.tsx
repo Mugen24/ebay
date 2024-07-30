@@ -3,7 +3,7 @@
 import { formToJSON } from "axios"
 import { Ebay } from "../api/ebay/ebay"
 import { EbaySearch } from "../types/ebaySeachTypes"
-import { EbaySearchConfig } from "../EbayItem"
+import { EbaySearchConfig } from "../ebay/EbayItem"
 import { readFile } from "fs/promises"
 import { PATH } from "../utils"
 import { writeFile } from "fs"

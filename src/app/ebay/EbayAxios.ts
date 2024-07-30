@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from "axios";
 import { EbaySearch, EbaySearchReturn } from "./types/ebaySeachTypes";
-import { EbayItem } from "./EbayItem";
+import { EbayItem } from "./ebay/EbayItem";
 
 export const baseAxios: AxiosRequestConfig = { 
     baseURL: "http://localhost:3000",

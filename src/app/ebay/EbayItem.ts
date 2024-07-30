@@ -1,13 +1,19 @@
 import { Key } from "react";
-import { Category, CategoryDistribution, EbaySearch, EbaySearchReturn, Image, ItemSummary } from "./types/ebaySeachTypes";
+import { Category, CategoryDistribution, EbaySearch, EbaySearchReturn, Image, ItemSummary } from "../types/ebaySeachTypes";
 import { Axios } from "axios";
-import { baseAxios } from "./EbayAxios";
+import { baseAxios } from "../EbayAxios";
 import { url } from "inspector";
-import { URLSearchParamsToJson } from "./utils";
+import { URLSearchParamsToJson } from "../utils";
 
 type ebayLink = string;
 type CategoryId = string;
 type CatagoryName = string;
+
+export class Ebay {
+
+}
+
+
 
 export class EbayItem {
     title: string;

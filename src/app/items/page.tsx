@@ -5,7 +5,7 @@ import { EbaySearch, EbaySearchReturn, ItemSummary } from "../types/ebaySeachTyp
 import { useSearchParams } from "next/navigation";
 import { SearchBar } from "../page";
 import { ebaySearch, handleSort, handleType, refineCategoryItemCall, saveParamsToConfig, search, searchRaw } from "./actions";
-import { EbaySearchConfig } from "../EbayItem";
+import { EbaySearchConfig } from "../ebay/EbayItem";
 
 function SideBar(
         { setSearchResponse, itemConfig, categories}: 
