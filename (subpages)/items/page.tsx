@@ -1,10 +1,10 @@
 "use client"
 
 import { ChangeEvent, useEffect, useRef, useState } from "react"
-import { CategoryDistribution, EbaySearch, EbaySearchReturn, ItemSummary, SortField } from "../types/ebaySeachTypes";
+import { CategoryDistribution, EbaySearch, EbaySearchReturn, ItemSummary, SortField } from "../../src/app/types/ebaySeachTypes";
 import { useSearchParams } from "next/navigation";
-import { SearchBar } from "../page";
-import { EbaySaverState } from "../ebay/Ebay";
+import { SearchBar } from "../../src/app/page";
+import { EbaySaverState } from "../../src/app/ebay/Ebay";
 import React from "react";
 
 export function Category_button({cat, ebaySaverState}: 

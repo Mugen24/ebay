@@ -1,4 +1,4 @@
-import { EbayApi } from "../actions/ebay/ebayApi"
+import { EbayApi } from "../actions/ebayApi"
 import { EbayGetItem } from "../types/ebayGetItemTypes"
 import { EbaySearch, EbaySearchReturn } from "../types/ebaySeachTypes"
 import { loadConfig, saveConfig } from "./actions/SaveState"

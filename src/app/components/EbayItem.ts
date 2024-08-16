@@ -11,8 +11,6 @@ export class Ebay {
 
 }
 
-
-
 export class EbayItem {
     title: string;
     images: Image[];

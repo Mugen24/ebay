@@ -2,6 +2,7 @@ import React from "react";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { formToJSON } from "axios";
+import { EbaySearch } from "../types/ebaySeachTypes";
 
 export function SearchBar({ }: {
 }) {

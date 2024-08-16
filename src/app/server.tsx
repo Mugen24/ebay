@@ -1,7 +1,7 @@
 "use server"
 import { writeFile } from "fs/promises";
 import path from "path";
-import { Ebay } from "./actions/ebay/ebayApi";
+import { Ebay } from "./actions/ebayApi";
 import config from "./data/searchConfig.json";
 import { checkNewListing } from "./utils";
 import { EbaySearchConfig } from "./components/EbayItem";
