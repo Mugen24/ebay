@@ -4,8 +4,9 @@ import { ChangeEvent, useEffect, useRef, useState } from "react"
 import { CategoryDistribution, EbaySearch, EbaySearchReturn, ItemSummary, SortField } from "../../src/app/types/ebaySeachTypes";
 import { useSearchParams } from "next/navigation";
 import { SearchBar } from "../../src/app/page";
-import { EbaySaverState } from "../../src/app/ebay/Ebay";
+import { EbaySaverState } from "../../src/app/actions/EbaySaverState";
 import React from "react";
+import { EbayApiWrapper } from "@/app/actions/EbayApiWrapper";
 
 export function Category_button({cat, ebaySaverState}: 
     {
@@ -77,7 +78,7 @@ export function ItemsContainer({getSearchResponse}: {getSearchResponse: EbaySear
     }
 
     return (
-        <div id="ItemsContainer">
+        <div id="ItemsContainer">Q
             {ebayItems}
         </div>
     )
@@ -127,6 +128,11 @@ function Filter({ebaySaverState}: {
 }
 
 export default function Gallery() {
+    const [searchParams, setSearchParams]
+    useEffect(() => {
+        const queries = useSearchParams();
+        EbayApiWrapper.search(queries)
+    }, [])
     const [searchParams , setSearchParams]= useState(new EbaySaverState(useSearchParams()));
 
     useEffect(() => {

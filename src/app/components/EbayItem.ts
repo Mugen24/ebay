@@ -1,7 +1,7 @@
 import { Key } from "react";
 import { Category, CategoryDistribution, EbaySearch, EbaySearchReturn, Image, ItemSummary } from "../types/ebaySeachTypes";
 import { url } from "inspector";
-import { URLSearchParamsToJson } from "../utils";
+import { URLSearchParamsToJson } from "../actions/utils";
 
 type ebayLink = string;
 type CategoryId = string;
