@@ -1,4 +1,3 @@
-'use server'
 import EbayAuthToken from "ebay-oauth-nodejs-client"
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import { EbaySearch, EbaySearchReturn } from "@/app/types/ebaySeachTypes";

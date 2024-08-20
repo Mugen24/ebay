@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { ItemsContainer } from "../../(subpages)/items/page";
 import { clearInterval, setInterval } from "timers";
 import { fetchSavedSearches } from "./actions/fetchSavedSearches";
+import { SearchBar } from "./components/SearchBar";
 
 function SavedSearchDashboard() {
     const [searches, setSearches]: [EbaySearchReturn[], Dispatch<SetStateAction<EbaySearchReturn[]>>] = useState([] as EbaySearchReturn[]);
@@ -22,7 +23,7 @@ function SavedSearchDashboard() {
 
     const searchedComponents = []
     for (const search of searches) {
-        searchedComponents.push(<ItemsContainer key={search.next} getSearchResponse={search}/>)
+        searchedComponents.push(<ItemsContainer key={search.next} ebaySearchResponse={search}/>)
     }
     return (
         <div id="savedSearches">

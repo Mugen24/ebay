@@ -1,6 +1,7 @@
 import { ItemSummary } from "../types/ebaySeachTypes"
 import config from "../data/searchConfig.json"
 import path from "path";
+import { EbaySearchReturn } from "../types/ebaySeachTypes";
 
 export const PATH = path.resolve("src/app/data/searchConfig.json");
 export function formToJson(form: FormData) {
@@ -40,4 +41,13 @@ export function checkNewListing(item: ItemSummary, fromDate?: Date) {
 
     //Offset the UTC time
     return (itemDate.getTime() + (minnuteOffset * 60) >= date.getTime())
+}
+
+//EbaySearchReturn related helper
+export function extractCategoryDistributions(result: EbaySearchReturn) {
+    return result["refinement"]?.["categoryDistributions"]
+}
+
+export function extractItems(result: EbaySearchReturn) {
+    return result["itemSummaries"]
 }

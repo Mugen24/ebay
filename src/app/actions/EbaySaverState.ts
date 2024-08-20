@@ -1,8 +1,5 @@
-import { EbayApi } from "./ebayApi"
-import { EbayGetItem } from "../types/ebayGetItemTypes"
 import { EbaySearch, EbaySearchReturn } from "../types/ebaySeachTypes"
-import { loadConfig, saveConfig } from "./actions/SaveState"
-let ebay = await EbayApi.authenticate()
+import { saveConfig, loadConfig } from "./saveState"
 
 export class EbaySaverState {
     data: EbaySearch
@@ -31,4 +28,5 @@ export class EbaySaverState {
     readConfig() {
         return loadConfig()
     }
+
 }

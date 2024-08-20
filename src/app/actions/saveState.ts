@@ -4,7 +4,7 @@ import { EbaySearch } from "@/app/types/ebaySeachTypes";
 import { readFileSync, writeFile } from "fs";
 const PATH = "../../data/search/searchConfig.json"
 
-export function saveConfig(ebaySearch: EbaySearch) {
+export async function saveConfig(ebaySearch: EbaySearch) {
     const fileContent = readFileSync(PATH, "utf-8");
     const localConfig = JSON.parse(fileContent);
     if (localConfig["ebaySearch"] === undefined) {
@@ -19,7 +19,7 @@ export function saveConfig(ebaySearch: EbaySearch) {
     })
 }
 
-export function loadConfig() {
+export async function loadConfig() {
     const fileContent = readFileSync(PATH, "utf-8")
     return fileContent as EbaySearch
 }

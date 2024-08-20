@@ -1,14 +1,18 @@
+"use server"
 import { EbayGetItem } from "../types/ebayGetItemTypes";
-import { EbaySearch } from "../types/ebaySeachTypes";
+import { EbaySearch, EbaySearchReturn } from "../types/ebaySeachTypes";
 import { EbayApi } from "./ebayApi"
 
-const ebayApi = await EbayApi.authenticate();
-export class EbayApiWrapper {
-    static search(params: EbaySearch) {
-        return ebayApi.search(params)
-    }
-
-    static getItem(params: EbayGetItem) {
-        return ebayApi.getItem(params)
-    }
+const ebayApi = EbayApi.authenticate();
+export async function search(params: EbaySearch) {
+    return ebayApi.then((ebay) => {
+        return ebay.search(params)
+    })
 }
+
+export async function getItem(params: EbayGetItem) {
+    return ebayApi.then((ebay) => {
+        return ebay.getItem(params)
+    })
+}
+
