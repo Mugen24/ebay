@@ -18,6 +18,10 @@ export class EbaySaverState {
         return Object.assign({}, this.data, this.tempData)
     }
 
+    toSearchParams() {
+        return new URLSearchParams(this.toJson() as Record<string, string>)
+    }
+
     readCurrentState() {
         return this.data
     }

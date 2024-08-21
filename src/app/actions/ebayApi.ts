@@ -46,7 +46,6 @@ export class EbayApi {
         //config is url returned by EbaySeachReturn[next]
         console.log(config)
         console.log("-----")
-        process.exit()
 
         if (typeof config === "string") {
             res = await this.axios.get(config)

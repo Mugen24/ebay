@@ -63,43 +63,42 @@ function Filter({setFilterState, setChoiceState, saveConfigState}: {
     setChoiceState: (choiceArgs: string) => void,
     saveConfigState: () => void,
 }) {
-    // const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
-    //     if (event.target instanceof Element) {
-    //         const params = event.target.nodeValue;
-    //         // ebaySaverState["data"]["filter"] = `buyingOptions:{${params}}`
-    //         setFilterState(params as string)
-    //     }
-    // }
+    const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
+        if (event.target instanceof Element) {
+            const params = event.target.nodeValue;
+            // ebaySaverState["data"]["filter"] = `buyingOptions:{${params}}`
+            setFilterState(params as string)
+        }
+    }
 
-    // const sortOptionsHandler: (event: React.ChangeEvent<HTMLSelectElement>) => void = (event) => {
-    //     // if (event.target instanceof Element) {
-    //     //     const params = event.target.nodeValue;
-    //     //     ebaySaverState["data"]["sort"] = params as SortField;
-    //     // }
-    //     if (event.target instanceof HTMLSelectElement) {
-    //         const choice = event.target.value;
-    //         setChoiceState(choice);
-    //     }
-    // }
+    const sortOptionsHandler: (event: React.ChangeEvent<HTMLSelectElement>) => void = (event) => {
+        // if (event.target instanceof Element) {
+        //     const params = event.target.nodeValue;
+        //     ebaySaverState["data"]["sort"] = params as SortField;
+        // }
+        if (event.target instanceof HTMLSelectElement) {
+            const choice = event.target.value;
+            setChoiceState(choice);
+        }
+    }
 
 
-    // return (
-    // <>
-    //     <button value="FIXED_PRICE|BEST_OFFER|AUCTION" onClick={buyingOptionsHandler}>All</button>
-    //     <button value="AUCTION" onClick={buyingOptionsHandler}>AUCTION</button>
-    //     <button value="FIXED_PRICE|BEST_OFFER" onClick={buyingOptionsHandler}>Buy It Now</button>
+    return (
+    <>
+        <button value="FIXED_PRICE|BEST_OFFER|AUCTION" onClick={buyingOptionsHandler}>All</button>
+        <button value="AUCTION" onClick={buyingOptionsHandler}>AUCTION</button>
+        <button value="FIXED_PRICE|BEST_OFFER" onClick={buyingOptionsHandler}>Buy It Now</button>
 
-    //     <label htmlFor="sort-options">Sort</label>
-    //     <select name="sort-options" id="sort-options" onChange={sortOptionsHandler}>
-    //         <option value={"newlyListed"}>Time: Newly Listed</option>
-    //         <option value={"endingSoonest"}>Time: Ending Soonest</option>
-    //         <option value={"price"}>Price + Postage: Lowest First</option>
-    //     </select>
+        <label htmlFor="sort-options">Sort</label>
+        <select name="sort-options" id="sort-options" onChange={sortOptionsHandler}>
+            <option value={"newlyListed"}>Time: Newly Listed</option>
+            <option value={"endingSoonest"}>Time: Ending Soonest</option>
+            <option value={"price"}>Price + Postage: Lowest First</option>
+        </select>
 
-    //     <button onClick={saveConfigState}>Save Search</button>
-    // </>
-    // )
-    return <></>
+        <button onClick={saveConfigState}>Save Search</button>
+    </>
+    )
 }
 
 function SideBar(
@@ -167,22 +166,31 @@ export default function App() {
             return resp.json()
         })
         .then((resp: EbaySearchReturn) => {
+            console.log(resp)
             setEbaySearchReturn(resp)
         })
 
         //Remove to since it only needed to fetch category at startup
         delete ebaySaverState.data["fieldgroups"];
-    }, [searchParams])
+    }, [])
 
-    ebaySearchResponse.then((response: EbaySearchReturn) => {
-        return (
-            <div>
-                <SearchBar/>
-                <SideBar ebaySearchResponse={response} getEbaySaverState={getEbaySaverState} setEbaySaverState={setEbaySaverState} ></SideBar>
-                <ItemsContainer ebaySearchResponse={response}></ItemsContainer>
-            </div>
-        )
-    })
+    useEffect(() => {
+        fetch(`/api/search?${ebaySaverState.toSearchParams().toString()}`)
+        .then((resp) => {
+            return resp.json()
+        })
+        .then((resp: EbaySearchReturn) => {
+            setEbaySearchReturn(resp)
+        })
 
-    return <></>
+        //Remove to since it only needed to fetch category at startup
+        delete ebaySaverState.data["fieldgroups"];
+    }, [ebaySaverState])
+    return (
+        <div>
+            <SearchBar/>
+            <SideBar ebaySearchResponse={ebaySearchReturn as EbaySearchReturn} getEbaySaverState={getEbaySaverState} setEbaySaverState={setEbaySaverState} ></SideBar>
+            <ItemsContainer ebaySearchResponse={ebaySearchReturn as EbaySearchReturn}></ItemsContainer>
+        </div>
+    )
 }

@@ -2,5 +2,12 @@ import { search } from "@/app/actions/EbayApiWrapper";
 import { URLSearchParamsToJson } from "@/app/actions/utils";
 
 export async function GET(request: Request) {
-    return Response.json(URLSearchParamsToJson(new URLSearchParams(request.url)), {status: 200})
+    const url = new URL(request.url)
+    const params = URLSearchParamsToJson(
+        url.searchParams
+    )
+    const resp = await search(params)
+    return Response.json(resp, {
+        status: 200
+    });
 }
