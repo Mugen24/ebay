@@ -1,13 +1,12 @@
 "use client"
-
-import { ChangeEvent, Dispatch, useEffect, useRef, useState } from "react"
-import { CategoryDistribution, EbaySearch, EbaySearchReturn, ItemSummary, SortField } from "../../src/app/types/ebaySeachTypes";
+import { Dispatch, useEffect, useRef, useState } from "react"
 import { useSearchParams } from "next/navigation";
-import { EbaySaverState } from "../../src/app/actions/EbaySaverState";
+import { CategoryDistribution, ItemSummary, EbaySearchReturn, SortField } from "@/app/types/ebaySeachTypes";
 import React from "react";
 import { search } from "@/app/actions/EbayApiWrapper";
 import { SearchBar } from "@/app/components/SearchBar";
 import { extractCategoryDistributions, extractItems, URLSearchParamsToJson } from "@/app/actions/utils";
+import { EbaySaverState } from "@/app/actions/EbaySaverState";
 
 export function Category_button({cat, setCategory}: 
     {
@@ -64,42 +63,43 @@ function Filter({setFilterState, setChoiceState, saveConfigState}: {
     setChoiceState: (choiceArgs: string) => void,
     saveConfigState: () => void,
 }) {
-    const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
-        if (event.target instanceof Element) {
-            const params = event.target.nodeValue;
-            // ebaySaverState["data"]["filter"] = `buyingOptions:{${params}}`
-            setFilterState(params as string)
-        }
-    }
+    // const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
+    //     if (event.target instanceof Element) {
+    //         const params = event.target.nodeValue;
+    //         // ebaySaverState["data"]["filter"] = `buyingOptions:{${params}}`
+    //         setFilterState(params as string)
+    //     }
+    // }
 
-    const sortOptionsHandler: (event: React.ChangeEvent<HTMLSelectElement>) => void = (event) => {
-        // if (event.target instanceof Element) {
-        //     const params = event.target.nodeValue;
-        //     ebaySaverState["data"]["sort"] = params as SortField;
-        // }
-        if (event.target instanceof HTMLSelectElement) {
-            const choice = event.target.value;
-            setChoiceState(choice);
-        }
-    }
+    // const sortOptionsHandler: (event: React.ChangeEvent<HTMLSelectElement>) => void = (event) => {
+    //     // if (event.target instanceof Element) {
+    //     //     const params = event.target.nodeValue;
+    //     //     ebaySaverState["data"]["sort"] = params as SortField;
+    //     // }
+    //     if (event.target instanceof HTMLSelectElement) {
+    //         const choice = event.target.value;
+    //         setChoiceState(choice);
+    //     }
+    // }
 
 
-    return (
-    <>
-        <button value="FIXED_PRICE|BEST_OFFER|AUCTION" onClick={buyingOptionsHandler}>All</button>
-        <button value="AUCTION" onClick={buyingOptionsHandler}>AUCTION</button>
-        <button value="FIXED_PRICE|BEST_OFFER" onClick={buyingOptionsHandler}>Buy It Now</button>
+    // return (
+    // <>
+    //     <button value="FIXED_PRICE|BEST_OFFER|AUCTION" onClick={buyingOptionsHandler}>All</button>
+    //     <button value="AUCTION" onClick={buyingOptionsHandler}>AUCTION</button>
+    //     <button value="FIXED_PRICE|BEST_OFFER" onClick={buyingOptionsHandler}>Buy It Now</button>
 
-        <label htmlFor="sort-options">Sort</label>
-        <select name="sort-options" id="sort-options" onChange={sortOptionsHandler}>
-            <option value={"newlyListed"}>Time: Newly Listed</option>
-            <option value={"endingSoonest"}>Time: Ending Soonest</option>
-            <option value={"price"}>Price + Postage: Lowest First</option>
-        </select>
+    //     <label htmlFor="sort-options">Sort</label>
+    //     <select name="sort-options" id="sort-options" onChange={sortOptionsHandler}>
+    //         <option value={"newlyListed"}>Time: Newly Listed</option>
+    //         <option value={"endingSoonest"}>Time: Ending Soonest</option>
+    //         <option value={"price"}>Price + Postage: Lowest First</option>
+    //     </select>
 
-        <button onClick={saveConfigState}>Save Search</button>
-    </>
-    )
+    //     <button onClick={saveConfigState}>Save Search</button>
+    // </>
+    // )
+    return <></>
 }
 
 function SideBar(
@@ -157,24 +157,29 @@ export default function App() {
         return ebaySaverState;
     }
 
-    let ebaySearchResponse = EbayApiWrapper.search(ebaySaverState.toJson())
+    // let ebaySearchResponse = search(ebaySaverState.toJson())
 
-    useEffect(() => {
-        ebaySaverState.saveState(searchParams)
-        ebaySearchResponse = search(searchParams)
+    // useEffect(() => {
+    //     console.log(searchParams)
+    //     ebaySaverState.saveState(searchParams)
+    //     function foo() {
+    //         console.log(searchParams)
+    //         ebaySearchResponse = search(searchParams);
+    //     }
+    //     foo()
+    //     //Remove to since it only needed to fetch category at startup
+    //     delete ebaySaverState.data["fieldgroups"];
+    // }, [searchParams])
 
-        //Remove to since it only needed to fetch category at startup
-        delete ebaySaverState.data["fieldgroups"];
-    }, [])
+    // ebaySearchResponse.then((response: EbaySearchReturn) => {
+    //     return (
+    //         <div>
+    //             <SearchBar/>
+    //             <SideBar ebaySearchResponse={response} getEbaySaverState={getEbaySaverState} setEbaySaverState={setEbaySaverState} ></SideBar>
+    //             <ItemsContainer ebaySearchResponse={response}></ItemsContainer>
+    //         </div>
+    //     )
+    // })
 
-    ebaySearchResponse.then((response: EbaySearchReturn) => {
-        return (
-            <div>
-                <SearchBar/>
-                <SideBar ebaySearchResponse={response} getEbaySaverState={getEbaySaverState} setEbaySaverState={setEbaySaverState} ></SideBar>
-                <ItemsContainer ebaySearchResponse={response}></ItemsContainer>
-            </div>
-        )
-    })
-
+    return <></>
 }

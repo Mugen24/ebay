@@ -4,7 +4,7 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
 import { EbaySearch, EbaySearchReturn } from "./types/ebaySeachTypes";
 import { formToJSON } from "axios";
 import { useRouter } from "next/navigation";
-import { ItemsContainer } from "../../(subpages)/items/page";
+import { ItemsContainer } from "./(subpages)/items/page";
 import { clearInterval, setInterval } from "timers";
 import { fetchSavedSearches } from "./actions/fetchSavedSearches";
 import { SearchBar } from "./components/SearchBar";

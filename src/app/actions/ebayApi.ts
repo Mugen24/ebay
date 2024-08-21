@@ -19,6 +19,7 @@ export class EbayApi {
         })
         async function responseErrorHandler(res: AxiosError) {
             if (res.status != 200) {
+                console.log(res.response?.request)
                 throw new Error(JSON.stringify(await res.toJSON()))
             }
         }
@@ -43,6 +44,10 @@ export class EbayApi {
     async search( config: EbaySearch | string ): Promise<EbaySearchReturn> {
         let res: AxiosResponse;
         //config is url returned by EbaySeachReturn[next]
+        console.log(config)
+        console.log("-----")
+        process.exit()
+
         if (typeof config === "string") {
             res = await this.axios.get(config)
         }
