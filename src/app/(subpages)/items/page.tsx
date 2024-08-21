@@ -150,36 +150,39 @@ function SideBar(
 
 
 export default function App() {
-    let searchParams = URLSearchParamsToJson(useSearchParams())
+    let searchParams = useSearchParams()
     const [ebaySaverState, setEbaySaverState]= useState<EbaySaverState>(new EbaySaverState())
+    const [ebaySearchReturn, setEbaySearchReturn] = useState<EbaySearchReturn>()
 
     function getEbaySaverState() {
         return ebaySaverState;
     }
 
-    // let ebaySearchResponse = search(ebaySaverState.toJson())
 
-    // useEffect(() => {
-    //     console.log(searchParams)
-    //     ebaySaverState.saveState(searchParams)
-    //     function foo() {
-    //         console.log(searchParams)
-    //         ebaySearchResponse = search(searchParams);
-    //     }
-    //     foo()
-    //     //Remove to since it only needed to fetch category at startup
-    //     delete ebaySaverState.data["fieldgroups"];
-    // }, [searchParams])
+    useEffect(() => {
+        const searchParamsJson = URLSearchParamsToJson(searchParams);
+        ebaySaverState.saveState(searchParamsJson)
+        fetch(`/api/search?${searchParams.toString()}`)
+        .then((resp) => {
+            return resp.json()
+        })
+        .then((resp: EbaySearchReturn) => {
+            setEbaySearchReturn(resp)
+        })
 
-    // ebaySearchResponse.then((response: EbaySearchReturn) => {
-    //     return (
-    //         <div>
-    //             <SearchBar/>
-    //             <SideBar ebaySearchResponse={response} getEbaySaverState={getEbaySaverState} setEbaySaverState={setEbaySaverState} ></SideBar>
-    //             <ItemsContainer ebaySearchResponse={response}></ItemsContainer>
-    //         </div>
-    //     )
-    // })
+        //Remove to since it only needed to fetch category at startup
+        delete ebaySaverState.data["fieldgroups"];
+    }, [searchParams])
+
+    ebaySearchResponse.then((response: EbaySearchReturn) => {
+        return (
+            <div>
+                <SearchBar/>
+                <SideBar ebaySearchResponse={response} getEbaySaverState={getEbaySaverState} setEbaySaverState={setEbaySaverState} ></SideBar>
+                <ItemsContainer ebaySearchResponse={response}></ItemsContainer>
+            </div>
+        )
+    })
 
     return <></>
 }
