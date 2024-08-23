@@ -44,11 +44,20 @@ function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
     )
 }
 
-export function ItemsContainer({ebaySearchResponse}: {ebaySearchResponse: EbaySearchReturn}) {
+export function ItemsContainer({ebaySaverState}: {
+    ebaySaverState: EbaySaverState
+}) {
+    const [ebaySearchResponse, setEbaySearchResponse] = useState<EbaySearchReturn | {}>({})
+
+    useEffect(() => {
+        (async () => {
+            const resp = await search(ebaySaverState.toJson())
+            setEbaySearchResponse(resp)
+        })()
+    }, [ebaySaverState])
+
     const ebayItems = [];
-    const items = extractItems(ebaySearchResponse)
-    // console.log(items)
-    for (const item of extractItems(ebaySearchResponse)) {
+    for (const item of extractItems(ebaySearchResponse as EbaySearchReturn)) {
         ebayItems.push(<EbayItem key={item.itemId} ebayItem={item}/>)
     }
 
@@ -114,6 +123,7 @@ function SideBar(
     
     const ebaySaverState = getEbaySaverState();
     const newEbaySaverState = new EbaySaverState();
+    newEbaySaverState.saveState(ebaySaverState.toJson())
 
     function setCategory(categoryId: string) {
         newEbaySaverState.data["category_ids"] = categoryId;
@@ -149,52 +159,61 @@ function SideBar(
     )
 }
 
-
-export default function App() {
-    let searchParams = useSearchParams()
-    const [ebaySaverState, setEbaySaverState]= useState<EbaySaverState>(new EbaySaverState())
-    const [ebaySearchReturn, setEbaySearchReturn] = useState<EbaySearchReturn | {}>({})
-
-    function getEbaySaverState() {
-        return ebaySaverState;
-    }
-
-
+export default function AppLoader() {
+    const searchParams = useSearchParams()
+    const saverState = new EbaySaverState()
+    let [data, setData] = useState<EbaySearchReturn>();
+    saverState.saveState(URLSearchParamsToJson(searchParams))
+    //Remove to since it only needed to fetch category at startup
+    delete saverState.data["fieldgroups"];
     useEffect(() => {
-        const searchParamsJson = URLSearchParamsToJson(searchParams);
-        ebaySaverState.saveState(searchParamsJson)
         fetch(`/api/search?${searchParams.toString()}`)
         .then((resp) => {
             return resp.json()
         })
         .then((resp: EbaySearchReturn) => {
-            setEbaySearchReturn(resp)
+            setData(resp)
         })
         .catch((e) => {
             console.log(e)
         })
 
-        //Remove to since it only needed to fetch category at startup
-        delete ebaySaverState.data["fieldgroups"];
-    }, [])
+    }, [searchParams])
 
-    // useEffect(() => {
-    //     fetch(`/api/search?${ebaySaverState.toSearchParams().toString()}`)
-    //     .then((resp) => {
-    //         return resp.json()
-    //     })
-    //     .then((resp: EbaySearchReturn) => {
-    //         setEbaySearchReturn(resp)
-    //     })
+    if (!data) {
+        return <></>
+    }
+    console.log("Apploader")
+    console.log(data)
+    console.log(saverState)
+    console.log(searchParams)
+    console.log("----")
+    return <App initialData={data} initialSaverState={saverState}></App>
 
-    //     //Remove to since it only needed to fetch category at startup
-    //     delete ebaySaverState.data["fieldgroups"];
-    // }, [ebaySaverState])
+}
+
+export function App({initialData, initialSaverState}: {
+    initialData: EbaySearchReturn,
+    initialSaverState: EbaySaverState,
+    }) {
+    const [ebaySaverState, setEbaySaverState]= useState<EbaySaverState>(initialSaverState)
+    // const [ebaySearchReturn, setEbaySearchReturn] = useState<EbaySearchReturn>(initialData)
+    useEffect(() => {
+        setEbaySaverState(initialSaverState)
+    }, [initialSaverState])
+    console.log("state")
+    console.log(ebaySaverState)
+    console.log("----")
+    function getEbaySaverState() {
+        return ebaySaverState;
+    }
+
+
     return (
         <div>
             <SearchBar/>
-            <SideBar ebaySearchResponse={ebaySearchReturn as EbaySearchReturn} getEbaySaverState={getEbaySaverState} setEbaySaverState={setEbaySaverState} ></SideBar>
-            <ItemsContainer ebaySearchResponse={ebaySearchReturn as EbaySearchReturn}></ItemsContainer>
+            <SideBar ebaySearchResponse={initialData as EbaySearchReturn} getEbaySaverState={getEbaySaverState} setEbaySaverState={setEbaySaverState} ></SideBar>
+            <ItemsContainer ebaySaverState={ebaySaverState}></ItemsContainer>
         </div>
     )
 }

@@ -5,6 +5,8 @@ import { EbayApi } from "./ebayApi"
 
 const ebayApi = EbayApi.authenticate();
 export async function search(params: EbaySearch) {
+    console.log("search")
+    console.log(params)
     return ebayApi.then((ebay) => {
         return ebay.search(params)
     })
