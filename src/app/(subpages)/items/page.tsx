@@ -46,6 +46,8 @@ function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
 
 export function ItemsContainer({ebaySearchResponse}: {ebaySearchResponse: EbaySearchReturn}) {
     const ebayItems = [];
+    const items = extractItems(ebaySearchResponse)
+    // console.log(items)
     for (const item of extractItems(ebaySearchResponse)) {
         ebayItems.push(<EbayItem key={item.itemId} ebayItem={item}/>)
     }
@@ -134,9 +136,9 @@ function SideBar(
 
     const categories = extractCategoryDistributions(ebaySearchResponse)
     const reactCategories = []
-    for (const cat of categories) {
+    for (const category of categories) {
         reactCategories.push(
-            <Category_button cat={cat} setCategory={setCategory}></Category_button>
+            <Category_button key={category.categoryId} cat={category} setCategory={setCategory}></Category_button>
         )
     }
     return (
@@ -151,7 +153,7 @@ function SideBar(
 export default function App() {
     let searchParams = useSearchParams()
     const [ebaySaverState, setEbaySaverState]= useState<EbaySaverState>(new EbaySaverState())
-    const [ebaySearchReturn, setEbaySearchReturn] = useState<EbaySearchReturn>()
+    const [ebaySearchReturn, setEbaySearchReturn] = useState<EbaySearchReturn | {}>({})
 
     function getEbaySaverState() {
         return ebaySaverState;
@@ -166,26 +168,28 @@ export default function App() {
             return resp.json()
         })
         .then((resp: EbaySearchReturn) => {
-            console.log(resp)
             setEbaySearchReturn(resp)
+        })
+        .catch((e) => {
+            console.log(e)
         })
 
         //Remove to since it only needed to fetch category at startup
         delete ebaySaverState.data["fieldgroups"];
     }, [])
 
-    useEffect(() => {
-        fetch(`/api/search?${ebaySaverState.toSearchParams().toString()}`)
-        .then((resp) => {
-            return resp.json()
-        })
-        .then((resp: EbaySearchReturn) => {
-            setEbaySearchReturn(resp)
-        })
+    // useEffect(() => {
+    //     fetch(`/api/search?${ebaySaverState.toSearchParams().toString()}`)
+    //     .then((resp) => {
+    //         return resp.json()
+    //     })
+    //     .then((resp: EbaySearchReturn) => {
+    //         setEbaySearchReturn(resp)
+    //     })
 
-        //Remove to since it only needed to fetch category at startup
-        delete ebaySaverState.data["fieldgroups"];
-    }, [ebaySaverState])
+    //     //Remove to since it only needed to fetch category at startup
+    //     delete ebaySaverState.data["fieldgroups"];
+    // }, [ebaySaverState])
     return (
         <div>
             <SearchBar/>

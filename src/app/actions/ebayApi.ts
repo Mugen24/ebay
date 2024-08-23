@@ -44,8 +44,6 @@ export class EbayApi {
     async search( config: EbaySearch | string ): Promise<EbaySearchReturn> {
         let res: AxiosResponse;
         //config is url returned by EbaySeachReturn[next]
-        console.log(config)
-        console.log("-----")
 
         if (typeof config === "string") {
             res = await this.axios.get(config)

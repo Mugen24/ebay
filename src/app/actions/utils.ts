@@ -45,10 +45,21 @@ export function checkNewListing(item: ItemSummary, fromDate?: Date) {
 
 //EbaySearchReturn related helper
 export function extractCategoryDistributions(result: EbaySearchReturn) {
-    console.log(result);
-    return result["refinement"]?.["categoryDistributions"];
+    const categories = result["refinement"]?.["categoryDistributions"];
+    console.log("Categories extracted")
+    console.log(categories)
+    if (!categories) {
+        return []
+    } 
+    return categories
 }
 
 export function extractItems(result: EbaySearchReturn) {
-    return result["itemSummaries"]
+    const data = result["itemSummaries"];
+    console.log("extracted items")
+    console.log(data)
+    if (!data) {
+        return []
+    }
+    return data
 }
