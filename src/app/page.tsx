@@ -1,9 +1,7 @@
 "use client"
-
+import { MainContainer } from "./style/searchBar";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
-import { EbaySearch, EbaySearchReturn } from "./types/ebaySeachTypes";
-import { formToJSON } from "axios";
-import { useRouter } from "next/navigation";
+import { EbaySearchReturn } from "./types/ebaySeachTypes";
 import { ItemsContainer } from "./(subpages)/items/page";
 import { clearInterval, setInterval } from "timers";
 import { fetchSavedSearches } from "./actions/fetchSavedSearches";
@@ -34,14 +32,11 @@ function SavedSearchDashboard() {
 
 
 export default function app() {
-    const style = {
-        height: "100px"
-    }
 
     return (
-        <div style={style}>
+        <MainContainer>
             <SearchBar/>
             <SavedSearchDashboard></SavedSearchDashboard>
-        </div>
+        </MainContainer>
     )
 }

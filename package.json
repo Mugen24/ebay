@@ -14,7 +14,8 @@
     "ebay-oauth-nodejs-client": "^1.2.2",
     "next": "14.2.3",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "styled-components": "^6.1.12"
   },
   "devDependencies": {
     "@types/ebay-oauth-nodejs-client": "^1.2.4",

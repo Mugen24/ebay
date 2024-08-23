@@ -3,6 +3,7 @@ import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { formToJSON } from "axios";
 import { EbaySearch } from "../types/ebaySeachTypes";
+import { SearchBarStyle } from "../style/searchBar";
 
 export function SearchBar({ }: {
 }) {
@@ -22,9 +23,11 @@ export function SearchBar({ }: {
     }
 
     return (
-        <form ref={refSearchForm}>
-            <input type="text" name="q"></input>
-            <input type="button" defaultValue="Enter" onClick={onclick}/>
-        </form>
+        <SearchBarStyle>
+            <form ref={refSearchForm}>
+                <input type="text" name="q"></input>
+                <input type="button" defaultValue="Enter" onClick={onclick}/>
+            </form>
+        </SearchBarStyle>
     )
 }

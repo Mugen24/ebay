@@ -183,11 +183,6 @@ export default function AppLoader() {
     if (!data) {
         return <></>
     }
-    console.log("Apploader")
-    console.log(data)
-    console.log(saverState)
-    console.log(searchParams)
-    console.log("----")
     return <App initialData={data} initialSaverState={saverState}></App>
 
 }
@@ -201,14 +196,9 @@ export function App({initialData, initialSaverState}: {
     useEffect(() => {
         setEbaySaverState(initialSaverState)
     }, [initialSaverState])
-    console.log("state")
-    console.log(ebaySaverState)
-    console.log("----")
     function getEbaySaverState() {
         return ebaySaverState;
     }
-
-
     return (
         <div>
             <SearchBar/>
