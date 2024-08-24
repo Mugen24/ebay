@@ -6,11 +6,3 @@ export const MainContainer = styled.div`
     justify-content: center;
     align-items: center;
 `
-export const SearchBarStyle = styled.div`
-    width: 80%;
-    height: 3%;
-    background-color: gray;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-`;
