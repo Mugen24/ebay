@@ -6,16 +6,18 @@ import { EbaySearch } from "../types/ebaySeachTypes";
 import { styled } from "styled-components";
 
 export const SearchBarStyle = styled.div`
-    width: 80%;
-    height: 5%;
+    width: 100%;
+    height: 50px;
     background-color: gray;
     display: flex;
     align-items: center;
+    font-size: large;
 `;
 
 export const SearchForm = styled.form`
     width: 100%;
     height: 100%;
+
     display: flex;
     justify-content: space-between;
     background-color: aliceblue;
@@ -42,7 +44,6 @@ export function SearchBar({ }: {
 
         const queries: EbaySearch = formToJSON(new FormData(refSearchForm.current))
         queries["fieldgroups"] = "ASPECT_REFINEMENTS,CATEGORY_REFINEMENTS,MATCHING_ITEMS"
-        console.log(queries)
         const params = new URLSearchParams(queries as Record<string, any>)
         router.push(`/items` + "?" + params.toString())
     }

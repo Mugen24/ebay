@@ -7,6 +7,7 @@ import { search } from "@/app/actions/EbayApiWrapper";
 import { SearchBar } from "@/app/components/SearchBar";
 import { extractCategoryDistributions, extractItems, URLSearchParamsToJson } from "@/app/actions/utils";
 import { EbaySaverState } from "@/app/actions/EbaySaverState";
+import styled from "styled-components";
 
 export function Category_button({cat, setCategory}: 
     {
@@ -44,6 +45,10 @@ function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
     )
 }
 
+const StyleItemsContainer = styled.div `
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+`
 export function ItemsContainer({ebaySaverState}: {
     ebaySaverState: EbaySaverState
 }) {
@@ -62,8 +67,11 @@ export function ItemsContainer({ebaySaverState}: {
     }
 
     return (
-        <div id="ItemsContainer">
-            {ebayItems}
+        <div>
+            <h1>Search: {ebaySaverState.data.q}</h1>
+            <StyleItemsContainer>
+                {ebayItems}
+            </StyleItemsContainer>
         </div>
     )
 }
