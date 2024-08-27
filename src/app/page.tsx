@@ -40,16 +40,21 @@ function SavedSearchDashboard() {
         })
     }, [])
 
-    const [displaySearch, setDisplaySearch] = useState<number>()
+    const [displaySearch, _setDisplaySearch] = useState<number>(-1)
     const searchedComponents = [];
-    const buttonSearchComponents: ReactElement<HTMLButtonElement>[] = [<button key={-1}>All</button>];
+    const buttonSearchComponents: ReactElement<HTMLButtonElement>[] = [<button onClick={()=>setDisplaySearch(-1)} key={-1}>All</button>];
+    function setDisplaySearch(numer: number) {
+        console.log(numer)
+        _setDisplaySearch(numer)
+    }
 
     let keyCounter = 0
     for (const search of searches) {
+        const tempCounter = keyCounter
         buttonSearchComponents.push(
-            <button onClick={()=> setDisplaySearch(keyCounter)} key={keyCounter}>{search.data.q}</button>
+            <button onClick={()=> setDisplaySearch(tempCounter)} key={tempCounter}>{search.data.q}</button>
         )
-        searchedComponents.push(<ItemsContainer key={keyCounter} ebaySaverState={search}/>)
+        searchedComponents.push(<ItemsContainer key={tempCounter} ebaySaverState={search}/>)
         keyCounter++;
     }
 
@@ -60,7 +65,7 @@ function SavedSearchDashboard() {
             </div>
             <StyleSavedSearchDashboard id="savedSearches">
                 {
-                    displaySearch ? 
+                    displaySearch != -1 ? 
                         searchedComponents[displaySearch]
                         : searchedComponents
                 }
