@@ -1,5 +1,5 @@
 "use client"
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
+import React, { Dispatch, ReactComponentElement, ReactElement, SetStateAction, useEffect, useRef, useState } from "react"
 import { EbaySearchReturn } from "./types/ebaySeachTypes";
 import { ItemsContainer } from "./(subpages)/items/page";
 import { clearInterval, setInterval } from "timers";
@@ -40,26 +40,30 @@ function SavedSearchDashboard() {
         })
     }, [])
 
+    const [displaySearch, setDisplaySearch] = useState<number>()
     const searchedComponents = [];
-    let queries: Record<string, any> = {};
+    const buttonSearchComponents: ReactElement<HTMLButtonElement>[] = [<button key={-1}>All</button>];
+
     let keyCounter = 0
-    const itemRef = useRef([])
     for (const search of searches) {
-        queries[search.data.q ?? "Data does not exists"] = keyCounter
-        searchedComponents.push(<ItemsContainer key={keyCounter++} ebaySaverState={search}/>)
+        buttonSearchComponents.push(
+            <button onClick={()=> setDisplaySearch(keyCounter)} key={keyCounter}>{search.data.q}</button>
+        )
+        searchedComponents.push(<ItemsContainer key={keyCounter} ebaySaverState={search}/>)
+        keyCounter++;
     }
+
     return (
         <>
             <div>
-                <button>All</button>
-                {
-                    [Object.keys(queries).map((key) => {
-                        <button>{key}</button>
-                    })]
-                }
+                {buttonSearchComponents}
             </div>
             <StyleSavedSearchDashboard id="savedSearches">
-                {searchedComponents}
+                {
+                    displaySearch ? 
+                        searchedComponents[displaySearch]
+                        : searchedComponents
+                }
             </StyleSavedSearchDashboard>
         </>
     )
