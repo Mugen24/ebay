@@ -8,7 +8,7 @@ import { styled } from "styled-components";
 export const SearchBarStyle = styled.div`
     width: 100%;
     height: 50px;
-    background-color: gray;
+    background-color: ${props => props.theme.dark["light-blue"]};
     display: flex;
     align-items: center;
     font-size: large;
@@ -17,18 +17,21 @@ export const SearchBarStyle = styled.div`
 export const SearchForm = styled.form`
     width: 100%;
     height: 100%;
-
     display: flex;
     justify-content: space-between;
-    background-color: aliceblue;
 ` 
 const InputBarStyle = styled.input`
     flex-grow: 1;
+    background-color: ${props => props.theme.dark["write-input"]};
 `
 
 const EnterButton = styled.input`
     padding-inline: 5px;
     flex-basis: 10%;
+    background-color: ${props => props.theme.dark["press-input"]};
+    &:hover {
+        opacity: 0.7;
+    }
 `
 
 

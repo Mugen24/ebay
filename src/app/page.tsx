@@ -1,14 +1,12 @@
 "use client"
-import React, { Dispatch, ReactComponentElement, ReactElement, SetStateAction, useEffect, useRef, useState } from "react"
-import { EbaySearchReturn } from "./types/ebaySeachTypes";
+import React, { ReactElement, useEffect, useState } from "react"
 import { ItemsContainer } from "./(subpages)/items/page";
-import { clearInterval, setInterval } from "timers";
 import { fetchSavedSearches } from "./actions/fetchSavedSearches";
 import { SearchBar } from "./components/SearchBar";
 import { EbaySaverState } from "./actions/EbaySaverState";
-import { wrap } from "module";
-import { styled } from "styled-components";
+import { styled, ThemeProvider } from "styled-components";
 import { StyledButton } from "./style/button";
+import { Themer } from "./style/theme";
 
 const StyleSavedSearchDashboard = styled.div `
     display: grid;
@@ -20,6 +18,7 @@ const MainContainer = styled.div`
     padding: 10px;
     width: 100vw;
     height: 100%;
+    background-color: ${props => props.theme.dark["background"]};
 `
 
 function SavedSearchDashboard() {
@@ -81,9 +80,11 @@ function SavedSearchDashboard() {
 export default function app() {
 
     return (
-        <MainContainer>
-            <SearchBar/>
-            <SavedSearchDashboard></SavedSearchDashboard>
-        </MainContainer>
+        <ThemeProvider theme={Themer}>
+            <MainContainer>
+                <SearchBar/>
+                <SavedSearchDashboard></SavedSearchDashboard>
+            </MainContainer>
+        </ThemeProvider>
     )
 }

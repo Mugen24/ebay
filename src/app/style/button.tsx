@@ -1,11 +1,6 @@
 import styled from "styled-components";
 
 export const StyledButton = styled.button<{$theme: "gray" | "blue"}>`
-    background-color: ${
-        props => props.$theme == "gray" ? 
-            "gray" : "blue"
-    };
-
     min-width: 50px;
     height: 30px;
     padding: 5px;
@@ -13,4 +8,5 @@ export const StyledButton = styled.button<{$theme: "gray" | "blue"}>`
     &:hover {
         opacity: 0.8;
     }
+    background-color: ${props => props.theme.dark["press-input"]};
 `

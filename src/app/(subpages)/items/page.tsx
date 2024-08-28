@@ -8,6 +8,7 @@ import { SearchBar } from "@/app/components/SearchBar";
 import { extractCategoryDistributions, extractItems, URLSearchParamsToJson } from "@/app/actions/utils";
 import { EbaySaverState } from "@/app/actions/EbaySaverState";
 import styled from "styled-components";
+import { EbayItem } from "@/app/components/EbayItem";
 
 export function Category_button({cat, setCategory}: 
     {
@@ -27,23 +28,6 @@ export function Category_button({cat, setCategory}:
     )
 }
 
-function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
-    return (
-        <div className="ebay-item">
-            <img src={ebayItem.image.imageUrl} alt={ebayItem.title}/>
-            <a href={ebayItem.itemWebUrl}><p>{ebayItem.title}</p></a>
-            <p>{ebayItem.buyingOptions}</p>
-            <p>{ebayItem.price.convertedFromCurrency} {ebayItem.price.convertedFromValue}</p>
-            <p>{ebayItem.price.currency}: {ebayItem.price.value}</p>
-            <p>Conditions: {ebayItem.condition}</p>
-            <p>date: {ebayItem.itemCreationDate}</p>
-            {/* <p>Shipping</p>
-            <p>{ebayItem.shippingOptions[0]?.shippingCostType}</p>
-            <p>{ebayItem.shippingOptions[0]?.shippingCost.convertedFromCurrency}:{ebayItem.shippingOptions[0].shippingCost.convertedFromValue}</p>
-            <p>{ebayItem.shippingOptions[0]?.shippingCost.currency}:{ebayItem.shippingOptions[0].shippingCost.value}</p> */}
-        </div>
-    )
-}
 
 const StyleItemsContainer = styled.div `
     display: grid;
