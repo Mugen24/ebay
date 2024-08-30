@@ -8,12 +8,16 @@ const StyleEbayItem = styled.div`
     gap: 3px;
     margin: 5px;
     &:hover{
-        box-shadow: ${props => props.theme.dark["highlight"]};
+        box-shadow: 0px 0px 10px 1px ${props => props.theme.dark["highlight"]}
     }
 `
 
 const StyleImage = styled.image `
 
+`
+const StyleHintWord = styled.p`
+    color: lightgray;
+    font-size: smaller;
 `
 
 export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
@@ -21,7 +25,7 @@ export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
         <StyleEbayItem className="ebay-item">
             <img src={ebayItem.image.imageUrl} alt={ebayItem.title}/>
             <a href={ebayItem.itemWebUrl}><p>{ebayItem.title}</p></a>
-            <p>{ebayItem.buyingOptions}</p>
+            {ebayItem.buyingOptions.map(option => <StyleHintWord>{option}</StyleHintWord>)}
             <p>{ebayItem.price.convertedFromCurrency} {ebayItem.price.convertedFromValue}</p>
             <p>{ebayItem.price.currency}: {ebayItem.price.value}</p>
             <p>Conditions: {ebayItem.condition}</p>
