@@ -6,19 +6,27 @@ import { SearchBar } from "./components/SearchBar";
 import { EbaySaverState } from "./actions/EbaySaverState";
 import { styled, ThemeProvider } from "styled-components";
 import { StyledButton } from "./style/button";
-import { Themer } from "./style/theme";
+import { GlobalStyle } from "./style/globals";
+import type { CSSProp } from 'styled-components'
+
+
+declare module 'react' {
+  interface Attributes {
+    css?: CSSProp | undefined
+  }
+}
 
 const StyleSavedSearchDashboard = styled.div `
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    margin-top: 60px
 `
 
 const MainContainer = styled.div`
-    padding: 10px;
-    width: 100vw;
-    height: 100%;
-    background-color: ${props => props.theme.dark["background"]};
+    max-width: 100%;
+    max-height: 100%;
+    background-color: ${props => props.theme["background"]};
+    display: flex;
+    flex-direction: column;
 `
 
 function SavedSearchDashboard() {
@@ -61,7 +69,7 @@ function SavedSearchDashboard() {
     }
 
     return (
-        <>
+        <div>
             <div>
                 {buttonSearchComponents}
             </div>
@@ -72,19 +80,24 @@ function SavedSearchDashboard() {
                         : searchedComponents
                 }
             </StyleSavedSearchDashboard>
-        </>
+        </div>
     )
 }
 
 
+export const _CenterContainer = styled.div`
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
 export default function app() {
 
     return (
-        <ThemeProvider theme={Themer}>
-            <MainContainer>
-                <SearchBar/>
-                <SavedSearchDashboard></SavedSearchDashboard>
-            </MainContainer>
-        </ThemeProvider>
+        <MainContainer>
+            <_CenterContainer><SearchBar/></_CenterContainer>
+            <SavedSearchDashboard></SavedSearchDashboard>
+        </MainContainer>
     )
 }

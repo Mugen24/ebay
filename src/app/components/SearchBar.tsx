@@ -6,12 +6,11 @@ import { EbaySearch } from "../types/ebaySeachTypes";
 import { styled } from "styled-components";
 
 export const SearchBarStyle = styled.div`
-    width: 100%;
+    width: 80%;
     height: 50px;
-    background-color: ${props => props.theme.dark["light-blue"]};
+    background-color: ${props => props.theme["light-blue"]};
     display: flex;
     align-items: center;
-    font-size: large;
 `;
 
 export const SearchForm = styled.form`
@@ -19,19 +18,35 @@ export const SearchForm = styled.form`
     height: 100%;
     display: flex;
     justify-content: space-between;
+    gap: 1px;
 ` 
 const InputBarStyle = styled.input`
     flex-grow: 1;
-    background-color: ${props => props.theme.dark["write-input"]};
+    background-color: ${props => props.theme["write-input"]};
+    filter: brightness(90%);
+    &:focus {
+        outline: none;
+        border: 3px solid ${props => props.theme["highlight"]};
+    }
+    &:hover {
+        filter: brightness(100%);
+    }
+    border: 3px solid ${props => props.theme["foreground"]};
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
 `
 
 const EnterButton = styled.input`
     padding-inline: 5px;
     flex-basis: 10%;
-    background-color: ${props => props.theme.dark["press-input"]};
+    background-color: ${props => props.theme["press-input"]};
+    max-width: 100px;
     &:hover {
         opacity: 0.7;
     }
+
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
 `
 
 

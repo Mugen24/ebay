@@ -8,5 +8,5 @@ export const StyledButton = styled.button<{$theme: "gray" | "blue"}>`
     &:hover {
         opacity: 0.8;
     }
-    background-color: ${props => props.theme.dark["press-input"]};
+    background-color: ${props => props.theme["press-input"]};
 `

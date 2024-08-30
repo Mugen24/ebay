@@ -5,27 +5,40 @@ const StyleEbayItem = styled.div`
     padding: 3px;
     display: flex;
     flex-direction: column;
-    gap: 3px;
     margin: 5px;
     &:hover{
-        box-shadow: 0px 0px 10px 1px ${props => props.theme.dark["highlight"]}
+        box-shadow: 0px 0px 10px 1px ${props => props.theme["highlight"]}
     }
+
+    & > *, * > * {
+        margin: 0;
+        font-size: 0.6vw;
+    }
+    gap: 5px;
 `
 
 const StyleImage = styled.image `
 
 `
+const StyleHintWordContainer = styled.div`
+    display: flex;
+`
 const StyleHintWord = styled.p`
     color: lightgray;
-    font-size: smaller;
+    font-size: xx-small;
+    margin-right: 5px;
 `
 
 export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
     return (
         <StyleEbayItem className="ebay-item">
             <img src={ebayItem.image.imageUrl} alt={ebayItem.title}/>
-            <a href={ebayItem.itemWebUrl}><p>{ebayItem.title}</p></a>
-            {ebayItem.buyingOptions.map(option => <StyleHintWord>{option}</StyleHintWord>)}
+            <div>
+                <a href={ebayItem.itemWebUrl}><p>{ebayItem.title}</p></a>
+                <StyleHintWordContainer>{
+                    ebayItem.buyingOptions.map(option => <StyleHintWord>{option}</StyleHintWord>)
+                }</StyleHintWordContainer>
+            </div>
             <p>{ebayItem.price.convertedFromCurrency} {ebayItem.price.convertedFromValue}</p>
             <p>{ebayItem.price.currency}: {ebayItem.price.value}</p>
             <p>Conditions: {ebayItem.condition}</p>
