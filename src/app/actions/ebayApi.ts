@@ -2,6 +2,8 @@ import EbayAuthToken from "ebay-oauth-nodejs-client"
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import { EbaySearch, EbaySearchReturn } from "@/app/types/ebaySeachTypes";
 import { EbayGetItemReturn, EbayGetItem } from "@/app/types/ebayGetItemTypes";
+import { writeFileSync } from "fs";
+import { space } from "postcss/lib/list";
 
 export class EbayApi {
     static scopes = ["https://api.ebay.com/oauth/api_scope"];
@@ -55,6 +57,18 @@ export class EbayApi {
                 }
             )
         }
+        // const strData = JSON.stringify(res.data, ()=>{}, 4)
+        // if (strData) {
+        //     console.log("running")
+        //     console.log(res.data)
+        //     process.exit(1)
+        // } else {
+        //     console.log(strData)
+        //     console.log("undefined")
+        // }
+        const data = JSON.stringify(res.data)
+        writeFileSync("SampleResponse.json", data)
+        process.exit(1)
         return res.data;
     }
 
@@ -63,6 +77,12 @@ export class EbayApi {
             params: options
         })
         return res.data
+    }
+
+    async getCategories() {
+        const ENDPOINT = "https://api.ebay.com/commerce/taxonomy/v1/category_tree/"
+
+
     }
 
 }

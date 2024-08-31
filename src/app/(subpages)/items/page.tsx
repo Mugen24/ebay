@@ -139,16 +139,17 @@ function SideBar(
     const CATEGORY_LIMIT = 10;
     const categories = extractCategoryDistributions(ebaySearchResponse)
     const reactCategories = []
-    for (let category_counter = 0; category_counter < CATEGORY_LIMIT; category_counter++) {
-        const category = categories[category_counter];
-        reactCategories.push(
-            <Category_button key={category.categoryId} cat={category} setCategory={setCategory}></Category_button>
-        )
+    for (let category_counter = 0; category_counter < categories.length; category_counter++) {
+        if (category_counter < CATEGORY_LIMIT) {
+            const category = categories[category_counter];
+            reactCategories.push(
+                <Category_button key={category.categoryId} cat={category} setCategory={setCategory}></Category_button>
+            )
+        } else {
+            reactCategories.push(<button>...</button>)
+        }
     }
 
-    if (categories.length > CATEGORY_LIMIT) {
-
-    }
 
     return (
         <div>
