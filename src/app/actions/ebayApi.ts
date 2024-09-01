@@ -57,18 +57,6 @@ export class EbayApi {
                 }
             )
         }
-        // const strData = JSON.stringify(res.data, ()=>{}, 4)
-        // if (strData) {
-        //     console.log("running")
-        //     console.log(res.data)
-        //     process.exit(1)
-        // } else {
-        //     console.log(strData)
-        //     console.log("undefined")
-        // }
-        const data = JSON.stringify(res.data)
-        writeFileSync("SampleResponse.json", data)
-        process.exit(1)
         return res.data;
     }
 
@@ -79,10 +67,10 @@ export class EbayApi {
         return res.data
     }
 
-    async getCategories() {
-        const ENDPOINT = "https://api.ebay.com/commerce/taxonomy/v1/category_tree/"
-
-
+    async getCategories(categoryId: string) {
+        const ENDPOINT = "https://api.ebay.com/commerce/taxonomy/v1/category_tree"
+        const res = await this.axios.get(`${ENDPOINT}/${categoryId}`)
+        return 
     }
 
 }

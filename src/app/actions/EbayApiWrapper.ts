@@ -18,3 +18,7 @@ export async function getItem(params: EbayGetItem) {
     })
 }
 
+export async function getCategories(categoryID: string) {
+    return {}    
+}
+
