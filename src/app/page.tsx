@@ -95,7 +95,7 @@ export const _CenterContainer = styled.div`
 `
 export default function app() {
     useEffect(() => {
-        getCategories(139971)
+        getCategories(1249)
     })
     return (
         <MainContainer>

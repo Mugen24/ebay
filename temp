@@ -1,0 +1,42 @@
+{
+    "message": "Request failed with status code 404",
+    "name": "AxiosError",
+    "stack": "AxiosError: Request failed with status code 404\n    at settle (webpack-internal:///(action-browser)/./node_modules/axios/lib/core/settle.js:24:12)\n    at IncomingMessage.handleStreamEnd (webpack-internal:///(action-browser)/./node_modules/axios/lib/adapters/http.js:541:71)\n    at IncomingMessage.emit (node:events:532:35)\n    at endReadableNT (node:internal/streams/readable:1696:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)\n    at Axios.request (webpack-internal:///(action-browser)/./node_modules/axios/lib/core/Axios.js:55:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)",
+    "config": {
+        "transitional": {
+            "silentJSONParsing": true,
+            "forcedJSONParsing": true,
+            "clarifyTimeoutError": false
+        },
+        "adapter": [
+            "xhr",
+            "http",
+            "fetch"
+        ],
+        "transformRequest": [
+            null
+        ],
+        "transformResponse": [
+            null
+        ],
+        "timeout": 0,
+        "xsrfCookieName": "XSRF-TOKEN",
+        "xsrfHeaderName": "X-XSRF-TOKEN",
+        "maxContentLength": -1,
+        "maxBodyLength": -1,
+        "env": {},
+        "headers": {
+            "Accept": "application/json, text/plain, */*",
+            "X-EBAY-C-ENDUSERCTX": "contextualLocation=country=AU,zip=2166",
+            "X-EBAY-C-MARKETPLACE-ID": "EBAY_AU",
+            "Accept-Encoding": "gzip",
+            "Authorization": "Bearer v^1.1#i^1#r^0#f^0#p^1#I^3#t^H4sIAAAAAAAAAOVYbWwURRi+u36QSlEJAloJnMtHsHT3Zvc+d+0dXHttegq90jtaS1Sytzt3t3C3e+7M2h7+aWtDgP7AH6Bo1TQmTYxBDAQiRsSIGkwEJYAmSoKmgcSIfwCVKCjubo9yrQSQXuIl3p/LvPPOO8/zzPvOzA7orayq3dSy6fIM6zTbcC/otVmt9HRQVVmx7N4yW02FBRQ4WId7F/WW95f9WI/4TDrLtUOUVWQE7T2ZtIw40+gnNFXmFB5JiJP5DEQcFrhocNVKjqEAl1UVrAhKmrCHQ36CF7xxQfTBhBPGWSh6dat8PWZM8RNx4GKcHlZgBMjHE7xb70dIg2EZYV7GfoIBjIsELAmcMeDl3B6OBpSbca0l7B1QRZIi6y4UIAImXM4cqxZgvTVUHiGoYj0IEQgHm6ORYDjU1BqrdxTECuR1iGIea2hiq1ERob2DT2vw1tMg05uLaoIAESIcgbEZJgblgtfB3AV8U2qnz+NziYBm3KIP8IyzKFI2K2qGx7fGYVgkkUyYrhyUsYRzt1NUVyO+Hgo432rVQ4RDduNvtcanpYQEVT/R1BDsCra1EYHHlZTcmtRyZAwiLMlJsq09RAqCkTquuJd0siCuJxDIzzMWLK/ypIkaFVmUDM2QvVXBDVAHDSdL4yqQRneKyBE1mMAGoEI/9rqEtG+tsaZji6jhlGwsK8zoOtjN5u0XYHw0xqoU1zAcjzC5w1RIr6psVhKJyZ1mKuazpwf5iRTGWc7h6O7uprqdlKImHQwAtOPJVSujQgpmeMLwNWrd9JduP4CUTCoC1EciicO5rI6lR09VHYCcJAIu1u2mnXndJ8IKTLb+w1DA2TGxIIpVIAwjekSG9zqFOCvwrLcYBRLI56jDwAHjfI7M8OoGiLNpXoCkoOeZloGqJHJOd4Jx+hKQFD1sgnSxiQQZd4sekk5ACCCMxwXW9z+qkzvN9CgUVIiLk+rFSvMuT/P6jrCa2xjrZpmkV9WWxXLtoVx3UxMIraQzDrot4o3JfCQEkf9Oi+Gm5BvTkq5MTJ+/9Gq9RUEYilOiFxWULGxT0pKQK60FdqpiG6/iXBSm07phSiSD2Wy4SFt1sej9u13i7mgX8YT6b06nm7JCRsaWFitjPNID8FmJMs4fSlAyDoXXjFrHKcO8zkQ9Jd6Sfm0tKdY6yTG2kjh236R0yjhFoecESoVI0VT9qk1FjPtXTNkAZf04w6qSTkO1g55yOWcyGubjaVhqdV2EBJf4EjtraS/jdroB7Z3adiSYJ+m6UtuSirQTlzfexZ3aMfEDP2Axf3S/9TDotx6yWa2gHiymF4JHKsvWlJdV1yAJQ0riExSSkrL+3apCagPMZXlJtc2yXHxzR0tjTVPkpdrnY7njQ0cs1QXvC8NPgwfHXxiqyujpBc8NYN6Nngr6vrkzGBdggRN43R4arAULb/SW03PKH9hj7crVz7nQ91jVgeaTnSdGhDVLz4IZ405Wa4WlvN9qedbzLZjdcezhFz2efbs/vrjNhpXzC2dvPfJp9a9n9/w2MnM1a3E0iJYm+0GxqnF2/VPBOZeVwYHXd/7+8qFX7B+d/6Dz/nc3xn75rGb+6rrDg+oTZHrprJ1fvFA7Ove9t05/tWJBHckdqJKmDW+1zWwY3TsycOrqM99fSm5+Y8nB2ofOfC5fWFy7/6glMnPXwCeL1l/ZdvqnyiujuLNlaPfxbee0U1s+XPLHYOd310JHHdvvO2O55/1rUXLTiKfntRN/DStQxI/Wvv1lu/frk9qosOfVvkuddaHBBX++c+7nQx0pd6JvXrYs6Jm7/cTQ0IH9mc37VuzY8sPR88eWVy8f6Nn1TZd1b938vqut4bG1/BuegxX2+REAAA==",
+            "User-Agent": "axios/1.7.4"
+        },
+        "baseURL": "https://api.ebay.com",
+        "method": "get",
+        "url": "/commerce/taxonomy/v1/category_tree/1249"
+    },
+    "code": "ERR_BAD_REQUEST",
+    "status": 404
+}

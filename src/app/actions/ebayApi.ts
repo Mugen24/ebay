@@ -3,7 +3,6 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, Cr
 import { EbaySearch, EbaySearchReturn } from "@/app/types/ebaySeachTypes";
 import { EbayGetItemReturn, EbayGetItem } from "@/app/types/ebayGetItemTypes";
 import { writeFileSync } from "fs";
-import { space } from "postcss/lib/list";
 
 export class EbayApi {
     static scopes = ["https://api.ebay.com/oauth/api_scope"];
@@ -85,14 +84,19 @@ export class EbayApi {
     }
 
     async getCategories(categoryId: number) {
+        console.log("call get cate")
         const ENDPOINT = "/commerce/taxonomy/v1/category_tree"
         const configInstance = JSON.parse(JSON.stringify(EbayApi.config))
         configInstance["headers"]["Accept-Encoding"] = "gzip";
         const axiosInstance = this.createAxiosInstance(configInstance)
-        const res = await axiosInstance.get(`${ENDPOINT}/${categoryId}`)
-        console.log(res)
-        writeFileSync("getCategory", JSON.stringify(res))
-        return new Response(null, {status: 200})
+        axiosInstance.get(`${ENDPOINT}/${categoryId}`)
+        .then(result => {
+            writeFileSync("temp2", JSON.stringify(result.data))
+        })
+        .catch(error => {
+            writeFileSync("temp", JSON.stringify(error.toJSON()))
+        })
+        // return new Response(null, {status: 200})
     }
 
 }
