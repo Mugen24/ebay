@@ -8,6 +8,7 @@ import { styled, ThemeProvider } from "styled-components";
 import { StyledButton } from "./style/button";
 import { GlobalStyle } from "./style/globals";
 import type { CSSProp } from 'styled-components'
+import { getCategories } from "./actions/EbayApiWrapper";
 
 
 declare module 'react' {
@@ -93,11 +94,13 @@ export const _CenterContainer = styled.div`
     align-items: center;
 `
 export default function app() {
-
+    useEffect(() => {
+        getCategories(139971)
+    })
     return (
         <MainContainer>
-            <_CenterContainer><SearchBar/></_CenterContainer>
-            <SavedSearchDashboard></SavedSearchDashboard>
+            {/* <_CenterContainer><SearchBar/></_CenterContainer>
+            <SavedSearchDashboard></SavedSearchDashboard> */}
         </MainContainer>
     )
 }

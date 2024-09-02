@@ -1,5 +1,5 @@
 import EbayAuthToken from "ebay-oauth-nodejs-client"
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, CreateAxiosDefaults } from "axios";
 import { EbaySearch, EbaySearchReturn } from "@/app/types/ebaySeachTypes";
 import { EbayGetItemReturn, EbayGetItem } from "@/app/types/ebayGetItemTypes";
 import { writeFileSync } from "fs";
@@ -7,18 +7,23 @@ import { space } from "postcss/lib/list";
 
 export class EbayApi {
     static scopes = ["https://api.ebay.com/oauth/api_scope"];
+    static config = {
+        baseURL: "https://api.ebay.com",
+        headers: {
+            "X-EBAY-C-ENDUSERCTX": "contextualLocation=country=AU,zip=2166",
+            "X-EBAY-C-MARKETPLACE-ID": "EBAY_AU",
+            // "Authorization": `Bearer ${this.token}`
+        }
+    }
     token: string;
     axios: AxiosInstance;
     private constructor (token: string) {
         this.token = token;
-        this.axios = axios.create({
-            baseURL: "https://api.ebay.com",
-            headers: {
-                "X-EBAY-C-ENDUSERCTX": "contextualLocation=country=AU,zip=2166",
-                "X-EBAY-C-MARKETPLACE-ID": "EBAY_AU",
-                "Authorization": `Bearer ${this.token}`
-            }
-        })
+        const configInstance = JSON.parse(JSON.stringify(EbayApi.config));
+        //Added for authorisation
+        configInstance["Authorization"] = `Bearer ${this.token}`;
+
+        this.axios = axios.create(configInstance)
         async function responseErrorHandler(res: AxiosError) {
             if (res.status != 200) {
                 console.log(res.response?.request)
@@ -29,7 +34,19 @@ export class EbayApi {
             return res
         }, responseErrorHandler)
     }
+    //Creates a separated instance from the main this.axios property
+    createAxiosInstance(config: AxiosRequestConfig) {
+        const configInstance = config;
+        //Added for authorisation
+        // configInstance[["Authorization"] = `Bearer ${this.token}`;
+        if (configInstance.headers) {
+            configInstance.headers.Authorization = `Bearer ${this.token}`
+        }
 
+        return axios.create(
+            configInstance
+        )
+    }
     static async authenticate () {
         const ebayAuth = new EbayAuthToken(
             {
@@ -67,10 +84,15 @@ export class EbayApi {
         return res.data
     }
 
-    async getCategories(categoryId: string) {
-        const ENDPOINT = "https://api.ebay.com/commerce/taxonomy/v1/category_tree"
-        const res = await this.axios.get(`${ENDPOINT}/${categoryId}`)
-        return 
+    async getCategories(categoryId: number) {
+        const ENDPOINT = "/commerce/taxonomy/v1/category_tree"
+        const configInstance = JSON.parse(JSON.stringify(EbayApi.config))
+        configInstance["headers"]["Accept-Encoding"] = "gzip";
+        const axiosInstance = this.createAxiosInstance(configInstance)
+        const res = await axiosInstance.get(`${ENDPOINT}/${categoryId}`)
+        console.log(res)
+        writeFileSync("getCategory", JSON.stringify(res))
+        return new Response(null, {status: 200})
     }
 
 }

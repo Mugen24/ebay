@@ -18,7 +18,9 @@ export async function getItem(params: EbayGetItem) {
     })
 }
 
-export async function getCategories(categoryID: string) {
-    return {}    
+export async function getCategories(categoryID: number) {
+    return ebayApi.then((ebay) => {
+        return ebay.getCategories(categoryID)
+    })
 }
 

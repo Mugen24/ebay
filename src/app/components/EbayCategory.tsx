@@ -21,9 +21,9 @@ function CategoryComponent({ebaySearchReturn, setCategory}:
 
     const truncatedCategories = categories.slice(0, CATEGORY_LIMIT);
 
-    for (let category of truncatedCategories) {
-        getCategories(category.categoryId)
-    }
+    // for (let category of truncatedCategories) {
+    //     getCategories(category.categoryId)
+    // }
 
 
 
