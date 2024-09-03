@@ -97,7 +97,8 @@ function Filter({setFilterState, setSortState, saveConfigState}: {
         </section>
 
         <section>
-            <StyledButton></StyledButton>
+            <StyledButton>New</StyledButton>
+            <StyledButton>Used</StyledButton>
         </section>
 
         <section>
@@ -144,8 +145,9 @@ function SideBar(
         setEbaySaverState(newEbaySaverState)
     }
 
-    function setFilterState(filterArgs: string) {
-        newEbaySaverState.data["filter"] = `buyingOptions:{${filterArgs}}`
+    function setFilterState(filterArgs: string[]) {
+        // newEbaySaverState.data["filter"] = `buyingOptions:{${filterArgs}}`
+        for ()
         setEbaySaverState(newEbaySaverState)
     }
 

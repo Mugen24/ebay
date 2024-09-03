@@ -1,3 +1,5 @@
+import { ValueOf } from "next/dist/shared/lib/constants";
+
 export interface EbaySearch extends Object {
     q?: string,
     gtin?: string,
@@ -13,6 +15,21 @@ export interface EbaySearch extends Object {
     aspect_filter?: AspectFilter,
     epid?: string
 }
+
+type _BuyingOption = "FIXED_PRICE" | "AUCTION" | "BEST_OFFER" | "CLASSIFIED_AD";
+export type BuyingOptions = 
+    | `buyingOptions:{${_BuyingOption}}`
+    | `buyingOptions:{${_BuyingOption}|${_BuyingOption}}`
+    | `buyingOptions:{${_BuyingOption}|${_BuyingOption}}|${_BuyingOption}`
+    | `buyingOptions:{${_BuyingOption}|${_BuyingOption}}|${_BuyingOption}|${_BuyingOption}`
+
+enum ConditionOption {
+    NEW = 1000,
+    USED = 3000,
+}
+
+export type ConditionOptions = 
+    | `conditionIds:{${ConditionOption}}`
 
 type CompatibilityFilter = "Not implemented for vehicle requirements"
 type FilterField = "filter by price bid etc. https://developer.ebay.com/api-docs/buy/static/ref-buy-browse-filters.html"
