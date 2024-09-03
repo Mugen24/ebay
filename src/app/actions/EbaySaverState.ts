@@ -1,6 +1,7 @@
 import { EbaySearch, EbaySearchReturn } from "../types/ebaySeachTypes"
 import { saveConfig, loadConfig } from "./saveState"
 
+type EbaySearchKey = keyof EbaySearch
 export class EbaySaverState {
     data: EbaySearch
     tempData: EbaySearch
@@ -13,6 +14,7 @@ export class EbaySaverState {
     saveState(searchState: EbaySearch) {
         this.data = searchState
     }
+
 
     toJson() {
         return Object.assign({}, this.data, this.tempData)
@@ -32,5 +34,4 @@ export class EbaySaverState {
     readConfig() {
         return loadConfig()
     }
-
 }

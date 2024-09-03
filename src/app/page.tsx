@@ -5,7 +5,7 @@ import { fetchSavedSearches } from "./actions/fetchSavedSearches";
 import { SearchBar } from "./components/SearchBar";
 import { EbaySaverState } from "./actions/EbaySaverState";
 import { styled, ThemeProvider } from "styled-components";
-import { StyledButton } from "./style/button";
+import { StyledButton } from "./style/inputWidgets";
 import { GlobalStyle } from "./style/globals";
 import type { CSSProp } from 'styled-components'
 
@@ -51,7 +51,7 @@ function SavedSearchDashboard() {
     const [displaySearch, _setDisplaySearch] = useState<number>(-1)
     const searchedComponents = [];
     const buttonSearchComponents: ReactElement<HTMLButtonElement>[] = [
-        <StyledButton $theme="gray" onClick={()=>setDisplaySearch(-1)} key={-1}>All</StyledButton>
+        <StyledButton onClick={()=>setDisplaySearch(-1)} key={-1}>All</StyledButton>
     ];
     function setDisplaySearch(numer: number) {
         console.log(numer)
@@ -62,7 +62,7 @@ function SavedSearchDashboard() {
     for (const search of searches) {
         const tempCounter = keyCounter
         buttonSearchComponents.push(
-            <StyledButton $theme="gray" onClick={()=> setDisplaySearch(tempCounter)} key={tempCounter}>{search.data.q}</StyledButton>
+            <StyledButton onClick={()=> setDisplaySearch(tempCounter)} key={tempCounter}>{search.data.q}</StyledButton>
         )
         searchedComponents.push(<ItemsContainer key={tempCounter} ebaySaverState={search}/>)
         keyCounter++;

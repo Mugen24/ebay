@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { formToJSON } from "axios";
 import { EbaySearch } from "../types/ebaySeachTypes";
 import { styled } from "styled-components";
+import { EbaySaverState } from "../actions/EbaySaverState";
+import { search } from "../actions/EbayApiWrapper";
 
 export const SearchBarStyle = styled.div`
     width: 80%;
@@ -50,21 +52,28 @@ const EnterButton = styled.input`
 `
 
 
-export function SearchBar({ }: {
+export function SearchBar({getEbaySaverState}: {
+    getEbaySaverState?: () => EbaySaverState
 }) {
-
-    const refSearchForm = useRef(null);
+    const refSearchForm = useRef<HTMLFormElement>(null);
     const router = useRouter();
-    function onclick() {
-        if (refSearchForm.current === null) {
-            throw new Error("Ref is null")
-        }
 
-        const queries: EbaySearch = formToJSON(new FormData(refSearchForm.current))
-        queries["fieldgroups"] = "ASPECT_REFINEMENTS,CATEGORY_REFINEMENTS,MATCHING_ITEMS"
-        const params = new URLSearchParams(queries as Record<string, any>)
-        router.push(`/items` + "?" + params.toString())
+    const onclick = () => {
+        if (refSearchForm.current !== null) {
+            const queries: EbaySearch = formToJSON(new FormData(refSearchForm.current))
+            queries["fieldgroups"] = "ASPECT_REFINEMENTS,CATEGORY_REFINEMENTS,MATCHING_ITEMS"
+            const params = new URLSearchParams(queries as Record<string, any>)
+            router.push(`/items` + "?" + params.toString())
+        } else {
+            if (getEbaySaverState === undefined) {
+                throw new Error("SearchBar has no information to search")
+            }
+            const ebaySaverState = getEbaySaverState();
+            const params = ebaySaverState.toSearchParams()
+            router.push(`/items?` + params.toString())
+        }
     }
+
 
     return (
         <SearchBarStyle>

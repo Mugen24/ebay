@@ -9,6 +9,8 @@ import { extractCategoryDistributions, extractItems, URLSearchParamsToJson } fro
 import { EbaySaverState } from "@/app/actions/EbaySaverState";
 import styled from "styled-components";
 import { EbayItem } from "@/app/components/EbayItem";
+import CategoryContainer from "@/app/components/EbayCategoryContainer";
+import { StyledButton, StyleOption } from "@/app/style/inputWidgets";
 
 export function Category_button({cat, setCategory}: 
     {
@@ -61,9 +63,9 @@ export function ItemsContainer({ebaySaverState}: {
 }
 
 
-function Filter({setFilterState, setChoiceState, saveConfigState}: {
+function Filter({setFilterState, setSortState, saveConfigState}: {
     setFilterState: (filterArgs: string) => void,
-    setChoiceState: (choiceArgs: string) => void,
+    setSortState: (choiceArgs: string) => void,
     saveConfigState: () => void,
 }) {
     const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
@@ -74,36 +76,56 @@ function Filter({setFilterState, setChoiceState, saveConfigState}: {
         }
     }
 
-    const sortOptionsHandler: (event: React.ChangeEvent<HTMLSelectElement>) => void = (event) => {
+    const sortOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
         // if (event.target instanceof Element) {
         //     const params = event.target.nodeValue;
         //     ebaySaverState["data"]["sort"] = params as SortField;
         // }
-        if (event.target instanceof HTMLSelectElement) {
-            const choice = event.target.value;
-            setChoiceState(choice);
+        if (event.target instanceof  Element) {
+            const choice = event.target.nodeValue;
+            setSortState(choice as string);
         }
     }
 
 
     return (
-    <>
-        <button value="FIXED_PRICE|BEST_OFFER|AUCTION" onClick={buyingOptionsHandler}>All</button>
-        <button value="AUCTION" onClick={buyingOptionsHandler}>AUCTION</button>
-        <button value="FIXED_PRICE|BEST_OFFER" onClick={buyingOptionsHandler}>Buy It Now</button>
+    <div>
+        <section>
+            <StyledButton value="FIXED_PRICE|BEST_OFFER|AUCTION" onClick={buyingOptionsHandler}>All</StyledButton>
+            <StyledButton value="AUCTION" onClick={buyingOptionsHandler}>AUCTION</StyledButton>
+            <StyledButton value="FIXED_PRICE|BEST_OFFER" onClick={buyingOptionsHandler}>Buy It Now</StyledButton>
+        </section>
 
-        <label htmlFor="sort-options">Sort</label>
-        <select name="sort-options" id="sort-options" onChange={sortOptionsHandler}>
-            <option value={"newlyListed"}>Time: Newly Listed</option>
-            <option value={"endingSoonest"}>Time: Ending Soonest</option>
-            <option value={"price"}>Price + Postage: Lowest First</option>
-        </select>
+        <section>
+            <StyledButton></StyledButton>
+        </section>
 
-        <button onClick={saveConfigState}>Save Search</button>
-    </>
+        <section>
+            <a>Sort: </a>
+            {/* <select style={{}} name="sort-options" id="sort-options" onChange={sortOptionsHandler}>
+                <StyleOption value={"newlyListed"}>Time: Newly Listed</StyleOption>
+                <StyleOption value={"endingSoonest"}>Time: Ending Soonest</StyleOption>
+                <StyleOption value={"price"}>Price + Postage: Lowest First </StyleOption>
+            </select> */}
+            <StyledButton value={"newlyListed"} onClick={sortOptionsHandler}>Time: Newly Listed</StyledButton>
+            <StyledButton value={"endingSoonest"} onClick={sortOptionsHandler}>Time: Ending Soonest</StyledButton>
+            <StyledButton value={"price"} onClick={sortOptionsHandler}>Price + Postage: Lowest First </StyledButton>
+        </section>
+        <section>
+            <a>Save Search:</a>
+            <StyledButton onClick={saveConfigState}>Save Search</StyledButton>
+        </section>
+    </div>
     )
 }
 
+const StyleSideBar = styled.div`
+    overflow: scroll;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    height: 97dvh;
+`
 function SideBar(
         {ebaySearchResponse, setEbaySaverState, getEbaySaverState}: 
         { 
@@ -127,7 +149,7 @@ function SideBar(
         setEbaySaverState(newEbaySaverState)
     }
 
-    function setChoiceState(choiceArgs: string) {
+    function setSortState(choiceArgs: string) {
         ebaySaverState["data"]["sort"] = choiceArgs as SortField;
     }
 
@@ -135,26 +157,11 @@ function SideBar(
         newEbaySaverState.saveToConfig();
     }
 
-
-    const CATEGORY_LIMIT = 10;
-    const categories = extractCategoryDistributions(ebaySearchResponse)
-    const reactCategories = []
-    for (let category_counter = 0; category_counter < CATEGORY_LIMIT; category_counter++) {
-        const category = categories[category_counter];
-        reactCategories.push(
-            <Category_button key={category.categoryId} cat={category} setCategory={setCategory}></Category_button>
-        )
-    }
-
-    if (categories.length > CATEGORY_LIMIT) {
-
-    }
-
     return (
-        <div>
-            <Filter setFilterState={setFilterState} setChoiceState={setChoiceState} saveConfigState={saveConfigState}/>
-            {reactCategories}
-        </div>
+        <StyleSideBar>
+            <Filter setFilterState={setFilterState} setSortState={setSortState} saveConfigState={saveConfigState}/>
+            <CategoryContainer categories={extractCategoryDistributions(ebaySearchResponse)} setCategory={setCategory}></CategoryContainer>
+        </StyleSideBar>
     )
 }
 
@@ -186,6 +193,9 @@ export default function AppLoader() {
 
 }
 
+const StyleEbayItemsContainer= styled.div`
+    display: flex;
+`
 export function App({initialData, initialSaverState}: {
     initialData: EbaySearchReturn,
     initialSaverState: EbaySaverState,
@@ -195,14 +205,21 @@ export function App({initialData, initialSaverState}: {
     useEffect(() => {
         setEbaySaverState(initialSaverState)
     }, [initialSaverState])
+
     function getEbaySaverState() {
         return ebaySaverState;
     }
+
+
     return (
         <div>
-            <SearchBar/>
-            <SideBar ebaySearchResponse={initialData as EbaySearchReturn} getEbaySaverState={getEbaySaverState} setEbaySaverState={setEbaySaverState} ></SideBar>
-            <ItemsContainer ebaySaverState={ebaySaverState}></ItemsContainer>
+            <div style={{display: "flex", justifyContent: "center"}}>
+                <SearchBar getEbaySaverState={getEbaySaverState}/>
+            </div>
+            <StyleEbayItemsContainer>
+                <SideBar ebaySearchResponse={initialData as EbaySearchReturn} getEbaySaverState={getEbaySaverState} setEbaySaverState={setEbaySaverState} ></SideBar>
+                <ItemsContainer ebaySaverState={ebaySaverState}></ItemsContainer>
+            </StyleEbayItemsContainer>
         </div>
     )
 }
