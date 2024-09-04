@@ -8,7 +8,7 @@ export interface EbaySearch extends Object {
     compatibility_filter?: CompatibilityFilter,
     auto_correct?: string,
     category_ids?: string,
-    filter?: string,
+    filter?: string | FilterField,
     sort?: SortField,
     limit?: string,
     offset?: string,
@@ -16,23 +16,24 @@ export interface EbaySearch extends Object {
     epid?: string
 }
 
-type _BuyingOption = "FIXED_PRICE" | "AUCTION" | "BEST_OFFER" | "CLASSIFIED_AD";
+type BuyingOption = "FIXED_PRICE" | "AUCTION" | "BEST_OFFER" | "CLASSIFIED_AD";
 export type BuyingOptions = 
-    | `buyingOptions:{${_BuyingOption}}`
-    | `buyingOptions:{${_BuyingOption}|${_BuyingOption}}`
-    | `buyingOptions:{${_BuyingOption}|${_BuyingOption}}|${_BuyingOption}`
-    | `buyingOptions:{${_BuyingOption}|${_BuyingOption}}|${_BuyingOption}|${_BuyingOption}`
+    | `buyingOptions:{${BuyingOption}}`
+    | `buyingOptions:{${BuyingOption}|${BuyingOption}}`
+    | `buyingOptions:{${BuyingOption}|${BuyingOption}}|${BuyingOption}`
+    | `buyingOptions:{${BuyingOption}|${BuyingOption}}|${BuyingOption}|${BuyingOption}`
 
-enum ConditionOption {
-    NEW = 1000,
-    USED = 3000,
-}
-
+type ConditionOption = "NEW" | "USED" | "UNSPECIFIED"
 export type ConditionOptions = 
-    | `conditionIds:{${ConditionOption}}`
+    | `conditions:{${ConditionOption}}`
+    | `conditions:{${ConditionOption}|${ConditionOption}}`
+
+export type FilterField = 
+    | `filter=${BuyingOptions},${ConditionOptions}`
+    | `filter=${ConditionOptions},${BuyingOptions}`
+
 
 type CompatibilityFilter = "Not implemented for vehicle requirements"
-type FilterField = "filter by price bid etc. https://developer.ebay.com/api-docs/buy/static/ref-buy-browse-filters.html"
 export type SortField = "price" | "distance" | "newlyListed" | "endingSoonest"
 type AspectFilter = "Not implemented https://developer.ebay.com/api-docs/buy/browse/resources/item_summary/methods/search#uri.aspect_filter"
 

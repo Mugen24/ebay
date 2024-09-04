@@ -1,7 +1,7 @@
 "use client"
 import { Dispatch, useEffect, useRef, useState } from "react"
 import { useSearchParams } from "next/navigation";
-import { CategoryDistribution, ItemSummary, EbaySearchReturn, SortField } from "@/app/types/ebaySeachTypes";
+import { CategoryDistribution, ItemSummary, EbaySearchReturn, SortField, BuyingOptions, ConditionOptions, FilterField } from "@/app/types/ebaySeachTypes";
 import React from "react";
 import { search } from "@/app/actions/EbayApiWrapper";
 import { SearchBar } from "@/app/components/SearchBar";
@@ -64,15 +64,27 @@ export function ItemsContainer({ebaySaverState}: {
 
 
 function Filter({setFilterState, setSortState, saveConfigState}: {
-    setFilterState: (filterArgs: string) => void,
+    setFilterState: (filterArgs: (BuyingOptions | ConditionOptions)[]) => void,
     setSortState: (choiceArgs: string) => void,
     saveConfigState: () => void,
 }) {
     const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
-        if (event.target instanceof Element) {
-            const params = event.target.nodeValue;
-            // ebaySaverState["data"]["filter"] = `buyingOptions:{${params}}`
-            setFilterState(params as string)
+        if (event.target instanceof HTMLButtonElement) {
+            const params = event.target.value;
+            if (params) {
+                setFilterState([`buyingOptions:{${params}}` as BuyingOptions])
+            }
+        }
+    }
+
+    const conditionOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
+        if (event.target instanceof HTMLButtonElement) {
+            const params = event.target.value;
+            // console.log("option handler")
+            // console.log(event)
+            if (params) {
+                setFilterState([`conditions:{${params}}` as ConditionOptions])
+            }
         }
     }
 
@@ -97,8 +109,9 @@ function Filter({setFilterState, setSortState, saveConfigState}: {
         </section>
 
         <section>
-            <StyledButton>New</StyledButton>
-            <StyledButton>Used</StyledButton>
+            <StyledButton value="NEW" onClick={conditionOptionsHandler}>New</StyledButton>
+            <StyledButton value="USED" onClick={conditionOptionsHandler}>Used</StyledButton>
+            <StyledButton value="UNSPECIFIED" onClick={conditionOptionsHandler}>Other</StyledButton>
         </section>
 
         <section>
@@ -128,15 +141,14 @@ const StyleSideBar = styled.div`
     height: 97dvh;
 `
 function SideBar(
-        {ebaySearchResponse, setEbaySaverState, getEbaySaverState}: 
+        {ebaySearchResponse, setEbaySaverState, ebaySaverState}: 
         { 
             ebaySearchResponse: EbaySearchReturn
             setEbaySaverState: Dispatch<EbaySaverState> 
-            getEbaySaverState: () => EbaySaverState
+            ebaySaverState: EbaySaverState
         }
     ) {
     
-    const ebaySaverState = getEbaySaverState();
     const newEbaySaverState = new EbaySaverState();
     newEbaySaverState.saveState(ebaySaverState.toJson())
 
@@ -145,9 +157,15 @@ function SideBar(
         setEbaySaverState(newEbaySaverState)
     }
 
-    function setFilterState(filterArgs: string[]) {
-        // newEbaySaverState.data["filter"] = `buyingOptions:{${filterArgs}}`
-        for ()
+    function setFilterState(filterArgs: (BuyingOptions | ConditionOptions)[]) {
+        if (!newEbaySaverState.data["filter"]) {
+            newEbaySaverState.data["filter"] = `${filterArgs.join()}`
+        } else {
+            newEbaySaverState.data["filter"] += `,${filterArgs.join()}`
+        }
+        console.log("setting saver state")
+        console.log(JSON.stringify(newEbaySaverState.data))
+        console.log(JSON.stringify(ebaySaverState.data))
         setEbaySaverState(newEbaySaverState)
     }
 
@@ -219,7 +237,7 @@ export function App({initialData, initialSaverState}: {
                 <SearchBar getEbaySaverState={getEbaySaverState}/>
             </div>
             <StyleEbayItemsContainer>
-                <SideBar ebaySearchResponse={initialData as EbaySearchReturn} getEbaySaverState={getEbaySaverState} setEbaySaverState={setEbaySaverState} ></SideBar>
+                <SideBar ebaySearchResponse={initialData as EbaySearchReturn} ebaySaverState={ebaySaverState} setEbaySaverState={setEbaySaverState} ></SideBar>
                 <ItemsContainer ebaySaverState={ebaySaverState}></ItemsContainer>
             </StyleEbayItemsContainer>
         </div>
