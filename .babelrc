@@ -11,5 +11,7 @@
       }
     ]
   ],
-  "plugins": ["babel-plugin-styled-components"]
+  "plugins": [
+    ["styled-components", { "ssr": true }]
+  ]
 }

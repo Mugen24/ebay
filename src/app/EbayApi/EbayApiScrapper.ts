@@ -1,5 +1,4 @@
 import puppeteer, { CookieParam, Browser, Page, EvaluateFunc, Keyboard } from 'puppeteer';
-import "dotenv/config"
 import {writeFile, writeFileSync, readFileSync} from 'node:fs';
 
 

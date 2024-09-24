@@ -1,3 +1,4 @@
+'use client'
 import React from "react";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -5,7 +6,6 @@ import { formToJSON } from "axios";
 import { EbaySearch } from "../types/ebaySeachTypes";
 import { styled } from "styled-components";
 import { EbaySaverState } from "../actions/EbaySaverState";
-import { search } from "../actions/EbayApiWrapper";
 
 export const SearchBarStyle = styled.div`
     width: 80%;
