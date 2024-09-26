@@ -7,6 +7,7 @@ const nextConfig = {
     config.experiments.topLevelAwait = true 
     return config;
   },
+  reactStrictMode: false
 };
 
 export default nextConfig;

@@ -50,7 +50,7 @@ export class EbayScraper {
         const browser = await puppeteer.launch({
             browser: "firefox",
             executablePath: process.env.FIREFOX_PATH,
-            headless: false,
+            headless: true,
             // protocol: "webDriverBiDi",
             extraPrefsFirefox: {
             "devtools.chrome.enabled": true,
@@ -73,13 +73,16 @@ export class EbayScraper {
     protected async loadEbayCookie() {
         const browser = this.browser;
         const cookies = JSON.parse(readFileSync(process.env.TOKEN_PATH, {encoding: "utf-8"}))
-        console.log(cookies)
         for (let cookie of cookies) {
             console.log(cookie)
             browser.connection.send("storage.setCookie", {
-            cookie: cookie 
+                "cookie": cookie 
             })
         }
+        // console.log(cookies[0])
+        // browser.connection.send("storage.setCookie", {
+        //     "cookie": cookies[0]
+        // })
     }
     protected async saveEbayCookies() {
         const browser = this.browser;
@@ -90,32 +93,32 @@ export class EbayScraper {
         }
         })
         if (type === "success") {
-        result["cookies"].map(cookie => {
-            cookie["value"] = cookie["value"]["value"]
-        })
-        writeFile(process.env.TOKEN_PATH, result["cookies"], (e) => {console.log(e)})
+        // result["cookies"].map(cookie => {
+        //     cookie["value"] = cookie["value"]["value"]
+        // })
+        writeFile(process.env.TOKEN_PATH, JSON.stringify(result["cookies"]), (e) => {console.log(e)})
         }
 
     }
     // Function should be used in as param for
     // page.waitForFunction
-    private async isEbayLoggedIn () {
+    private static async isEbayLoggedIn () {
         if (document.readyState === "complete") {
             // Check if username is present
             if (document.querySelector("#gh-ug > b:nth-child(1)") !== null) {
-            if (document.cookie) {
-                await new Promise((resolve, reject) => {
-                setTimeout(resolve, 3000)
-                })
-                return true
-            }
+                if (document.cookie) {
+                    await new Promise((resolve, reject) => {
+                    setTimeout(resolve, 3000)
+                    })
+                    return true
+                }
             } 
         }
         return false
     }
 
 
-    async login(retry = 3, _page?: Page) {
+    async login(retry = 2, _page?: Page) {
         const browser = this.browser;
         // Navigate the page to a URL
         const page = _page ?? await browser.newPage();
@@ -128,16 +131,16 @@ export class EbayScraper {
         try {
             this.loadEbayCookie()
             await new Promise((res, rej) => {
-            return setTimeout(res, 3000)
+                return setTimeout(res, 3000)
             })
             await page.goto(process.env.EBAY_URL);
-            await page.waitForFunction(this.isEbayLoggedIn, {
+            await page.waitForFunction(EbayScraper.isEbayLoggedIn, {
             "timeout": 5000
             })
 
         } catch (error){
-            console.log(error)
-
+            // console.log(error)
+            // process.exit(1);
             await page.goto(process.env.EBAY_URL);
             await page.locator(LOGIN_LINK_SELECTOR).click();
 
@@ -149,10 +152,11 @@ export class EbayScraper {
             await page.locator(PASSWORD_SELECTOR).click();
             await page.keyboard.type(process.env.EBAY_PASSWORD, {delay: 100});
             await page.click(PASSWORD_ENTER_SELECTOR);
-            await page.waitForNavigation({waitUntil: "networkidle2"});
+            // await page.waitForNavigation({waitUntil: "networkidle2"});
+            await page.waitForFunction(EbayScraper.isEbayLoggedIn)
             await this.saveEbayCookies()
 
-            this.login(retry - 1)
+            // this.login(retry - 1)
         } 
     }
     async _searchLowestSold(searchTerm: string, browser: Browser, page: Page) {
@@ -295,7 +299,7 @@ export class EbayScraper {
     }
 }
 
-(async () => {
-    const ebayScrapper = await EbayScraper.authenticate();
-    await ebayScrapper.searchLowestSoldBetter("steam deck", 100)
-})()
+// (async () => {
+//     const ebayScrapper = await EbayScraper.authenticate();
+//     await ebayScrapper.searchLowestSoldBetter("steam deck", 100)
+// })()
