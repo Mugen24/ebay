@@ -117,16 +117,12 @@ export class EbayScraper {
         return false
     }
 
-
-    async login(retry = 2, _page?: Page) {
+    // TODO: switch out to a manual login
+    async login(retry = 1, _page?: Page) {
         const browser = this.browser;
         // Navigate the page to a URL
         const page = _page ?? await browser.newPage();
 
-        if (retry <= 0) {
-            page.close()
-            throw new Error("Failed to login")
-        } 
 
         try {
             this.loadEbayCookie()
@@ -141,6 +137,11 @@ export class EbayScraper {
         } catch (error){
             // console.log(error)
             // process.exit(1);
+            if (retry <= 0) {
+                page.close()
+                throw new Error("Failed to login")
+            } 
+
             await page.goto(process.env.EBAY_URL);
             await page.locator(LOGIN_LINK_SELECTOR).click();
 
@@ -156,7 +157,8 @@ export class EbayScraper {
             await page.waitForFunction(EbayScraper.isEbayLoggedIn)
             await this.saveEbayCookies()
 
-            // this.login(retry - 1)
+
+            this.login(retry - 1)
         } 
     }
     async _searchLowestSold(searchTerm: string, browser: Browser, page: Page) {
