@@ -55,6 +55,7 @@ export class EbayApi {
                 }
             )
         }
+        // console.log(res.data)
         return res.data;
     }
 

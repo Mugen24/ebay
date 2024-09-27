@@ -49,7 +49,7 @@ export class EbayScraper {
     static async authenticate() {
         const browser = await puppeteer.launch({
             browser: "firefox",
-            executablePath: process.env.FIREFOX_PATH,
+            // executablePath: process.env.FIREFOX_PATH,
             headless: true,
             // protocol: "webDriverBiDi",
             extraPrefsFirefox: {
@@ -74,7 +74,7 @@ export class EbayScraper {
         const browser = this.browser;
         const cookies = JSON.parse(readFileSync(process.env.TOKEN_PATH, {encoding: "utf-8"}))
         for (let cookie of cookies) {
-            console.log(cookie)
+            // console.log(cookie)
             browser.connection.send("storage.setCookie", {
                 "cookie": cookie 
             })

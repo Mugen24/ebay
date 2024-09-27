@@ -32,6 +32,7 @@ export async function SavedSearchDashboard() {
     let key: keyof typeof searchParams
     const itemGalleries: ReactElement<typeof ItemGallery>[] = [];
 
+    let index = 0;
     for (key in searchParams) {
         const searchParam: EbaySearch = searchParams[key] as EbaySearch;
         const ebaySearchReturn: EbaySearchReturn = await search(searchParam);
@@ -39,11 +40,14 @@ export async function SavedSearchDashboard() {
 
         const itemSummaries: ItemSummary[] = ebaySearchReturn.itemSummaries;
         for (let itemSummary of itemSummaries) {
-            itemComponents.push(<EbayItem ebayItem={itemSummary}/>)
+            itemComponents.push(<EbayItem key={itemSummary.itemId} ebayItem={itemSummary}/>);
         }
 
-        itemGalleries.push(<ItemGallery ebayItems={itemComponents}/>)
+        console.log(itemComponents.length)
+        itemGalleries.push(<ItemGallery key={index} ebayItems={itemComponents}/>);
+        index++;
     }
+    console.log(itemGalleries.length)
     return (
         <div>
             {itemGalleries}
