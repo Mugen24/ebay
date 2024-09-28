@@ -1,11 +1,11 @@
 .main_layout {
     width: 100%;
     height: 100%;
-    /* background-color: var(--main-bg-colour); */
+    background-color: var(--main-bg-colour);
     padding: 3px;
 }
 
-.main {
+.center_content{
     /* width: 100%;
     height: 100%; */
     display: flex;

@@ -1,31 +1,12 @@
-import { readFileSync } from "fs";
 import { ReactElement } from "react";
-import styled from "styled-components";
 import searchConfig from "@/app/data/searchConfig.json"
 import { EbaySearch, EbaySearchReturn, ItemSummary } from "../types/ebaySeachTypes";
 import { search } from "../EbayApi/EbayApi";
 import { EbayItem } from '../components/EbayItem';
-
-// const StyleSavedSearchDashboard = styled.div `
-//     display: grid;
-//     grid-template-columns: repeat(3, 1fr);
-// `
+import styles from './structure.module.css'
+import { ItemGallery } from "../components/ItemGallery";
 
 
-// const StyleItemGallery = styled.div`
-
-// `
-
-function ItemGallery({ebayItems}: {ebayItems: ReactElement<typeof EbayItem>[]}) {
-    return (
-        <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)"
-        }}>
-            {ebayItems}
-        </div>
-    )
-}
 
 export async function SavedSearchDashboard() {
     const searchParams = searchConfig.searchParams
@@ -40,16 +21,14 @@ export async function SavedSearchDashboard() {
 
         const itemSummaries: ItemSummary[] = ebaySearchReturn.itemSummaries;
         for (let itemSummary of itemSummaries) {
-            itemComponents.push(<EbayItem key={itemSummary.itemId} ebayItem={itemSummary}/>);
+            itemComponents.push(<EbayItem key={`${itemSummary.itemId}:${itemSummary.epid}`} ebayItem={itemSummary}/>);
         }
 
-        console.log(itemComponents.length)
-        itemGalleries.push(<ItemGallery key={index} ebayItems={itemComponents}/>);
+        itemGalleries.push(<ItemGallery key={`P:${index}`} ebayItems={itemComponents}/>);
         index++;
     }
-    console.log(itemGalleries.length)
     return (
-        <div>
+        <div className={styles.save_search_dashboard}>
             {itemGalleries}
         </div>
     )

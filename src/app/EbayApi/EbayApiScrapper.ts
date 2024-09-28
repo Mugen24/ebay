@@ -49,7 +49,7 @@ export class EbayScraper {
     static async authenticate() {
         const browser = await puppeteer.launch({
             browser: "firefox",
-            // executablePath: process.env.FIREFOX_PATH,
+            executablePath: process.env.FIREFOX_PATH,
             headless: true,
             // protocol: "webDriverBiDi",
             extraPrefsFirefox: {

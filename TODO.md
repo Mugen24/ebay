@@ -1,0 +1,4 @@
+- Frontpage save searches should re-fetch ebay api every x seconds
+- Repeated selling type (Auction, Best offer etc) seems to be accumulating more than the normal amount. 
+- Duplicated react key somewhere
+- Autocomplete the category

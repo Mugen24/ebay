@@ -6,9 +6,12 @@ import styles from "./structure.module.css";
 
 export default function ClientSideApp({children}: {children?: ReactNode}) {
     return (
-      <section className={styles.main_layout}>
-        <SearchBar></SearchBar>
+      <div className={styles.main_layout}>
+        <section className={styles.center_content}>
+          <SearchBar></SearchBar>
+        </section>
+
         {children}
-      </section> 
+      </div > 
     )
 }

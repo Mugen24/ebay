@@ -1,6 +1,6 @@
 // import styled from "styled-components"
 import { ItemSummary } from "../types/ebaySeachTypes"
-
+import styles from "./structure.module.css"
 // const StyleEbayItem = styled.div`
 //     padding: 3px;
 //     display: flex;
@@ -31,21 +31,7 @@ import { ItemSummary } from "../types/ebaySeachTypes"
 
 export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
     return (
-        <div className="ebay-item" style={{
-            padding: "3px",
-            display: "flex",
-            flexDirection: "column",
-            margin: "5px",
-            // "&:hover" {
-            //     boxShadow: "0px 0px 10px 1px ${props => props.theme["highlight"]}"
-            // }
-
-            // & > *, * > * {
-            //     margin: 0;
-            //     font-size: 0.6vw;
-            // }
-            gap: "5px"
-        }}>
+        <div className={styles.ebay_item}>
             <img src={ebayItem.image.imageUrl} alt={ebayItem.title}/>
             <div>
                 <a href={ebayItem.itemWebUrl}><p>{ebayItem.title}</p></a>

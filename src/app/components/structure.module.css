@@ -1,0 +1,24 @@
+.ebay_item {
+    padding: "3px";
+    display: "flex";
+    flex-direction: "column";
+    margin: "5px";
+    gap: 5px;
+    width: 300px;
+}
+
+.ebay_item:hover {
+    box-shadow: 0px 0px 10px 1px var(--outline);
+};
+
+.ebay_item > * {
+        margin: 0;
+        font-size: 0.6vw;
+}
+
+.item_gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    height: 100%;
+    width: 100%;
+}

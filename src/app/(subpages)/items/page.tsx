@@ -3,14 +3,16 @@ import { Dispatch, useEffect, useRef, useState } from "react"
 import { useSearchParams } from "next/navigation";
 import { CategoryDistribution, ItemSummary, EbaySearchReturn, SortField, BuyingOptions, ConditionOptions, FilterField } from "@/app/types/ebaySeachTypes";
 import React from "react";
-import { search } from "@/app/actions/EbayApiWrapper";
+import { search } from "@/app/EbayApi/EbayApi";
 import { SearchBar } from "@/app/components/SearchBar";
 import { extractCategoryDistributions, extractItems, URLSearchParamsToJson } from "@/app/actions/utils";
 import { EbaySaverState } from "@/app/actions/EbaySaverState";
-import styled from "styled-components";
 import { EbayItem } from "@/app/components/EbayItem";
 import CategoryContainer from "@/app/components/EbayCategoryContainer";
 import { StyledButton, StyleOption } from "@/app/style/inputWidgets";
+import styles from "./structure.module.css"
+import { ItemGallery } from "@/app/components/ItemGallery";
+
 
 export function Category_button({cat, setCategory}: 
     {
@@ -31,10 +33,6 @@ export function Category_button({cat, setCategory}:
 }
 
 
-const StyleItemsContainer = styled.div `
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-`
 export function ItemsContainer({ebaySaverState}: {
     ebaySaverState: EbaySaverState
 }) {
@@ -55,9 +53,7 @@ export function ItemsContainer({ebaySaverState}: {
     return (
         <div>
             <h1>Search: {ebaySaverState.data.q}</h1>
-            <StyleItemsContainer>
-                {ebayItems}
-            </StyleItemsContainer>
+            <ItemGallery ebayItems={ebayItems}/>
         </div>
     )
 }
@@ -193,10 +189,7 @@ export default function AppLoader() {
     //Remove to since it only needed to fetch category at startup
     delete saverState.data["fieldgroups"];
     useEffect(() => {
-        fetch(`/api/search?${searchParams.toString()}`)
-        .then((resp) => {
-            return resp.json()
-        })
+        search(searchParams.toString())
         .then((resp: EbaySearchReturn) => {
             setData(resp)
         })
