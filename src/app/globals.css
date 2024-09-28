@@ -10,6 +10,18 @@ html, body {
 }
 
 :root {
-    --main-bg-colour: red;
+    --main-bg: red;
     --outline: blue;
+    --primary-button: yellow;
+}
+
+.primary_button {
+    min-width: 50px;
+    height: 30px;
+    padding: 5px;
+    margin: 3px;
+    background-color: var(--primary-button)
+}
+.primary_button:hover {
+    opacity: 0.8;
 }

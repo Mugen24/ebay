@@ -1,5 +1,5 @@
-import { search } from "@/app/actions/EbayApiWrapper";
 import { URLSearchParamsToJson } from "@/app/actions/utils";
+import { search } from "@/app/EbayApi/EbayApi";
 
 export async function GET(request: Request) {
     const url = new URL(request.url)

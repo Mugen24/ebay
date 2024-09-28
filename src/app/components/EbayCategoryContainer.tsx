@@ -1,6 +1,22 @@
-import { Category_button } from "../(subpages)/items/page";
 import { extractCategoryDistributions } from "../actions/utils";
 import { Category, CategoryDistribution } from "../types/ebaySeachTypes";
+
+export function Category_button({cat, setCategory}: 
+    {
+        cat: CategoryDistribution,
+        setCategory: (categoryId: string) => void
+    }
+    ) 
+
+{
+    return (
+        <div key={cat.categoryId}>
+            <a onClick={() => { setCategory(cat.categoryId)}}>
+                {cat.categoryName}
+            </a>
+        </div>
+    )
+}
 
 export default function CategoryContainer({categories, setCategory}: 
     {
