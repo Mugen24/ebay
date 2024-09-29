@@ -1,7 +1,7 @@
 .side_bar {
-    overflow: scroll;
+    /* overflow: scroll;
     display: flex;
     flex-direction: column;
     gap: 5px;
-    height: 97dvh;
+    height: 97dvh; */
 }

@@ -27,11 +27,9 @@ export function ClientPage({}: {
             console.log(jsonUrlSearchParams);
             const data = await searchAction(jsonUrlSearchParams)
             .then((resp: EbaySearchReturn) => {
-                // Order matters here
-                // If initial is not set before rerendering
-                // Sidebar will throw error
-                initialResponse.current = resp
-                setEbaySearchResponse(resp)
+                console.log(resp);
+                initialResponse.current = resp;
+                setEbaySearchResponse(resp);
             })
         })()
     }, [])
@@ -45,9 +43,10 @@ export function ClientPage({}: {
             <div className={styles.center_content}>
                 <SearchBar getEbaySaverState={getEbaySaverState}/>
             </div>
+
             {initialResponse.current ?
                 <EbayItemSideBar ebaySearchResponse={initialResponse.current as EbaySearchReturn} ebaySaverState={ebaySaverState} setEbaySaverState={setEbaySaverState} ></EbayItemSideBar> 
-                : <div></div>
+                : <h1>Not yet render</h1>
             }
             <ItemsContainer ebaySearchResponse={ebaySearchResponse} ebaySaverState={ebaySaverState}></ItemsContainer>
         </div>

@@ -2,3 +2,4 @@
 - Repeated selling type (Auction, Best offer etc) seems to be accumulating more than the normal amount. 
 - Duplicated react key somewhere
 - Autocomplete the category
+- No pagination on when searching on item

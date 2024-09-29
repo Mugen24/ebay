@@ -12,7 +12,7 @@ export class EbaySaverState {
     }
     
     saveState(searchState: EbaySearch) {
-        this.data = searchState
+        this.data = JSON.parse(JSON.stringify(searchState))
     }
 
 

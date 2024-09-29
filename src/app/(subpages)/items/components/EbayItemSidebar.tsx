@@ -44,6 +44,7 @@ export function EbayItemSideBar(
         newEbaySaverState.saveToConfig();
     }
 
+    console.log(ebaySearchResponse)
     return (
         <div className={styles.side_bar}>
             <Filter setFilterState={setFilterState} setSortState={setSortState} saveConfigState={saveConfigState}/>
