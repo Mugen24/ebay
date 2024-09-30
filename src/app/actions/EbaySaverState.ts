@@ -1,3 +1,4 @@
+'use client'
 import { EbaySearch, EbaySearchReturn } from "../types/ebaySeachTypes"
 import { saveConfig, loadConfig } from "./saveState"
 
