@@ -3,3 +3,6 @@
 - Duplicated react key somewhere
 - Autocomplete the category
 - No pagination on when searching on item
+- Extract set category and filter in its own function,
+writes enum for the type as well
+- Save search doesn't work

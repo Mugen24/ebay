@@ -106,11 +106,6 @@ function Filter({setFilterState, setSortState, saveConfigState}: {
 
         <section>
             <a>Sort: </a>
-            {/* <select style={{}} name="sort-options" id="sort-options" onChange={sortOptionsHandler}>
-                <StyleOption value={"newlyListed"}>Time: Newly Listed</StyleOption>
-                <StyleOption value={"endingSoonest"}>Time: Ending Soonest</StyleOption>
-                <StyleOption value={"price"}>Price + Postage: Lowest First </StyleOption>
-            </select> */}
             <button className="primary_button" value={"newlyListed"} onClick={sortOptionsHandler}>Time: Newly Listed</button>
             <button className="primary_button" value={"endingSoonest"} onClick={sortOptionsHandler}>Time: Ending Soonest</button>
             <button className="primary_button" value={"price"} onClick={sortOptionsHandler}>Price + Postage: Lowest First </button>

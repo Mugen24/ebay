@@ -63,14 +63,16 @@ export function SearchBar({getEbaySaverState}: {
             const queries: EbaySearch = formToJSON(new FormData(refSearchForm.current))
             queries["fieldgroups"] = "ASPECT_REFINEMENTS,CATEGORY_REFINEMENTS,MATCHING_ITEMS"
             const params = new URLSearchParams(queries as Record<string, any>)
-            router.push(`/items` + "?" + params.toString())
+            // router.push(`/items` + "?" + params.toString())
+            window.location.href = `/items` + "?" + params.toString();
         } else {
             if (getEbaySaverState === undefined) {
                 throw new Error("SearchBar has no information to search")
             }
             const ebaySaverState = getEbaySaverState();
             const params = ebaySaverState.toSearchParams()
-            router.push(`/items?` + params.toString())
+            // router.push(`/items?` + params.toString())
+            window.location.href = `/items` + "?" + params.toString();
         }
     }
 

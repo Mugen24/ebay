@@ -5,3 +5,16 @@
     justify-content: center;
     align-items: center;
 }
+
+.main_page {
+    display: flex;
+    flex-direction: row;
+}
+
+.sidebar {
+    width: 20vw;
+}
+
+.items_container {
+    flex-grow: 2;
+}
