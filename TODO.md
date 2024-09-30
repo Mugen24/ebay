@@ -16,3 +16,5 @@ writes enum for the type as well
 - Automated reminder when new item is listed
 - Bid sniping
 - Cleaner prompt when asking for manual ebay login. EbayScraper
+- auction doesn't work
+- listing doesn't show auction items
