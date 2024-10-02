@@ -41,6 +41,8 @@ export class EbaySaverState {
     private handleFilter(filter: string) {
         // filter=buyingOptions:FIXED_PRICE|AUCTION|BEST_OFFER,conditions:NEW|USED
         const [filterKeyword, options] = filter.split("=")
+
+
     }
 
     toJson() {
