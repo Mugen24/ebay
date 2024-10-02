@@ -33,9 +33,9 @@ export type FilterField =
     | `filter=${ConditionOptions},${BuyingOptions}`
 
 
-type CompatibilityFilter = "Not implemented for vehicle requirements"
+export type CompatibilityFilter = "Not implemented for vehicle requirements"
 export type SortField = "price" | "distance" | "newlyListed" | "endingSoonest"
-type AspectFilter = "Not implemented https://developer.ebay.com/api-docs/buy/browse/resources/item_summary/methods/search#uri.aspect_filter"
+export type AspectFilter = "Not implemented https://developer.ebay.com/api-docs/buy/browse/resources/item_summary/methods/search#uri.aspect_filter"
 
 export interface EbaySearchReturn {
     autoCorrections: AutoCorrections;
