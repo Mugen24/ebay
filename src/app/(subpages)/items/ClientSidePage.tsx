@@ -12,7 +12,7 @@ import { EbayItemSideBar } from './components/EbayItemSidebar';
 import { SearchBar } from "@/app/components/SearchBar";
 import styles from "./structure.module.css"
 
-export function ClientPage({}: {
+export function ClientSidePage({}: {
 }) {
     const searchParams = useSearchParams();
     const [ebaySaverState, setSaverState] = useState<EbaySaverState | undefined>(undefined);
@@ -21,9 +21,9 @@ export function ClientPage({}: {
     useEffect(() => {
         (async () =>{
             const jsonUrlSearchParams = URLSearchParamsToJson(searchParams)
-            const ebaySaverState = new EbaySaverState();
-            ebaySaverState.saveState(jsonUrlSearchParams)
-            delete ebaySaverState.data["fieldgroups"];
+            const ebaySaverState = new EbaySaverState(jsonUrlSearchParams);
+            ebaySaverState.removeCategoryRequest()
+
             const data = await searchAction(jsonUrlSearchParams);
             setSaverState(ebaySaverState);
             setSearchReturn(data);

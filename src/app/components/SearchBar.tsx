@@ -47,7 +47,7 @@ const EnterButton = styled.input`
         opacity: 0.7;
     }
 
-    border-top-right-radius: 10px;
+    border-top-right-radius: 10pxh;
     border-bottom-right-radius: 10px;
 `
 

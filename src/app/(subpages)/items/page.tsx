@@ -1,10 +1,10 @@
 import React from "react";
-import { ClientPage } from "./ClientPage";
+import { ClientSidePage } from "./ClientSidePage";
 
 
 
 export default function App() {
     return (
-        <ClientPage></ClientPage>
+        <ClientSidePage></ClientSidePage>
     )
 }
