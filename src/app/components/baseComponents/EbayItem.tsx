@@ -1,5 +1,5 @@
 // import styled from "styled-components"
-import { ItemSummary } from "../types/ebaySeachTypes"
+import { ItemSummary } from "../../types/ebaySeachTypes"
 import styles from "./structure.module.css"
 // const StyleEbayItem = styled.div`
 //     padding: 3px;

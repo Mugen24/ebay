@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 import searchConfig from "@/app/data/searchConfig.json"
 import { EbaySearch, EbaySearchReturn, ItemSummary } from "../types/ebaySeachTypes";
 import { search } from "../EbayApi/EbayApi";
-import { EbayItem } from '../components/EbayItem';
+import { EbayItem } from '../components/baseComponents/EbayItem';
 import styles from './structure.module.css'
 import { ItemGallery } from "../components/ItemGallery";
 
