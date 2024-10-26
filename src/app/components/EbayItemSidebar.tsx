@@ -16,17 +16,16 @@ export function EbayItemSideBar(
         }
     ) {
     
-    const newEbaySaverState = new EbaySaverState();
-    newEbaySaverState.saveState(ebaySaverState.toJson())
+    const newEbaySaverState = new EbaySaverState(ebaySaverState.toJson());
 
     function setCategory(categoryId: string) {
-        newEbaySaverState.data["category_ids"] = categoryId;
+        newEbaySaverState.category_ids = categoryId;
         setEbaySaverState(newEbaySaverState)
     }
 
     function setFilterState(filterArgs: (BuyingOptions | ConditionOptions)[]) {
-        if (!newEbaySaverState.data["filter"]) {
-            newEbaySaverState.data["filter"] = `${filterArgs.join()}`
+        if (!newEbaySaverState.filter) {
+            newEbaySaverState.filter = `${filterArgs.join()}`
         } else {
             newEbaySaverState.data["filter"] += `,${filterArgs.join()}`
         }
