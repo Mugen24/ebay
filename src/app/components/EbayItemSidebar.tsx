@@ -1,10 +1,11 @@
 'use client'
-import { EbaySaverState } from "@/app/actions/EbaySaverState"
+import { EbaySaverState } from "../EbayApi/EbaySaverState"
 import { extractCategoryDistributions } from "@/app/actions/utils"
 import CategoryContainer from "./baseComponents/CategoryContainer"
 import { BuyingOptions, ConditionOptions, EbaySearchReturn, SortField } from "@/app/types/ebaySeachTypes"
 import { Dispatch } from "react"
 import styles from "./structure.module.css"
+import { Filter } from "../EbayApi/EbaySaverState"
 
 export function EbayItemSideBar(
         {ebaySearchResponse, setEbaySaverState, ebaySaverState}: 
@@ -22,15 +23,11 @@ export function EbayItemSideBar(
         setEbaySaverState(newEbaySaverState)
     }
 
-    function setFilterState(filterArgs: (BuyingOptions | ConditionOptions)[]) {
-        if (!newEbaySaverState.filter) {
-            newEbaySaverState.filter = `${filterArgs.join()}`
-        } else {
-            newEbaySaverState.data["filter"] += `,${filterArgs.join()}`
-        }
+    function setFilterState<T extends keyof Filter>(filterKey: T, filterValue: Filter[T]) {
+        newEbaySaverState.addUniqueFilter(filterKey, filterValue)
         console.log("setting saver state")
-        console.log(JSON.stringify(newEbaySaverState.data))
-        console.log(JSON.stringify(ebaySaverState.data))
+        console.log(JSON.stringify(newEbaySaverState))
+        console.log(JSON.stringify(ebaySaverState))
         setEbaySaverState(newEbaySaverState)
     }
 

@@ -1,6 +1,6 @@
 import { BuyingOptions, ConditionOptions, EbaySearchReturn, SortField } from "@/app/types/ebaySeachTypes"
 
-function Filter({setFilterState, setSortState, saveConfigState}: {
+export function Filter({setFilterState, setSortState, saveConfigState}: {
     setFilterState: (filterArgs: (BuyingOptions | ConditionOptions)[]) => void,
     setSortState: (choiceArgs: string) => void,
     saveConfigState: () => void,

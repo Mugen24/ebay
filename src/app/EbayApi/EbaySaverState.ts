@@ -1,8 +1,13 @@
 'use client'
-import { search } from "../EbayApi/EbayApi"
-import { searchAction } from "../EbayApi/EbayApiAction"
-import { AspectFilter, CompatibilityFilter, EbaySearch, SortField } from "../types/ebaySeachTypes"
-import { saveConfig, loadConfig } from "./saveState"
+import { search } from "./EbayApi"
+import { searchAction } from "./EbayApiAction"
+import { AspectFilter, BuyingOption, CompatibilityFilter, ConditionOption, EbaySearch, SortField } from "../types/ebaySeachTypes"
+import { saveConfig, loadConfig } from "../actions/saveState"
+
+export type Filter = {
+    "buyingOptions": BuyingOption[]
+    "conditions": ConditionOption[]
+}
 
 export class EbaySaverState {
     q?: string
@@ -12,7 +17,7 @@ export class EbaySaverState {
     compatibility_filter?: CompatibilityFilter
     auto_correct?: string
     category_ids?: string
-    filter?: Record<string, string[]>
+    filter: Filter
     sort?: SortField
     limit?: string
     offset?: string
@@ -33,11 +38,22 @@ export class EbaySaverState {
         this.auto_correct = searchState.auto_correct;
         this.category_ids = searchState.category_ids;
 
-        if (searchState.filter) {
-            this.filter = this.deconstructFilter(searchState.filter);
-        } else {
-            console.warn("No filter args given")
+        this.filter = {
+            "buyingOptions": [],
+            "conditions": []
         }
+
+        if (searchState.filter) {
+            this.deconstructFilter(searchState.filter);
+        }
+
+        if (!this.filter["buyingOptions"]) {
+            this.filter["buyingOptions"] = []
+        }
+        else if (!this.filter["conditions"]) {
+            this.filter["conditions"] = []
+        }
+
 
         this.sort = searchState.sort;
         this.limit = searchState.limit;
@@ -55,7 +71,7 @@ export class EbaySaverState {
         this.fieldgroups = ""
     }
 
-    private deconstructFilter(filter: string) {
+    private deconstructFilter(filter: string): Record<string, string[]> {
         // filter=buyingOptions:FIXED_PRICE|AUCTION|BEST_OFFER,conditions:NEW|USED
         const options: Record<string, string[]>= {};
         const [_ , filterOptions] = filter.split("=")
@@ -64,7 +80,14 @@ export class EbaySaverState {
         for (const value of params) {
             const [paramKeyword, paramOptionsRaw] = value.split(":");
             const paramOptions = paramOptionsRaw.split("|");
-            options[paramKeyword] = paramOptions
+            if (Object.keys(this.filter).includes(paramKeyword)) {
+                const val = this.filter[paramKeyword as keyof Filter]
+                // @ts-ignore
+                this.filter[paramKeyword as keyof Filter] = val.concat(
+                    // @ts-ignore
+                    paramOptions.filter(op => !val.includes(op))
+                )
+            }
         }
         return options
     }
@@ -72,23 +95,33 @@ export class EbaySaverState {
     private constructFilter() {
         const filter = this.filter;
         // let filterString = "";
-        if (!filter) {
+        if (!filter || Object.keys(filter).length <= 0) {
             console.warn("No filter given");
             return "";
         }
 
         const optionStrings = [];
         for (const key in filter) {
-            const optionValues = filter[key].reduce((a,b) => `${a}|${b}`);
+            const optionValues: string | undefined = filter[key as keyof Filter]?.join('|');
             optionStrings.push(`${key}:{${optionValues}}`);
         }
 
         let filterString = "filter=";
-        filterString += optionStrings.reduce((a,b) => `${a},${b}`);
+        filterString += optionStrings.join(',');
         return filterString;
     }
 
-    toJson(): EbaySearch {
+    // TODO: fix the stupid type 
+    addUniqueFilter<K extends keyof Filter>(filterKey: K, filterValue: Filter[K]) {
+        const value = this.filter[filterKey];
+        // @ts-ignore
+        if (!value.includes(filterValue)){
+            // @ts-ignore
+            this.filter[filterKey].push(filterValue)
+        }
+    }
+
+    toJSON(): EbaySearch {
         const temp: EbaySearch = {
             "q": this.q,
             "gtin": this.gtin,
@@ -114,17 +147,18 @@ export class EbaySaverState {
     }
 
     toSearchParams(): URLSearchParams{
-        return new URLSearchParams(this.toJson() as Record<string, string>)
+        return new URLSearchParams(this.toJSON() as Record<string, string>)
     }
 
     saveToConfig() {
-        saveConfig(this.toJson())
+        saveConfig(this.toJSON())
     }
     readConfig() {
         return loadConfig()
     }
 
     search() {
-        return search(this.toJson())
+        return search(this.toJSON())
     }
+    
 }

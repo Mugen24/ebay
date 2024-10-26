@@ -4,7 +4,7 @@ import path from "path";
 import config from "../data/searchConfig.json"
 import { checkNewListing, URLSearchParamsToJson } from "./utils";
 import { search } from "./EbayApiWrapper";
-import { EbaySaverState } from "./EbaySaverState";
+import { EbaySaverState } from "../EbayApi/EbaySaverState";
 
 const PATH = path.resolve("src/app/data/searchConfig.json");
 

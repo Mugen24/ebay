@@ -16,14 +16,14 @@ export interface EbaySearch extends Object {
     epid?: string
 }
 
-type BuyingOption = "FIXED_PRICE" | "AUCTION" | "BEST_OFFER" | "CLASSIFIED_AD";
+export type BuyingOption = "FIXED_PRICE" | "AUCTION" | "BEST_OFFER" | "CLASSIFIED_AD";
 export type BuyingOptions = 
     | `buyingOptions:{${BuyingOption}}`
     | `buyingOptions:{${BuyingOption}|${BuyingOption}}`
     | `buyingOptions:{${BuyingOption}|${BuyingOption}}|${BuyingOption}`
     | `buyingOptions:{${BuyingOption}|${BuyingOption}}|${BuyingOption}|${BuyingOption}`
 
-type ConditionOption = "NEW" | "USED" | "UNSPECIFIED"
+export type ConditionOption = "NEW" | "USED" | "UNSPECIFIED"
 export type ConditionOptions = 
     | `conditions:{${ConditionOption}}`
     | `conditions:{${ConditionOption}|${ConditionOption}}`
