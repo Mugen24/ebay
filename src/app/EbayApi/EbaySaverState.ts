@@ -1,8 +1,8 @@
 'use client'
-import { search } from "./EbayApi"
-import { searchAction } from "./EbayApiAction"
 import { AspectFilter, BuyingOption, CompatibilityFilter, ConditionOption, EbaySearch, SortField } from "../types/ebaySeachTypes"
 import { saveConfig, loadConfig } from "../actions/saveState"
+
+type ArrayElement<T> = T extends (infer U)[] ? U : never
 
 export type Filter = {
     "buyingOptions": BuyingOption[]
@@ -54,6 +54,8 @@ export class EbaySaverState {
             this.filter["conditions"] = []
         }
 
+        console.log("constructu: ---")
+        console.log(this.filter)
 
         this.sort = searchState.sort;
         this.limit = searchState.limit;
@@ -71,29 +73,38 @@ export class EbaySaverState {
         this.fieldgroups = ""
     }
 
-    private deconstructFilter(filter: string): Record<string, string[]> {
+    private deconstructFilter(filter: string) {
         // filter=buyingOptions:FIXED_PRICE|AUCTION|BEST_OFFER,conditions:NEW|USED
+        console.log("decon:")
+        console.log(filter)
         const options: Record<string, string[]>= {};
         const [_ , filterOptions] = filter.split("=")
         // buyingOptions: .. | .. | .. , conditions: .. | .. | ..
         const params = filterOptions.split(",");
         for (const value of params) {
-            const [paramKeyword, paramOptionsRaw] = value.split(":");
-            const paramOptions = paramOptionsRaw.split("|");
-            if (Object.keys(this.filter).includes(paramKeyword)) {
-                const val = this.filter[paramKeyword as keyof Filter]
-                // @ts-ignore
-                this.filter[paramKeyword as keyof Filter] = val.concat(
+            let [paramKeyword, paramOptionsRaw] = value.split(":");
+            paramOptionsRaw = paramOptionsRaw.replace("{", "")
+            paramOptionsRaw = paramOptionsRaw.replace("}", "")
+            // if option = "" or {} bf replacing
+            if (paramOptionsRaw.length >= 0) {
+                const paramOptions = paramOptionsRaw.split("|");
+                if (Object.keys(this.filter).includes(paramKeyword)) {
+                    const val = this.filter[paramKeyword as keyof Filter]
                     // @ts-ignore
-                    paramOptions.filter(op => !val.includes(op))
-                )
+                    this.filter[paramKeyword as keyof Filter] = val.concat(
+                        // @ts-ignore
+                        paramOptions.filter(op => !val.includes(op))
+                    )
+                }
             }
         }
-        return options
+        // return options
     }
 
     private constructFilter() {
         const filter = this.filter;
+        console.log("construct:")
+        console.log(filter)
         // let filterString = "";
         if (!filter || Object.keys(filter).length <= 0) {
             console.warn("No filter given");
@@ -101,6 +112,8 @@ export class EbaySaverState {
         }
 
         const optionStrings = [];
+        console.log("here: ---------")
+        console.log(filter)
         for (const key in filter) {
             const optionValues: string | undefined = filter[key as keyof Filter]?.join('|');
             optionStrings.push(`${key}:{${optionValues}}`);
@@ -112,12 +125,41 @@ export class EbaySaverState {
     }
 
     // TODO: fix the stupid type 
-    addUniqueFilter<K extends keyof Filter>(filterKey: K, filterValue: Filter[K]) {
+    addUniqueFilter<K extends keyof Filter>(filterKey: K, filterValue: ArrayElement<Filter[K]>, clear: Boolean) {
+        if (!clear) {
+            clear = false
+        } 
+
         const value = this.filter[filterKey];
         // @ts-ignore
-        if (!value.includes(filterValue)){
+        if (clear) {
             // @ts-ignore
-            this.filter[filterKey].push(filterValue)
+            this.filter[filterKey] = [filterValue]
+        } else {
+            // @ts-ignore
+            if (!value.includes(filterValue)){
+                // @ts-ignore
+                this.filter[filterKey].push(filterValue!)
+            }
+        }
+
+    }
+    // TODO: fix the stupid type 
+    addUniqueFilters<K extends keyof Filter>(filterKey: K, filterValues: Filter[K], clear: Boolean) {
+        if (!clear) {
+            clear = false
+        } 
+
+        const value = this.filter[filterKey];
+        // @ts-ignore
+        const temp = filterValues.filter(f => !value.includes(f))
+        // @ts-ignore
+        if (clear) {
+            // @ts-ignore
+            this.filter[filterKey] = temp
+        } else {
+            // @ts-ignore
+            this.filter[filterKey] = value.concat(temp)
         }
     }
 
@@ -157,8 +199,4 @@ export class EbaySaverState {
         return loadConfig()
     }
 
-    search() {
-        return search(this.toJSON())
-    }
-    
 }

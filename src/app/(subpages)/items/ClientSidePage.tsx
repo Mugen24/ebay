@@ -1,14 +1,14 @@
 'use client'
 
-import { EbaySaverState } from "@/app/actions/EbaySaverState";
 import { URLSearchParamsToJson, extractItems } from "@/app/actions/utils";
-import { EbayItem } from "@/app/components/EbayItem";
+import { EbaySaverState } from "@/app/EbayApi/EbaySaverState";
+import { EbayItem } from "@/app/components/baseComponents/EbayItem";
 import { ItemGallery } from "@/app/components/ItemGallery";
 import { EbaySearchReturn } from "@/app/types/ebaySeachTypes";
 import { searchAction } from "@/app/EbayApi/EbayApiAction";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { EbayItemSideBar } from './components/EbayItemSidebar';
+import { useEffect, useState } from "react";
+import { EbayItemSideBar } from '../../components/EbayItemSidebar';
 import { SearchBar } from "@/app/components/SearchBar";
 import styles from "./structure.module.css"
 
@@ -62,7 +62,7 @@ export function _ClientPage({initialSaverState, initialResponse}: {
             if (ebaySearchResponse === undefined) {
                 setEbaySearchResponse(initialResponse)
             } else {
-                const data = await searchAction(ebaySaverState.toJson())
+                const data = await searchAction(ebaySaverState.toJSON())
                 setEbaySearchResponse(data)
             }
         })()
@@ -108,7 +108,7 @@ export function ItemsContainer({ebaySearchResponse, ebaySaverState}: {
 
     return (
         <div>
-            <h1>Search: {ebaySaverState.data.q}</h1>
+            <h1>Search: {ebaySaverState.q}</h1>
             <ItemGallery ebayItems={ebayItems}/>
         </div>
     )

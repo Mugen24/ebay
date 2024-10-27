@@ -3,7 +3,14 @@ import { EbayScraper as EbayApiScrapper} from "./EbayApiScrapper";
 import { EbaySearch } from "../types/ebaySeachTypes";
 
 const ebayApiToken: Promise<EbayApiToken> = EbayApiToken.authenticate()
-const ebayApiScrapper: Promise<EbayApiScrapper> = EbayApiScrapper.authenticate()
+// const ebayApiScrapper: Promise<EbayApiScrapper> = EbayApiScrapper.authenticate()
+let ebayApiScrapper: Promise<EbayApiScrapper>;
+
+async function loadScrapper(){
+    if (!ebayApiScrapper) {
+        ebayApiScrapper = EbayApiScrapper.authenticate()
+    } else return
+}
 
 
 export async function topLevelAwaitWorkAround() {
@@ -16,6 +23,7 @@ export async function search(ebaySearch: EbaySearch) {
 }
 
 export async function getItemHistoricalLowest(searchTerm: string, minPrice: number) {
+    await loadScrapper()
     const ebayApi = await ebayApiScrapper;
     return ebayApi.searchLowestSoldBetter(searchTerm, minPrice)
 }

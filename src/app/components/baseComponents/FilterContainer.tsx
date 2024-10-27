@@ -1,38 +1,40 @@
-import { BuyingOptions, ConditionOptions, EbaySearchReturn, SortField } from "@/app/types/ebaySeachTypes"
+import { Filter as FilterType } from "@/app/EbayApi/EbaySaverState";
+import { BuyingOption, ConditionOption, ConditionOptions, EbaySearchReturn, SortField } from "@/app/types/ebaySeachTypes"
 
 export function Filter({setFilterState, setSortState, saveConfigState}: {
-    setFilterState: (filterArgs: (BuyingOptions | ConditionOptions)[]) => void,
-    setSortState: (choiceArgs: string) => void,
+    setFilterState: <T extends keyof FilterType>(filterKey: T, filterValue: FilterType[T]) => void,
+    setSortState: (choiceArgs: SortField) => void,
     saveConfigState: () => void,
 }) {
     const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
         if (event.target instanceof HTMLButtonElement) {
-            const params = event.target.value;
-            if (params) {
-                setFilterState([`buyingOptions:{${params}}` as BuyingOptions])
+            const option = event.target.value;
+            switch (option) {
+                case "All": 
+                    setFilterState("buyingOptions", ["AUCTION", "BEST_OFFER", "FIXED_PRICE"])
+                break;
+                case "Auction": 
+                    setFilterState("buyingOptions", ["AUCTION"])
+                break;
+                case "Buy it now": 
+                    setFilterState("buyingOptions", ["BEST_OFFER", "FIXED_PRICE"])
+                break;
             }
+
         }
     }
 
     const conditionOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
         if (event.target instanceof HTMLButtonElement) {
-            const params = event.target.value;
-            // console.log("option handler")
-            // console.log(event)
-            if (params) {
-                setFilterState([`conditions:{${params}}` as ConditionOptions])
-            }
+            const param = event.target.value;
+            setFilterState("conditions", [param as ConditionOption])
         }
     }
 
     const sortOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
-        // if (event.target instanceof Element) {
-        //     const params = event.target.nodeValue;
-        //     ebaySaverState["data"]["sort"] = params as SortField;
-        // }
-        if (event.target instanceof  Element) {
+        if (event.target instanceof Element) {
             const choice = event.target.nodeValue;
-            setSortState(choice as string);
+            setSortState(choice as SortField);
         }
     }
 

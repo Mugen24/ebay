@@ -5,7 +5,8 @@ import CategoryContainer from "./baseComponents/CategoryContainer"
 import { BuyingOptions, ConditionOptions, EbaySearchReturn, SortField } from "@/app/types/ebaySeachTypes"
 import { Dispatch } from "react"
 import styles from "./structure.module.css"
-import { Filter } from "../EbayApi/EbaySaverState"
+import { Filter as FilterType} from "../EbayApi/EbaySaverState"
+import { Filter } from "./baseComponents/FilterContainer"
 
 export function EbayItemSideBar(
         {ebaySearchResponse, setEbaySaverState, ebaySaverState}: 
@@ -16,23 +17,25 @@ export function EbayItemSideBar(
         }
     ) {
     
-    const newEbaySaverState = new EbaySaverState(ebaySaverState.toJson());
+    const newEbaySaverState = new EbaySaverState(ebaySaverState.toJSON());
+    console.log("sidebar:")
+    console.log(newEbaySaverState)
 
     function setCategory(categoryId: string) {
         newEbaySaverState.category_ids = categoryId;
         setEbaySaverState(newEbaySaverState)
     }
 
-    function setFilterState<T extends keyof Filter>(filterKey: T, filterValue: Filter[T]) {
-        newEbaySaverState.addUniqueFilter(filterKey, filterValue)
+    function setFilterState<T extends keyof FilterType>(filterKey: T, filterValues: FilterType[T]) {
+        newEbaySaverState.addUniqueFilters(filterKey, filterValues, true)
         console.log("setting saver state")
         console.log(JSON.stringify(newEbaySaverState))
         console.log(JSON.stringify(ebaySaverState))
         setEbaySaverState(newEbaySaverState)
     }
 
-    function setSortState(choiceArgs: string) {
-        ebaySaverState["data"]["sort"] = choiceArgs as SortField;
+    function setSortState(choiceArgs: SortField) {
+        ebaySaverState.sort = choiceArgs;
     }
 
     function saveConfigState(){
