@@ -5,11 +5,15 @@ import { EbaySearch } from "../types/ebaySeachTypes";
 const ebayApiToken: Promise<EbayApiToken> = EbayApiToken.authenticate()
 // const ebayApiScrapper: Promise<EbayApiScrapper> = EbayApiScrapper.authenticate()
 let ebayApiScrapper: Promise<EbayApiScrapper>;
+loadScrapper()
 
 async function loadScrapper(){
     if (!ebayApiScrapper) {
         ebayApiScrapper = EbayApiScrapper.authenticate()
     } else return
+
+    const scrapper = await ebayApiScrapper
+    console.log(await scrapper.searchLowestSoldBetter("steam deck"))
 }
 
 
