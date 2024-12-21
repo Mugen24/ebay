@@ -24,3 +24,21 @@ export async function loadConfig() {
     return fileContent as EbaySearch
 }
 
+
+export async function fetchSavedSearches() {
+    const searches: Array<Record<string, string>> = []
+
+    for (const searchParam of Object.values(config["searchParams"])) {
+        searches.push(searchParam);
+    }
+
+    config.lastRunTime = new Date(Date.now()).toISOString()
+    try {
+        writeFile(PATH, JSON.stringify(config))
+    }
+    catch (e) {
+        console.log(e)
+    }
+
+    return searches;
+}

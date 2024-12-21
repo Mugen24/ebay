@@ -1,6 +1,6 @@
 'use client'
 import { AspectFilter, BuyingOption, CompatibilityFilter, ConditionOption, EbaySearch, SortField } from "../types/ebaySeachTypes"
-import { saveConfig, loadConfig } from "../actions/saveState"
+import { saveConfig, loadConfig } from "../server_components/saveState"
 
 type ArrayElement<T> = T extends (infer U)[] ? U : never
 
@@ -164,7 +164,7 @@ export class EbaySaverState {
     }
 
     toJSON(): EbaySearch {
-        const temp: EbaySearch = {
+        const temp: Record<string, any> = {
             "q": this.q,
             "gtin": this.gtin,
             "charity_ids": this.charity_ids,
@@ -181,8 +181,8 @@ export class EbaySaverState {
         }
 
         for (const key in temp) {
-            if (!temp[key as keyof typeof temp]) {
-                delete temp[key as keyof typeof temp]
+            if (!temp[key]) {
+                delete temp[key]
             }
         }
         return temp

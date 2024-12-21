@@ -4,21 +4,17 @@ import { EbaySearch } from "../types/ebaySeachTypes";
 
 const ebayApiToken: Promise<EbayApiToken> = EbayApiToken.authenticate()
 // const ebayApiScrapper: Promise<EbayApiScrapper> = EbayApiScrapper.authenticate()
-let ebayApiScrapper: Promise<EbayApiScrapper>;
-loadScrapper()
+let ebayApiScrapper: EbayApiScrapper;
 
 async function loadScrapper(){
     if (!ebayApiScrapper) {
-        ebayApiScrapper = EbayApiScrapper.authenticate()
+        const state = EbayApiScrapper.authenticate()
+        if (state instanceof EbayApiScrapper) {
+            ebayApiScrapper = state
+        } else {
+            return state            
+        }
     } else return
-
-    const scrapper = await ebayApiScrapper
-    console.log(await scrapper.searchLowestSoldBetter("steam deck"))
-}
-
-
-export async function topLevelAwaitWorkAround() {
-    //TODO: Just get called in server component so that top level await works
 }
 
 export async function search(ebaySearch: EbaySearch) {
@@ -27,7 +23,9 @@ export async function search(ebaySearch: EbaySearch) {
 }
 
 export async function getItemHistoricalLowest(searchTerm: string, minPrice: number) {
-    await loadScrapper()
-    const ebayApi = await ebayApiScrapper;
-    return ebayApi.searchLowestSoldBetter(searchTerm, minPrice)
+    return ebayApiScrapper.searchLowestSoldBetter({
+        keywords: searchTerm,
+        sorting: "-avgsalesprice",
+        minPrice: minPrice
+    })
 }

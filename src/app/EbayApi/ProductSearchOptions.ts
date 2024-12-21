@@ -16,6 +16,8 @@ export type ProductSearchOptions = {
     tz?: "Australia Sydney";
     marketplace?: "EBAY-AU";
     tabName?: "SOLD";
+    minPrice?: number;
+    maxPrice?: number;
 }
 
 export type RequiredProductSearchOptions = {
@@ -33,6 +35,8 @@ export type RequiredProductSearchOptions = {
     marketplace: "EBAY-AU";
     tabName: "SOLD";
     modules: "aggregates" | "searchResults" | "resultsHeader"
+    minPrice?: number
+    maxPrice?: number
 }
 
 

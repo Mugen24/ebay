@@ -38,7 +38,7 @@ export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
                 <div style={{
                     display: "flex"
                 }}>{
-                    ebayItem.buyingOptions.map(option => <div key={Date.now()} style={{
+                    ebayItem.buyingOptions.map((option) => <div key={`${ebayItem.epid}_${option}_${ebayItem.itemId}`} style={{
                         color: "lightgray",
                         fontSize: "xx-small",
                         marginRight: "5px"

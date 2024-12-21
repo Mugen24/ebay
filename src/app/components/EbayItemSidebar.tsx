@@ -35,7 +35,8 @@ export function EbayItemSideBar(
     }
 
     function setSortState(choiceArgs: SortField) {
-        ebaySaverState.sort = choiceArgs;
+        newEbaySaverState.sort = choiceArgs;
+        setEbaySaverState(newEbaySaverState)
     }
 
     function saveConfigState(){

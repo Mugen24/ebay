@@ -73,7 +73,6 @@ export class EbayScraper {
     async searchLowestSoldBetter(options: ProductSearchOptions): Promise<EbayItemSummary> {
         const BASEURL = "https://www.ebay.com.au/sh/research"
 
-
         const header = this.session.getSessionHeader()
         const today = new Date()
         today.setUTCFullYear(today.getUTCFullYear() + 3)

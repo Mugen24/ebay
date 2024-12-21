@@ -51,11 +51,6 @@ export function _ClientPage({initialSaverState, initialResponse}: {
     const [ebaySaverState, setEbaySaverState]= useState<EbaySaverState>(initialSaverState);
     const [ebaySearchResponse, setEbaySearchResponse] = useState<EbaySearchReturn | undefined>(undefined);
 
-    // const ebaySearchResponse = useRef<EbaySearchReturn | undefined>(undefined);
-
-    useEffect(() => {
-        // setEbaySearchResponse(initialResponse)
-    }, [])
 
     useEffect(() => {
         (async () => {

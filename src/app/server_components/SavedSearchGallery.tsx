@@ -7,7 +7,6 @@ import styles from './structure.module.css'
 import { ItemGallery } from "../components/ItemGallery";
 
 
-
 export async function SavedSearchDashboard() {
     const searchParams = searchConfig.searchParams
     let key: keyof typeof searchParams
@@ -16,9 +15,10 @@ export async function SavedSearchDashboard() {
     let index = 0;
     for (key in searchParams) {
         const searchParam: EbaySearch = searchParams[key] as EbaySearch;
-        const ebaySearchReturn: EbaySearchReturn = await search(searchParam);
-        const itemComponents: ReactElement<typeof EbayItem>[] = []
 
+        const ebaySearchReturn: EbaySearchReturn = await search(searchParam);
+
+        const itemComponents: ReactElement<typeof EbayItem>[] = []
         const itemSummaries: ItemSummary[] = ebaySearchReturn.itemSummaries;
         for (let itemSummary of itemSummaries) {
             itemComponents.push(<EbayItem key={`${itemSummary.itemId}:${itemSummary.epid}`} ebayItem={itemSummary}/>);

@@ -32,8 +32,8 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
     }
 
     const sortOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
-        if (event.target instanceof Element) {
-            const choice = event.target.nodeValue;
+        if (event.target instanceof HTMLButtonElement) {
+            const choice = event.target.value;
             setSortState(choice as SortField);
         }
     }
