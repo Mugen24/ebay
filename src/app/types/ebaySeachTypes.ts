@@ -1,7 +1,7 @@
 import { ValueOf } from "next/dist/shared/lib/constants";
 
 export interface EbaySearch extends Object {
-    q?: string,
+    q: string,
     gtin?: string,
     charity_ids?: string,
     fieldgroups?: string,

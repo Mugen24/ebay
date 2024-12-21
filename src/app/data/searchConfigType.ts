@@ -1,4 +1,6 @@
+import { EbaySearch } from "../types/ebaySeachTypes"
+
 export type SearchConfigType = {
-    "searchParams": "",
+    "searchParams": [EbaySearch],
     "lastRunTime": EpochTimeStamp
 }
