@@ -1,7 +1,7 @@
 import EbayAuthToken from "ebay-oauth-nodejs-client"
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
-import { EbaySearch, EbaySearchReturn } from "@/app/types/ebaySeachTypes";
-import { EbayGetItemReturn, EbayGetItem } from "@/app/types/ebayGetItemTypes";
+import { EbaySearch, EbaySearchReturn } from "@/app/types/EbayApiTypes/ebaySeachTypes";
+import { EbayGetItemReturn, EbayGetItem } from "@/app/types/EbayApiTypes/ebayGetItemTypes";
 
 export class EbayApi {
     static scopes = ["https://api.ebay.com/oauth/api_scope"];

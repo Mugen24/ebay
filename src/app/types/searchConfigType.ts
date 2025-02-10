@@ -1,4 +1,4 @@
-import { EbaySearch } from "../types/ebaySeachTypes"
+import { EbaySearch } from "./EbayApiTypes/ebaySeachTypes"
 
 export type SearchConfigType = {
     "searchParams": [EbaySearch],

@@ -1,183 +1,53 @@
 'use client'
-import { AspectFilter, BuyingOption, CompatibilityFilter, ConditionOption, EbaySearch, SortField } from "../types/ebaySeachTypes"
-import { saveConfig, loadConfig } from "../server_components/saveState"
+import { AspectFilter, BuyingOption, CompatibilityFilter, ConditionOption, EbaySearch, SortField } from '../types/EbayApiTypes/ebaySeachTypes';
+import logging from "../utils/logger"
 
-type ArrayElement<T> = T extends (infer U)[] ? U : never
 
 export type Filter = {
     "buyingOptions": BuyingOption[]
     "conditions": ConditionOption[]
 }
 
-export class EbaySaverState {
-    q?: string
-    gtin?: string
-    charity_ids?: string
-    fieldgroups?: string
-    compatibility_filter?: CompatibilityFilter
-    auto_correct?: string
-    category_ids?: string
-    filter: Filter
-    sort?: SortField
-    limit?: string
-    offset?: string
-    aspect_filter?: AspectFilter
-    epid?: string
+export interface SEbaySearch extends EbaySearch {}
 
-    constructor(searchState: EbaySearch) {
+export class EbaySaverState {
+    static parse(searchState: EbaySearch): SEbaySearch {
+        logging.info("Parsing searchState:", searchState)
         // this.data = JSON.parse(JSON.stringify(searchState))
         if (!searchState.q) {
             throw new Error("'q' params is required")
         }
-        this.q = searchState.q;
 
-        this.gtin = searchState.gtin;
-        this.charity_ids = searchState.charity_ids;
-        this.fieldgroups = searchState.fieldgroups;
-        this.compatibility_filter = searchState.compatibility_filter;
-        this.auto_correct = searchState.auto_correct;
-        this.category_ids = searchState.category_ids;
+        const q = searchState.q;
+        const gtin = searchState.gtin;
+        const charity_ids = searchState.charity_ids;
+        const fieldgroups = searchState.fieldgroups;
+        const compatibility_filter = searchState.compatibility_filter;
+        const auto_correct = searchState.auto_correct;
+        const category_ids = searchState.category_ids;
 
-        this.filter = {
-            "buyingOptions": [],
-            "conditions": []
-        }
+        const filter = EbaySaverState.deconstructFilter(searchState).filter;
 
-        if (searchState.filter) {
-            this.deconstructFilter(searchState.filter);
-        }
+        const sort = searchState.sort;
+        const limit = searchState.limit;
+        const offset = searchState.offset;
+        const aspect_filter = searchState.aspect_filter;
+        const epid = searchState.epid;
 
-        if (!this.filter["buyingOptions"]) {
-            this.filter["buyingOptions"] = []
-        }
-        else if (!this.filter["conditions"]) {
-            this.filter["conditions"] = []
-        }
-
-        console.log("constructu: ---")
-        console.log(this.filter)
-
-        this.sort = searchState.sort;
-        this.limit = searchState.limit;
-        this.offset = searchState.offset;
-        this.aspect_filter = searchState.aspect_filter;
-        this.epid = searchState.epid;
-
-        // this.toJson.bind(this)
-    }
-
-    addCategoryRequest() {
-        this.fieldgroups = "ASPECT_REFINEMENTS,CATEGORY_REFINEMENTS,MATCHING_ITEMS"
-    }
-    removeCategoryRequest() {
-        this.fieldgroups = ""
-    }
-
-    private deconstructFilter(filter: string) {
-        // filter=buyingOptions:FIXED_PRICE|AUCTION|BEST_OFFER,conditions:NEW|USED
-        console.log("decon:")
-        console.log(filter)
-        const options: Record<string, string[]>= {};
-        const [_ , filterOptions] = filter.split("=")
-        // buyingOptions: .. | .. | .. , conditions: .. | .. | ..
-        const params = filterOptions.split(",");
-        for (const value of params) {
-            let [paramKeyword, paramOptionsRaw] = value.split(":");
-            paramOptionsRaw = paramOptionsRaw.replace("{", "")
-            paramOptionsRaw = paramOptionsRaw.replace("}", "")
-            // if option = "" or {} bf replacing
-            if (paramOptionsRaw.length >= 0) {
-                const paramOptions = paramOptionsRaw.split("|");
-                if (Object.keys(this.filter).includes(paramKeyword)) {
-                    const val = this.filter[paramKeyword as keyof Filter]
-                    // @ts-ignore
-                    this.filter[paramKeyword as keyof Filter] = val.concat(
-                        // @ts-ignore
-                        paramOptions.filter(op => !val.includes(op))
-                    )
-                }
-            }
-        }
-        // return options
-    }
-
-    private constructFilter() {
-        const filter = this.filter;
-        console.log("construct:")
-        console.log(filter)
-        // let filterString = "";
-        if (!filter || Object.keys(filter).length <= 0) {
-            console.warn("No filter given");
-            return "";
-        }
-
-        const optionStrings = [];
-        console.log("here: ---------")
-        console.log(filter)
-        for (const key in filter) {
-            const optionValues: string | undefined = filter[key as keyof Filter]?.join('|');
-            optionStrings.push(`${key}:{${optionValues}}`);
-        }
-
-        let filterString = "filter=";
-        filterString += optionStrings.join(',');
-        return filterString;
-    }
-
-    // TODO: fix the stupid type 
-    addUniqueFilter<K extends keyof Filter>(filterKey: K, filterValue: ArrayElement<Filter[K]>, clear: Boolean) {
-        if (!clear) {
-            clear = false
-        } 
-
-        const value = this.filter[filterKey];
-        // @ts-ignore
-        if (clear) {
-            // @ts-ignore
-            this.filter[filterKey] = [filterValue]
-        } else {
-            // @ts-ignore
-            if (!value.includes(filterValue)){
-                // @ts-ignore
-                this.filter[filterKey].push(filterValue!)
-            }
-        }
-
-    }
-    // TODO: fix the stupid type 
-    addUniqueFilters<K extends keyof Filter>(filterKey: K, filterValues: Filter[K], clear: Boolean) {
-        if (!clear) {
-            clear = false
-        } 
-
-        const value = this.filter[filterKey];
-        // @ts-ignore
-        const temp = filterValues.filter(f => !value.includes(f))
-        // @ts-ignore
-        if (clear) {
-            // @ts-ignore
-            this.filter[filterKey] = temp
-        } else {
-            // @ts-ignore
-            this.filter[filterKey] = value.concat(temp)
-        }
-    }
-
-    toJSON(): EbaySearch {
-        const temp: Record<string, any> = {
-            "q": this.q,
-            "gtin": this.gtin,
-            "charity_ids": this.charity_ids,
-            "fieldgroups": this.fieldgroups,
-            "compatibility_filter": this.compatibility_filter,
-            "auto_correct": this.auto_correct,
-            "category_ids": this.category_ids,
-            "filter": this.constructFilter(),
-            "sort": this.sort,
-            "limit": this.limit,
-            "offset": this.offset,
-            "aspect_filter": this.aspect_filter,
-            "epid": this.epid
+        const temp: any = {
+            q,
+            gtin,
+            charity_ids,
+            fieldgroups,
+            compatibility_filter,
+            auto_correct,
+            category_ids,
+            filter,
+            sort,
+            limit,
+            offset,
+            aspect_filter,
+            epid
         }
 
         for (const key in temp) {
@@ -188,15 +58,93 @@ export class EbaySaverState {
         return temp
     }
 
-    toSearchParams(): URLSearchParams{
-        return new URLSearchParams(this.toJSON() as Record<string, string>)
+    static addCategoryRequest(ebaySearch: SEbaySearch) {
+        ebaySearch.fieldgroups = "ASPECT_REFINEMENTS,CATEGORY_REFINEMENTS,MATCHING_ITEMS"
+        return ebaySearch
+    }
+    static removeCategoryRequest(ebaySearch: SEbaySearch) {
+        ebaySearch.fieldgroups = undefined
+        return ebaySearch
     }
 
-    saveToConfig() {
-        saveConfig(this.toJSON())
+    static deconstructFilter(ebaySearch: EbaySearch) {
+        // filter=buyingOptions:FIXED_PRICE|AUCTION|BEST_OFFER,conditions:NEW|USED
+        let filter = ebaySearch.filter
+        logging.debug("Deconstructing Filter \n:", filter)
+        if (!filter) {
+            ebaySearch.filter = {}
+            return ebaySearch
+        }
+
+        const options: Record<string, string[]>= {};
+        const [_ , filterOptions] = filter.split("=")
+        // buyingOptions: .. | .. | .. , conditions: .. | .. | ..
+        const params = filterOptions.split(",");
+        for (const param of params) {
+            const key_value_matcher = /(?:(\w+):\W?([a-zA-Z|_]+)\W?)/;
+            const match = param.match(key_value_matcher)
+            if (match && match.length > 3) {
+                options[match[1]] = match[2].split("|")
+            } else {
+                logging.error("Unable to parse filter")
+                return ebaySearch
+            }
+        }
+        // return options
+        logging.debug("Result\n", options)
+        ebaySearch.filter = options
+        return ebaySearch
     }
-    readConfig() {
-        return loadConfig()
+
+    static constructFilter(sEbaySearch: SEbaySearch): EbaySearch {
+        const filter = sEbaySearch.filter
+        logging.debug("Constructing filter: \n", filter)
+        if (!filter) return sEbaySearch
+        if (Object.keys(filter).length <= 0) {
+            logging.warn("Empty filter");
+            return "";
+        }
+
+        const optionStrings = [];
+        for (const param in filter) {
+            const optionValues: string | undefined = filter[param as keyof Filter]?.join('|');
+            optionStrings.push(`${param}:{${optionValues}}`);
+        }
+
+        let filterString = "filter=";
+        filterString += optionStrings.join(',');
+
+        sEbaySearch.filter = filterString
+        return sEbaySearch
+    }
+
+    // TODO: fix the stupid type 
+    static addUniqueFilter(sEbaySearch: SEbaySearch, filterKey: any, filterValue: any, clear: Boolean = false) {
+        const filter = sEbaySearch.filter
+        if (!filter) return sEbaySearch
+        if (clear) {
+            filter[filterKey] = [filterValue]
+        } else {
+            if (filter.includes(filterValue)){
+                filter[filterKey].push(filterValue!)
+            }
+        }
+    }
+
+    static toSearchParams(ebaySearch: SEbaySearch): URLSearchParams{
+        ebaySearch = EbaySaverState.constructFilter(ebaySearch)
+        logging.debug("Converting search param\n", ebaySearch)
+        return new URLSearchParams(ebaySearch as unknown as Record<string, any>)
+    }
+
+    static saveToConfig(ebaySearch: SEbaySearch) {
+        throw new Error("Not implemented")
+        //saveConfig(ebaySearch)
+    }
+
+    static readConfig(): SEbaySearch {
+        throw new Error("Not implemented")
+        // return loadConfig()
     }
 
 }

@@ -1,16 +1,11 @@
 import puppeteer, { CookieParam, Browser, Page, EvaluateFunc, Keyboard, Session } from 'puppeteer';
 import {writeFile, writeFileSync, readFileSync} from 'fs';
 import { SessionError, SessionManager } from './SessionManager';
-import { conditionIds, ProductSearchOptions, RequiredProductSearchOptions } from './ProductSearchOptions';
+import { conditionIds, ProductSearchOptions, RequiredProductSearchOptions } from '../types/EbayScraperTypes/ProductSearchOptions';
 import { headers } from 'next/headers';
 import { webpack } from 'next/dist/compiled/webpack/webpack';
+import { EbayItemSummary } from '../types/EbayScraperTypes/ScraperTypes';
 
-export type EbayItemSummary = {
-  title: String | undefined | null,
-  image: String | undefined | null, 
-  price: String | undefined | null,
-  date: String | undefined | null
-}
 export class EbayScraper {
     session: SessionManager
 

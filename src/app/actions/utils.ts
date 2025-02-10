@@ -1,7 +1,7 @@
-import { ItemSummary } from "../types/ebaySeachTypes"
+import { ItemSummary } from "../types/EbayApiTypes/ebaySeachTypes"
 import config from "../data/searchConfig.json"
 import path from "path";
-import { EbaySearchReturn } from "../types/ebaySeachTypes";
+import { EbaySearchReturn } from "../types/EbayApiTypes/ebaySeachTypes";
 
 export const PATH = path.resolve("src/app/data/searchConfig.json");
 export function formToJson(form: FormData) {

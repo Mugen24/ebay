@@ -1,6 +1,6 @@
 import { EbayApi as EbayApiToken} from "./EbayApiToken";
 import { EbayScraper as EbayApiScrapper} from "./EbayApiScrapper";
-import { EbaySearch } from "../types/ebaySeachTypes";
+import { EbaySearch } from "../types/EbayApiTypes/ebaySeachTypes";
 
 const ebayApiToken: Promise<EbayApiToken> = EbayApiToken.authenticate()
 // const ebayApiScrapper: Promise<EbayApiScrapper> = EbayApiScrapper.authenticate()

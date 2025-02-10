@@ -1,5 +1,6 @@
-import { EbayItemSummary } from "./EbayApiScrapper";
-import { EbaySearch, EbaySearchReturn } from "../types/ebaySeachTypes";
+import { EbaySearch, EbaySearchReturn } from "./EbayApiTypes/ebaySeachTypes";
+import { EbayItemSummary } from "./EbayScraperTypes/ScraperTypes";
+
 
 export interface EbayApiInterface {
     search: (ebaySearch: EbaySearch) => EbaySearchReturn

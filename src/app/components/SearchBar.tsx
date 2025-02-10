@@ -1,11 +1,11 @@
 'use client'
-import React from "react";
+import React, { useState } from "react";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { formToJSON } from "axios";
-import { EbaySearch } from "../types/ebaySeachTypes";
+import { EbaySearch } from "../types/EbayApiTypes/ebaySeachTypes";
 import { styled } from "styled-components";
-import { EbaySaverState } from "../EbayApi/EbaySaverState";
+import { EbaySaverState, SEbaySearch } from "../EbayApi/EbaySaverState";
 
 export const SearchBarStyle = styled.div`
     width: 80%;
@@ -52,27 +52,24 @@ const EnterButton = styled.input`
 `
 
 
-export function SearchBar({getEbaySaverState}: {
-    getEbaySaverState?: () => EbaySaverState
-}) {
+export function SearchBar() {
     const refSearchForm = useRef<HTMLFormElement>(null);
+    const [state, setState] = useState<SEbaySearch>()
     const router = useRouter();
 
     const onclick = () => {
-        if (refSearchForm.current !== null) {
-            const queries: EbaySearch = formToJSON(new FormData(refSearchForm.current))
-            queries["fieldgroups"] = "ASPECT_REFINEMENTS,CATEGORY_REFINEMENTS,MATCHING_ITEMS"
-            const params = new URLSearchParams(queries as Record<string, any>)
-            // router.push(`/items` + "?" + params.toString())
+        if (refSearchForm.current) {
+            console.log("click")
+            const queries: EbaySearch = formToJSON(new FormData(refSearchForm.current)) 
+            EbaySaverState.addCategoryRequest(queries)
+            const params = EbaySaverState.toSearchParams(queries)
+            console.log(params)
             window.location.href = `/items` + "?" + params.toString();
         } else {
-            if (getEbaySaverState === undefined) {
-                throw new Error("SearchBar has no information to search")
+            if (state) {
+                const params = EbaySaverState.toSearchParams(state)
+                window.location.href = `/items` + "?" + params.toString();
             }
-            const ebaySaverState = getEbaySaverState();
-            const params = ebaySaverState.toSearchParams()
-            // router.push(`/items?` + params.toString())
-            window.location.href = `/items` + "?" + params.toString();
         }
     }
 

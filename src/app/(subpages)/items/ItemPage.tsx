@@ -4,13 +4,13 @@ import { URLSearchParamsToJson, extractItems } from "@/app/actions/utils";
 import { EbaySaverState } from "@/app/EbayApi/EbaySaverState";
 import { EbayItem } from "@/app/components/baseComponents/EbayItem";
 import { ItemGallery } from "@/app/components/ItemGallery";
-import { EbaySearchReturn } from "@/app/types/ebaySeachTypes";
-import { searchAction } from "@/app/EbayApi/EbayApiAction";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { EbayItemSideBar } from '../../components/EbayItemSidebar';
 import { SearchBar } from "@/app/components/SearchBar";
 import styles from "./structure.module.css"
+import { EbaySearchReturn } from "@/app/types/EbayApiTypes/ebaySeachTypes";
+import { search } from "@/app/EbayApi/EbayApi";
 
 export function ClientSidePage({}: {
 }) {
@@ -21,10 +21,9 @@ export function ClientSidePage({}: {
     useEffect(() => {
         (async () =>{
             const jsonUrlSearchParams = URLSearchParamsToJson(searchParams)
-            const ebaySaverState = new EbaySaverState(jsonUrlSearchParams);
-            ebaySaverState.removeCategoryRequest()
+            EbaySaverState.removeCategoryRequest(jsonUrlSearchParams)
+            const data = await search(jsonUrlSearchParams)
 
-            const data = await searchAction(jsonUrlSearchParams);
             setSaverState(ebaySaverState);
             setSearchReturn(data);
         })()
@@ -44,7 +43,7 @@ export function ClientSidePage({}: {
 
 }
 
-export function _ClientPage({initialSaverState, initialResponse}: {
+export function ClientPage({initialSaverState, initialResponse}: {
         initialSaverState: EbaySaverState
         initialResponse: EbaySearchReturn
     }) {

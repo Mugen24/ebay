@@ -1,5 +1,5 @@
 import { extractCategoryDistributions } from "../../actions/utils";
-import { Category, CategoryDistribution } from "../../types/ebaySeachTypes";
+import { Category, CategoryDistribution } from "../../types/EbayApiTypes/ebaySeachTypes";
 
 export function Category_button({cat, setCategory}: 
     {

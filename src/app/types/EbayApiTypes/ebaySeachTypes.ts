@@ -1,14 +1,12 @@
-import { ValueOf } from "next/dist/shared/lib/constants";
-
 export interface EbaySearch extends Object {
-    q: string,
+    q?: string,
     gtin?: string,
     charity_ids?: string,
     fieldgroups?: string,
     compatibility_filter?: CompatibilityFilter,
     auto_correct?: string,
     category_ids?: string,
-    filter?: string | FilterField,
+    filter?: any,
     sort?: SortField,
     limit?: string,
     offset?: string,

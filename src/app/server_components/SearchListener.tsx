@@ -1,11 +1,12 @@
 import { setTimeout } from "timers/promises";
 import { search } from "../EbayApi/EbayApi";
-import { ItemSummary } from "../types/ebaySeachTypes";
-import { EbaySearch } from "@/app/types/ebaySeachTypes";
+import { EbaySearch, ItemSummary } from "../types/EbayApiTypes/ebaySeachTypes";
 import { readFileSync, writeFile } from "fs";
-import { SearchConfigType } from "../data/searchConfigType";
+import { SearchConfigType } from "../types/searchConfigType";
+import path from "path";
 
-const PATH = "../../data/search/searchConfig.json"
+"/home/mugen/Programing/ebay/.next/server/app"
+const PATH = "../../../src/app/data/searchConfig.json"
 type searchString = string
 export type SearchConfigDataType = Record<searchString, ItemSummary[]>
 
@@ -14,7 +15,7 @@ async function sleep(second: number) {
 }
 
 export async function saveConfig(ebaySearch: EbaySearch) {
-    const fileContent = readFileSync(PATH, "utf-8");
+    const fileContent = readFileSync(path.resolve(__dirname, PATH), "utf-8");
     const localConfig: SearchConfigType | undefined = JSON.parse(fileContent);
     const epochTime = Date.now()
     let newConfig: SearchConfigType 
@@ -39,7 +40,8 @@ export async function saveConfig(ebaySearch: EbaySearch) {
 }
 
 export async function loadConfig() {
-    const fileContent = JSON.parse(readFileSync(PATH, "utf-8"))
+    console.log(__dirname)
+    const fileContent = JSON.parse(readFileSync(path.resolve(__dirname, PATH), "utf-8"))
     return fileContent as SearchConfigType
 }
 
@@ -48,41 +50,23 @@ class SearchListener {
     _running: boolean
     timeout: number
     cached: boolean
-    /*
-        {
-            searchTerm: {
-                "epid+itemId": true
-            }
-        }
-    */
-    _cached_info: Record<searchString, Record<string, true>>
     constructor() {
         this.listeners = []
         this._running = false
         this.timeout = 6000
         this.cached = true
-        this._cached_info = {}
     }
     static _hash_item(item: ItemSummary) {
         return `${item.epid+item.itemId}`
     }
 
-    compareCache(data: SearchConfigDataType) {
+    compareCache(data: SearchConfigDataType, lastRunTime: EpochTimeStamp) {
         const searchTerms = Object.keys(data)
         for (const searchTerm of searchTerms) {
-            const searchCache = this._cached_info[searchTerm]
-            if (!searchCache) {
-                const keyHashDict: any = {}
-                for (const item of data[searchTerm]) {
-                    keyHashDict[SearchListener._hash_item(item)] = true
-                }
-                this._cached_info[searchTerm] = keyHashDict
-
-            } else {
-                data[searchTerm].filter(item => {
-                    return this._cached_info[searchTerm][SearchListener._hash_item(item)] 
-                })
-            }
+            data[searchTerm].filter(item => {
+                const dateCreated = new Date(item.itemCreationDate).valueOf()
+                return (dateCreated - lastRunTime > 0) 
+            })
 
         }
 
@@ -90,23 +74,34 @@ class SearchListener {
     }
 
     async search(searchConfig: SearchConfigType): Promise<SearchConfigDataType> {
-        const perConfigData: SearchConfigDataType = {}
-        for (const perConfig of searchConfig.searchParams) {
-            const resp = await search(perConfig) 
+        let perConfigData: SearchConfigDataType = {}
+        for (const [searchTerm, searchParam] of Object.entries(searchConfig.searchParams)) {
+            const resp = await search(searchParam) 
             const itemDatas = resp.itemSummaries
 
-            perConfigData[perConfig.q] = itemDatas
+            perConfigData[searchParam.q] = itemDatas
         }
 
-        const filteredData = this.compareCache(perConfigData)
-        return filteredData
+        if (this.cached) {
+            perConfigData = this.compareCache(perConfigData, searchConfig.lastRunTime)
+        }
+        return perConfigData
     }
 
     async start() {
         this._running = true
+        let initialData = true
         while (this._running) {
-            const searchConfig = await loadConfig();
-            const data = await this.search(searchConfig)
+            let data: SearchConfigDataType
+            if (initialData) {
+                data = await this.oneOffSearch()    
+                initialData = false
+            }
+            else {
+                const searchConfig = await loadConfig();
+                data = await this.search(searchConfig)
+            }
+
             for (const listener of this.listeners) {
                 listener(data)
             }
@@ -114,7 +109,7 @@ class SearchListener {
         }
     }
 
-    async oneOffSearch() {
+    async oneOffSearch(): Promise<SearchConfigDataType> {
         const searchConfig = await loadConfig();
         const data = await this.search(searchConfig)
         return data
