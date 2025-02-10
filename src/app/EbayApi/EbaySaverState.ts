@@ -1,4 +1,5 @@
 'use client'
+import { INSTRUMENTATION_HOOK_FILENAME } from 'next/dist/lib/constants';
 import { AspectFilter, BuyingOption, CompatibilityFilter, ConditionOption, EbaySearch, SortField } from '../types/EbayApiTypes/ebaySeachTypes';
 import logging from "../utils/logger"
 
@@ -63,7 +64,7 @@ export class EbaySaverState {
         return ebaySearch
     }
     static removeCategoryRequest(ebaySearch: SEbaySearch) {
-        ebaySearch.fieldgroups = undefined
+        ebaySearch.fieldgroups = ""
         return ebaySearch
     }
 
@@ -100,9 +101,14 @@ export class EbaySaverState {
         const filter = sEbaySearch.filter
         logging.debug("Constructing filter: \n", filter)
         if (!filter) return sEbaySearch
+
+        // Already constructed
+        if (filter instanceof String) return sEbaySearch
+
         if (Object.keys(filter).length <= 0) {
             logging.warn("Empty filter");
-            return "";
+            sEbaySearch.filter = ""
+            return sEbaySearch
         }
 
         const optionStrings = [];
@@ -111,28 +117,34 @@ export class EbaySaverState {
             optionStrings.push(`${param}:{${optionValues}}`);
         }
 
-        let filterString = "filter=";
+        let filterString = "";
         filterString += optionStrings.join(',');
-
+        console.log("asdfasdf", filter)
         sEbaySearch.filter = filterString
         return sEbaySearch
     }
 
     // TODO: fix the stupid type 
     static addUniqueFilter(sEbaySearch: SEbaySearch, filterKey: any, filterValue: any, clear: Boolean = false) {
-        const filter = sEbaySearch.filter
-        if (!filter) return sEbaySearch
+        logging.debug("Adding unique filter\n", sEbaySearch.filter, filterKey, filterValue)
+        const filter = sEbaySearch.filter ?? {}
+        if (!filter[filterKey]) {
+            filter[filterKey] = [filterValue]
+        }
         if (clear) {
             filter[filterKey] = [filterValue]
         } else {
-            if (filter.includes(filterValue)){
+            if (!Object.values(filter[filterKey]).includes(filterValue)){
                 filter[filterKey].push(filterValue!)
             }
         }
+        sEbaySearch.filter = filter
+        logging.debug("mod: ", filter)
+        return sEbaySearch
     }
 
     static toSearchParams(ebaySearch: SEbaySearch): URLSearchParams{
-        ebaySearch = EbaySaverState.constructFilter(ebaySearch)
+        ebaySearch = EbaySaverState.constructFilter({...ebaySearch})
         logging.debug("Converting search param\n", ebaySearch)
         return new URLSearchParams(ebaySearch as unknown as Record<string, any>)
     }

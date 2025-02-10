@@ -1,9 +1,12 @@
+"use client"
 import React from "react";
-import { ClientSidePage } from "./ClientSidePage";
-
+import { ClientPage } from "./ItemPage";
+import { QueryStateProvider } from '../../hooks/useQuerytState';
 
 export default function App() {
     return (
-        <ClientSidePage></ClientSidePage>
+        <QueryStateProvider>
+            <ClientPage></ClientPage>
+        </QueryStateProvider>
     )
 }

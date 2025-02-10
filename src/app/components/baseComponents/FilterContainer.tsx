@@ -1,5 +1,6 @@
 import { Filter as FilterType } from "@/app/EbayApi/EbaySaverState";
-import { BuyingOption, ConditionOption, ConditionOptions, EbaySearchReturn, SortField } from "@/app/types/ebaySeachTypes"
+import { ConditionOption, SortField } from "@/app/types/EbayApiTypes/ebaySeachTypes";
+import logging from "@/app/utils/logger";
 
 export function Filter({setFilterState, setSortState, saveConfigState}: {
     setFilterState: <T extends keyof FilterType>(filterKey: T, filterValue: FilterType[T]) => void,
@@ -7,21 +8,22 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
     saveConfigState: () => void,
 }) {
     const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
-        if (event.target instanceof HTMLButtonElement) {
-            const option = event.target.value;
-            switch (option) {
-                case "All": 
-                    setFilterState("buyingOptions", ["AUCTION", "BEST_OFFER", "FIXED_PRICE"])
-                break;
-                case "Auction": 
-                    setFilterState("buyingOptions", ["AUCTION"])
-                break;
-                case "Buy it now": 
-                    setFilterState("buyingOptions", ["BEST_OFFER", "FIXED_PRICE"])
-                break;
-            }
-
+        logging.debug("buyingOptionHandler: ", event)
+        const option: string = event.target.value;
+        switch (option.toLowerCase()) {
+            case "all": 
+                setFilterState("buyingOptions", ["AUCTION", "BEST_OFFER", "FIXED_PRICE"])
+            break;
+            case "auction": 
+                setFilterState("buyingOptions", ["AUCTION"])
+            break;
+            case "buy it now": 
+                setFilterState("buyingOptions", ["BEST_OFFER", "FIXED_PRICE"])
+            break;
+            default:
+                console.error("Buying option did not match", option)
         }
+
     }
 
     const conditionOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
@@ -42,9 +44,9 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
     return (
     <div>
         <section>
-            <button className="primary_button" value="FIXED_PRICE|BEST_OFFER|AUCTION" onClick={buyingOptionsHandler}>All</button>
-            <button className="primary_button" value="AUCTION" onClick={buyingOptionsHandler}>AUCTION</button>
-            <button className="primary_button" value="FIXED_PRICE|BEST_OFFER" onClick={buyingOptionsHandler}>Buy It Now</button>
+            <button className="primary_button" value="All" onClick={buyingOptionsHandler}>All</button>
+            <button className="primary_button" value="Auction" onClick={buyingOptionsHandler}>AUCTION</button>
+            <button className="primary_button" value="Buy it now" onClick={buyingOptionsHandler}>Buy It Now</button>
         </section>
 
         <section>

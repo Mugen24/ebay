@@ -1,15 +1,23 @@
 "use  client"
 import axios from "axios";
+import { EbaySearch, EbaySearchReturn, DistanceFromPickupLocation } from '../types/EbayApiTypes/ebaySeachTypes';
+import { EbaySaverState } from "../EbayApi/EbaySaverState";
+import logging from "../utils/logger";
 
-const BASE = "/api"
-export async function search(): Promise<any | undefined> {
+const BASE = "api"
+export async function search(query: EbaySearch): Promise<EbaySearchReturn | undefined> {
+    logging.debug("Item Search request", query)
     const path= `${BASE}/search`;
-    const resp = await axios.get(path)
-    if (resp.status === 202) {
+    const searchParam = EbaySaverState.toSearchParams(query)
+    logging.debug(searchParam.toString())
+    return axios.get(`${path}?${searchParam.toString()}`)
+    .then(resp => {
         return resp.data
-    } else {
+    })
+    .catch(error => {
+        logging.warn("Server error:", error)
         return undefined
-    }
+    })
 }
 
 function useApi() {

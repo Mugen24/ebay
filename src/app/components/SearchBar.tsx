@@ -61,7 +61,6 @@ export function SearchBar() {
         if (refSearchForm.current) {
             console.log("click")
             const queries: EbaySearch = formToJSON(new FormData(refSearchForm.current)) 
-            EbaySaverState.addCategoryRequest(queries)
             const params = EbaySaverState.toSearchParams(queries)
             console.log(params)
             window.location.href = `/items` + "?" + params.toString();

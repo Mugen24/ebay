@@ -2,52 +2,47 @@
 import { EbaySaverState } from "../EbayApi/EbaySaverState"
 import { extractCategoryDistributions } from "@/app/actions/utils"
 import CategoryContainer from "./baseComponents/CategoryContainer"
-import { BuyingOptions, ConditionOptions, EbaySearchReturn, SortField } from "@/app/types/ebaySeachTypes"
-import { Dispatch } from "react"
 import styles from "./structure.module.css"
 import { Filter as FilterType} from "../EbayApi/EbaySaverState"
 import { Filter } from "./baseComponents/FilterContainer"
+import { useQueryState } from "../hooks/useQuerytState"
+import logging from "../utils/logger"
+import { SortField } from "../types/EbayApiTypes/ebaySeachTypes"
 
-export function EbayItemSideBar(
-        {ebaySearchResponse, setEbaySaverState, ebaySaverState}: 
-        { 
-            ebaySearchResponse: EbaySearchReturn
-            setEbaySaverState: Dispatch<EbaySaverState> 
-            ebaySaverState: EbaySaverState
-        }
-    ) {
-    
-    const newEbaySaverState = new EbaySaverState(ebaySaverState.toJSON());
-    console.log("sidebar:")
-    console.log(newEbaySaverState)
+export function EbayItemSideBar() {
+    const {state, setState, resp} = useQueryState()
+    logging.info("Sidebar initialise")
+    logging.debug(state)
 
     function setCategory(categoryId: string) {
-        newEbaySaverState.category_ids = categoryId;
-        setEbaySaverState(newEbaySaverState)
+        logging.info("Set category: ", categoryId)
+        state.category_ids = categoryId
+        setState(state)
     }
 
     function setFilterState<T extends keyof FilterType>(filterKey: T, filterValues: FilterType[T]) {
-        newEbaySaverState.addUniqueFilters(filterKey, filterValues, true)
-        console.log("setting saver state")
-        console.log(JSON.stringify(newEbaySaverState))
-        console.log(JSON.stringify(ebaySaverState))
-        setEbaySaverState(newEbaySaverState)
+        logging.info("Set filter state: ", filterKey, ":", filterValues)
+        for (const value of filterValues) {
+            EbaySaverState.addUniqueFilter(state, filterKey, value,  true)
+            const newState= {...state}
+            setState(newState)
+        }
     }
 
     function setSortState(choiceArgs: SortField) {
-        newEbaySaverState.sort = choiceArgs;
-        setEbaySaverState(newEbaySaverState)
+        logging.info("Set sort state: ", choiceArgs)
+        state.sort = choiceArgs
+        setState(state)
     }
 
     function saveConfigState(){
-        newEbaySaverState.saveToConfig();
+        EbaySaverState.saveToConfig(state)
     }
 
-    console.log(ebaySearchResponse)
     return (
         <div className={styles.side_bar}>
             <Filter setFilterState={setFilterState} setSortState={setSortState} saveConfigState={saveConfigState}/>
-            <CategoryContainer categories={extractCategoryDistributions(ebaySearchResponse)} setCategory={setCategory}></CategoryContainer>
+            <CategoryContainer setCategory={setCategory}></CategoryContainer>
         </div>
     )
 }

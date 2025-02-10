@@ -10,77 +10,42 @@ import { EbayItemSideBar } from '../../components/EbayItemSidebar';
 import { SearchBar } from "@/app/components/SearchBar";
 import styles from "./structure.module.css"
 import { EbaySearchReturn } from "@/app/types/EbayApiTypes/ebaySeachTypes";
-import { search } from "@/app/EbayApi/EbayApi";
+import { search } from "@/app/hooks/useApi";
+import logging from "@/app/utils/logger";
+import { QueryStateProvider, useQueryState } from "@/app/hooks/useQuerytState";
 
-export function ClientSidePage({}: {
-}) {
-    const searchParams = useSearchParams();
-    const [ebaySaverState, setSaverState] = useState<EbaySaverState | undefined>(undefined);
-    const [ebaySearchReturn, setSearchReturn] = useState<EbaySearchReturn | undefined>(undefined);
-
-    useEffect(() => {
-        (async () =>{
-            const jsonUrlSearchParams = URLSearchParamsToJson(searchParams)
-            EbaySaverState.removeCategoryRequest(jsonUrlSearchParams)
-            const data = await search(jsonUrlSearchParams)
-
-            setSaverState(ebaySaverState);
-            setSearchReturn(data);
-        })()
-    }, [])
-
-    return (
-        <>
-            {
-                ebaySaverState ? 
-                    ebaySearchReturn ? 
-                        <_ClientPage initialSaverState={ebaySaverState} initialResponse={ebaySearchReturn}></_ClientPage>
-                        : <></>
-                    : <></>
-            }
-        </>
-    )
-
-}
-
-export function ClientPage({initialSaverState, initialResponse}: {
-        initialSaverState: EbaySaverState
-        initialResponse: EbaySearchReturn
-    }) {
-    const [ebaySaverState, setEbaySaverState]= useState<EbaySaverState>(initialSaverState);
-    const [ebaySearchResponse, setEbaySearchResponse] = useState<EbaySearchReturn | undefined>(undefined);
-
-
+export function ClientPage() {
+    const {state, setState, resp, setResp} = useQueryState()
+    const query = useSearchParams().toString()
+    console.log(query)
     useEffect(() => {
         (async () => {
-            if (ebaySearchResponse === undefined) {
-                setEbaySearchResponse(initialResponse)
-            } else {
-                const data = await searchAction(ebaySaverState.toJSON())
-                setEbaySearchResponse(data)
-            }
+            const urlQuery= URLSearchParamsToJson(new URLSearchParams(query))
+            let temp_state = EbaySaverState.parse(urlQuery)
+            temp_state= EbaySaverState.addCategoryRequest(temp_state)
+            setState(temp_state)
+            temp_state = EbaySaverState.removeCategoryRequest(temp_state)
         })()
-    }, [ebaySaverState])
+    }, [query, setState])
 
-    function getEbaySaverState() {
-        return ebaySaverState;
+
+    if (!resp) {
+        return <>
+            <h1>Loading...</h1>
+        </>
     }
-
-    // EbayItemSideBar gets initialResponse 
-    // Because it contains information about category
-    // Which get stripped in subsequent call
 
     return (
         <div>
             <div className={styles.center_content}>
-                <SearchBar getEbaySaverState={getEbaySaverState}/>
+                <SearchBar/>
             </div>
             <div className={styles.main_page}>
                 <div className={styles.sidebar}>
-                    <EbayItemSideBar ebaySearchResponse={initialResponse} ebaySaverState={ebaySaverState} setEbaySaverState={setEbaySaverState} ></EbayItemSideBar> 
+                    <EbayItemSideBar/>
                 </div>
                 <div className={styles.items_container}>
-                    <ItemsContainer ebaySearchResponse={ebaySearchResponse} ebaySaverState={ebaySaverState}></ItemsContainer>
+                    <ItemsContainer/>
                 </div>
             </div>
         </div>
@@ -88,21 +53,18 @@ export function ClientPage({initialSaverState, initialResponse}: {
 }
 
 
-export function ItemsContainer({ebaySearchResponse, ebaySaverState}: {
-    ebaySearchResponse: EbaySearchReturn | undefined
-    ebaySaverState: EbaySaverState
-}) {
-
+export function ItemsContainer() {
+    const {state, resp} = useQueryState();
     const ebayItems = [];
-    if (ebaySearchResponse) {
-        for (const item of extractItems(ebaySearchResponse)) {
+    if (resp) {
+        for (const item of extractItems(resp)) {
             ebayItems.push(<EbayItem key={item.itemId} ebayItem={item}/>)
         }
     }
 
     return (
         <div>
-            <h1>Search: {ebaySaverState.q}</h1>
+            <h1>Search: {state.q}</h1>
             <ItemGallery ebayItems={ebayItems}/>
         </div>
     )

@@ -1,3 +1,4 @@
+import { useQueryState } from "@/app/hooks/useQuerytState";
 import { extractCategoryDistributions } from "../../actions/utils";
 import { Category, CategoryDistribution } from "../../types/EbayApiTypes/ebaySeachTypes";
 
@@ -18,11 +19,13 @@ export function Category_button({cat, setCategory}:
     )
 }
 
-export default function CategoryContainer({categories, setCategory}: 
+export default function CategoryContainer({setCategory}: 
     {
-        categories: CategoryDistribution[],
         setCategory: (categoryId: string) => void
     }) {
+
+    const {resp} = useQueryState()
+    const categories = resp["refinement"]?.["categoryDistributions"] ?? [];
     
     const CATEGORY_LIMIT = 10;
     const reactCategories = []

@@ -1,5 +1,5 @@
 // import styled from "styled-components"
-import { ItemSummary } from "../../types/EbayApiTypes/ebaySeachTypes"
+import { ItemSummary, CurrentBidPrice } from '../../types/EbayApiTypes/ebaySeachTypes';
 import styles from "./structure.module.css"
 // const StyleEbayItem = styled.div`
 //     padding: 3px;
@@ -29,10 +29,32 @@ import styles from "./structure.module.css"
 //     margin-right: 5px;
 // `
 
+
+
 export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
+    const itemTypes = ebayItem.buyingOptions
+
+
+    // OPTIONS = FIXED_PRICE BEST_OFFER AUCTION
+    const bidCount = ebayItem.bidCount;
+    const currentBidPrice = ebayItem.currentBidPrice?.value;
+    const currentBidPriceCurrency = ebayItem.currentBidPrice?.currency;
+    const originalBidCurrency = ebayItem.currentBidPrice?.convertedFromCurrency;
+    const originalBidCurrencyPrice = ebayItem.currentBidPrice?.convertedFromValue;
+
+    const originalCurrency = ebayItem.price?.convertedFromCurrency;
+    const originalCurrencyPrice = ebayItem.price?.convertedFromValue
+    const price = ebayItem.price?.value
+    const currency= ebayItem.price?.currency
+
+    const condition = ebayItem.condition
+
+    const location = ebayItem.itemLocation.country
+    const postcode= ebayItem.itemLocation.postalCode
+
     return (
         <div className={styles.ebay_item}>
-            <img src={ebayItem.image.imageUrl} alt={ebayItem.title}/>
+            <img src={ebayItem.image?.imageUrl} alt={ebayItem.title}/>
             <div>
                 <a href={ebayItem.itemWebUrl}><p>{ebayItem.title}</p></a>
                 <div style={{
@@ -45,10 +67,13 @@ export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
                     }}>{option}</div>)
                 }</div>
             </div>
-            <p>{ebayItem.price.convertedFromCurrency} {ebayItem.price.convertedFromValue}</p>
-            <p>{ebayItem.price.currency}: {ebayItem.price.value}</p>
-            <p>Conditions: {ebayItem.condition}</p>
+            <p>Location: {location}</p>
+            <p>{originalCurrency} {originalCurrencyPrice}</p>
+            <p>{currency}: {price}</p>
+            <p>Conditions: {condition}</p>
             <p>date: {ebayItem.itemCreationDate}</p>
+            <p>Auction: {originalBidCurrency} {originalBidCurrencyPrice}</p>
+            <p>         {currentBidPriceCurrency} {currentBidPrice}</p>
             {/* <p>Shipping</p>
             <p>{ebayItem.shippingOptions[0]?.shippingCostType}</p>
             <p>{ebayItem.shippingOptions[0]?.shippingCost.convertedFromCurrency}:{ebayItem.shippingOptions[0].shippingCost.convertedFromValue}</p>

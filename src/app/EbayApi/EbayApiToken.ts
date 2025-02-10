@@ -2,6 +2,8 @@ import EbayAuthToken from "ebay-oauth-nodejs-client"
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import { EbaySearch, EbaySearchReturn } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import { EbayGetItemReturn, EbayGetItem } from "@/app/types/EbayApiTypes/ebayGetItemTypes";
+import logging from "../utils/logger";
+import { ShippingOption } from '../types/EbayApiTypes/ebaySeachTypes';
 
 export class EbayApi {
     static scopes = ["https://api.ebay.com/oauth/api_scope"];
@@ -55,7 +57,9 @@ export class EbayApi {
                 }
             )
         }
-        // console.log(res.data)
+        logging.debug("Response:", res)
+        logging.debug("Item:", res.data.itemSummaries[0])
+        logging.debug("Item:", res.data.itemSummaries[0]?.shippingOptions)
         return res.data;
     }
 
