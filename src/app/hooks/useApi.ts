@@ -19,6 +19,3 @@ export async function search(query: EbaySearch): Promise<EbaySearchReturn | unde
         return undefined
     })
 }
-
-function useApi() {
-}

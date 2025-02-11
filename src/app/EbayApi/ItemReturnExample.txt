@@ -1,0 +1,72 @@
+Item: {
+  itemId: 'v1|135395611906|0',
+  title: '✅ Valve Steam Deck OLED 90Hz Handheld Gaming Console 512GB 🎮 2024 Model - Black',
+  leafCategoryIds: [ '139971' ],
+  categories: [
+    { categoryId: '139971', categoryName: 'Video Game Consoles' },
+    { categoryId: '1249', categoryName: 'Video Games & Consoles' }
+  ],
+  image: {
+    imageUrl: 'https://i.ebayimg.com/images/g/-noAAOSw3g1nPxip/s-l225.jpg'
+  },
+  price: { value: '1047.00', currency: 'AUD' },
+  itemHref: 'https://api.ebay.com/buy/browse/v1/item/v1%7C135395611906%7C0',
+  seller: {
+    username: 'micromau-com',
+    feedbackPercentage: '100.0',
+    feedbackScore: 684
+  },
+  marketingPrice: {
+    originalPrice: { value: '1090.98', currency: 'AUD' },
+    discountPercentage: '4',
+    discountAmount: { value: '43.98', currency: 'AUD' }
+  },
+  condition: 'Brand New',
+  conditionId: '1000',
+  thumbnailImages: [
+    {
+      imageUrl: 'https://i.ebayimg.com/images/g/-noAAOSw3g1nPxip/s-l1600.jpg'
+    }
+  ],
+  shippingOptions: [ { shippingCostType: 'FIXED', shippingCost: [Object] } ],
+  buyingOptions: [ 'FIXED_PRICE', 'BEST_OFFER' ],
+  epid: '13064680120',
+  itemWebUrl: 'https://www.ebay.com.au/itm/135395611906?_skw=steam+deck&hash=item1f86351502:g:-noAAOSw3g1nPxip&amdata=enc%3AAQAJAAAA8H%2FqIbIc6o8B4%2BvpFzQyE8UJ1Q8E3froArA4YJ%2FE5mOyEt1y%2Fyr3FKug53SaP3a9P%2BpS%2B2E6Z%2FOKeeBh%2BLFGWvrMgC%2FLCsywwJNpuQZBQxjhjkmHj9Xb2Z6vJy77IUihjqAEONqmaLxXEjpihxW4eJv2rY2uiGBXe992hvwssBLyG0oPBCgfKYSiuzcXL9aVGn5LfnahJm3k4WX7%2FIjKSq141SZ0UC2bvZP3SgLJzKE%2FCcl5HJDEgfx3fIQb%2F69EG16hfnGxSd%2Ft%2Bwa7GF4Vko7AHnunzMaiqyUN5adt%2BgjL6lCqzOAQ1UNXtt462FSrVA%3D%3D',
+  itemLocation: { postalCode: '2***', country: 'AU' },
+  additionalImages: [
+    {
+      imageUrl: 'https://i.ebayimg.com/images/g/l7kAAOSwSLNnSAai/s-l225.jpg'
+    },
+    {
+      imageUrl: 'https://i.ebayimg.com/images/g/Zz4AAOSwRO9nSD0f/s-l225.jpg'
+    },
+    {
+      imageUrl: 'https://i.ebayimg.com/images/g/i5UAAOSwIatnRsLC/s-l225.jpg'
+    },
+    {
+      imageUrl: 'https://i.ebayimg.com/images/g/EOwAAOSwwJZnPxm~/s-l225.jpg'
+    },
+    {
+      imageUrl: 'https://i.ebayimg.com/images/g/CaQAAOSwjbNnPxmr/s-l225.jpg'
+    },
+    {
+      imageUrl: 'https://i.ebayimg.com/images/g/~KYAAOSwunhnPxnb/s-l225.jpg'
+    },
+    {
+      imageUrl: 'https://i.ebayimg.com/images/g/cdAAAOSwOIFnRsJ3/s-l225.jpg'
+    },
+    {
+      imageUrl: 'https://i.ebayimg.com/images/g/gJsAAOSw8UBnRsN6/s-l225.jpg'
+    },
+    {
+      imageUrl: 'https://i.ebayimg.com/images/g/7AcAAOSwu~pnRsJ6/s-l225.jpg'
+    }
+  ],
+  adultOnly: false,
+  legacyItemId: '135395611906',
+  availableCoupons: false,
+  itemCreationDate: '2024-11-23T09:04:46.000Z',
+  topRatedBuyingExperience: false,
+  priorityListing: true,
+  listingMarketplaceId: 'EBAY_AU'
+}

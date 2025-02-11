@@ -17,9 +17,9 @@ async function loadScrapper(){
     } else return
 }
 
-export async function search(ebaySearch: EbaySearch) {
+export async function search(ebaySearch: EbaySearch, optionalConfig: Record<string, any> = {}) {
     const ebayApi = await ebayApiToken;
-    return ebayApi.search(ebaySearch)
+    return ebayApi.search(ebaySearch, optionalConfig)
 }
 
 export async function getItemHistoricalLowest(searchTerm: string, minPrice: number) {

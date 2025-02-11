@@ -1,12 +1,18 @@
-import { Filter as FilterType } from "@/app/EbayApi/EbaySaverState";
+import { Countries, EbaySaverState, Filter as FilterType } from "@/app/EbayApi/EbaySaverState";
+import { useQueryState } from "@/app/hooks/useQuerytState";
 import { ConditionOption, SortField } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import logging from "@/app/utils/logger";
+import React from "react";
+import { formToJson } from '../../actions/utils';
 
 export function Filter({setFilterState, setSortState, saveConfigState}: {
     setFilterState: <T extends keyof FilterType>(filterKey: T, filterValue: FilterType[T]) => void,
     setSortState: (choiceArgs: SortField) => void,
     saveConfigState: () => void,
 }) {
+    
+    const {state, setState, setAddress} = useQueryState();
+    // TODO: move all this login into EbaySaverState
     const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
         logging.debug("buyingOptionHandler: ", event)
         const option: string = event.target.value;
@@ -40,9 +46,56 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
         }
     }
 
+    const locationOptionsHandler: (event: React.FormEvent<HTMLFormElement>) => void = (event) => {
+        if (event.target?.value) {
+            EbaySaverState.setLocation(state, event.target?.value)
+        }
+        setState({...state})
+    }
+
+    const addressHandler: (event: React.FormEvent<HTMLFormElement>) => void = (event) => {
+        event.preventDefault()
+        const formData = new FormData(event.currentTarget)
+        const country = formData.get("country")
+        const postcode= formData.get("postcode")
+        console.log(formToJson(formData))
+        if (country && postcode) {
+            setAddress(country as keyof typeof Countries, Number(postcode))
+        }
+    }
 
     return (
     <div>
+        <section>
+            <h1>Delivery Location: </h1>
+            <form onSubmit={addressHandler}>
+                <label htmlFor="Country">Country</label>
+                <select name="country" id="country">
+                    <option value="US">United State</option>
+                    <option value="AU">Australia</option>
+                </select>
+
+                <label htmlFor="Postcode">Postcode</label>
+                <input type="text" id="Postcode" name="postcode" defaultValue="0000"/>
+
+                <input type="submit" value={"enter"}/>
+            </form>
+        </section>
+        <section>
+            <form onChange={locationOptionsHandler}>
+                {
+                    Object.keys(Countries).map(country => {
+                        return (
+                            <div key={`${country}_container`}>
+                                <label key={`${country}_label`} htmlFor={country} >{country}</label>
+                                <input type="radio" key={country} id={country} name="country" value={country}/>
+                            </div>
+                        )
+                    })
+                }
+            </form>
+        </section>
+
         <section>
             <button className="primary_button" value="All" onClick={buyingOptionsHandler}>All</button>
             <button className="primary_button" value="Auction" onClick={buyingOptionsHandler}>AUCTION</button>

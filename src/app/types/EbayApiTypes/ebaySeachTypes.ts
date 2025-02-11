@@ -1,3 +1,4 @@
+import { Value } from './ebayGetItemTypes';
 export interface EbaySearch extends Object {
     q?: string,
     gtin?: string,

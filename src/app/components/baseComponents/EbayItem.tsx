@@ -1,5 +1,6 @@
 // import styled from "styled-components"
-import { ItemSummary, CurrentBidPrice } from '../../types/EbayApiTypes/ebaySeachTypes';
+import logging from '@/app/utils/logger';
+import { ItemSummary, CurrentBidPrice, ShippingOption } from '../../types/EbayApiTypes/ebaySeachTypes';
 import styles from "./structure.module.css"
 // const StyleEbayItem = styled.div`
 //     padding: 3px;
@@ -52,8 +53,15 @@ export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
     const location = ebayItem.itemLocation.country
     const postcode= ebayItem.itemLocation.postalCode
 
+    const shippingObject= ebayItem.shippingOptions ?? []
+    const shippingPrice = shippingObject[0]?.shippingCost.value
+    const shippingCurrency= shippingObject[0]?.shippingCost.currency
+
+    const epid = ebayItem.epid
+
     return (
         <div className={styles.ebay_item}>
+            <p>Epid: {epid}</p>
             <img src={ebayItem.image?.imageUrl} alt={ebayItem.title}/>
             <div>
                 <a href={ebayItem.itemWebUrl}><p>{ebayItem.title}</p></a>
@@ -74,10 +82,9 @@ export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
             <p>date: {ebayItem.itemCreationDate}</p>
             <p>Auction: {originalBidCurrency} {originalBidCurrencyPrice}</p>
             <p>         {currentBidPriceCurrency} {currentBidPrice}</p>
-            {/* <p>Shipping</p>
-            <p>{ebayItem.shippingOptions[0]?.shippingCostType}</p>
-            <p>{ebayItem.shippingOptions[0]?.shippingCost.convertedFromCurrency}:{ebayItem.shippingOptions[0].shippingCost.convertedFromValue}</p>
-            <p>{ebayItem.shippingOptions[0]?.shippingCost.currency}:{ebayItem.shippingOptions[0].shippingCost.value}</p> */}
+
+            <p>Shipping</p>
+            <p>Price: {shippingPrice} {shippingCurrency}</p>
         </div>
     )
 }

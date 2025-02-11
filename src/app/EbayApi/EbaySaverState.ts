@@ -2,12 +2,29 @@
 import { INSTRUMENTATION_HOOK_FILENAME } from 'next/dist/lib/constants';
 import { AspectFilter, BuyingOption, CompatibilityFilter, ConditionOption, EbaySearch, SortField } from '../types/EbayApiTypes/ebaySeachTypes';
 import logging from "../utils/logger"
+import { List } from 'postcss/lib/list';
+import { countReset } from 'console';
 
 
 export type Filter = {
     "buyingOptions": BuyingOption[]
     "conditions": ConditionOption[]
 }
+
+const MULTI_OPTIONS= [
+    "buyingOptions",
+    "conditions"
+]
+const SINGLE_OPTIONS = [
+    "itemLocationCountry"
+]
+
+export const Countries = {
+    // More valid country code
+    "AU": "AU",
+    "US": "US",
+}
+
 
 export interface SEbaySearch extends EbaySearch {}
 
@@ -113,33 +130,48 @@ export class EbaySaverState {
 
         const optionStrings = [];
         for (const param in filter) {
-            const optionValues: string | undefined = filter[param as keyof Filter]?.join('|');
-            optionStrings.push(`${param}:{${optionValues}}`);
+            if (MULTI_OPTIONS.includes(param)) {
+                const optionValues: string | undefined = filter[param as keyof Filter]?.join('|');
+                optionStrings.push(`${param}:{${optionValues}}`);
+            } else if (SINGLE_OPTIONS.includes(param)){
+                optionStrings.push(`${param}:${filter[param]}`)
+            } else {
+                logging.warn("Unknown option: ",param)
+            }
         }
 
         let filterString = "";
         filterString += optionStrings.join(',');
-        console.log("asdfasdf", filter)
         sEbaySearch.filter = filterString
         return sEbaySearch
     }
 
     // TODO: fix the stupid type 
-    static addUniqueFilter(sEbaySearch: SEbaySearch, filterKey: any, filterValue: any, clear: Boolean = false) {
+    static addUniqueFilter(sEbaySearch: SEbaySearch, filterKey: any, filterValue: any, clear: Boolean = false, toggle = false) {
         logging.debug("Adding unique filter\n", sEbaySearch.filter, filterKey, filterValue)
         const filter = sEbaySearch.filter ?? {}
-        if (!filter[filterKey]) {
-            filter[filterKey] = [filterValue]
-        }
-        if (clear) {
-            filter[filterKey] = [filterValue]
-        } else {
-            if (!Object.values(filter[filterKey]).includes(filterValue)){
-                filter[filterKey].push(filterValue!)
+        if (MULTI_OPTIONS.includes(filterKey)) {
+            if (!filter[filterKey] || clear) {
+                filter[filterKey] = [filterValue]
+            }
+            else {
+                if (!Object.values(filter[filterKey]).includes(filterValue)){
+                    filter[filterKey].push(filterValue!)
+                } else if (toggle) {
+                    const index = filter[filterKey].indexOf(filterValue)
+                    delete filter[filterKey][index]
+                }
             }
         }
+        else if (SINGLE_OPTIONS.includes(filterKey)) {
+            // if (!filter[filterKey] || clear) {
+            //     filter[filterKey] = filterValue
+            // } 
+            filter[filterKey] = filterValue
+        }
+
         sEbaySearch.filter = filter
-        logging.debug("mod: ", filter)
+        logging.debug("New filter", filter)
         return sEbaySearch
     }
 
@@ -158,5 +190,27 @@ export class EbaySaverState {
         throw new Error("Not implemented")
         // return loadConfig()
     }
+
+    static setLocation(sEbaySearch: SEbaySearch, country: keyof typeof Countries) {
+        const OPTION = "itemLocationCountry";
+        // filter=itemLocationCountry:US
+
+        logging.debug("Setting location:", country)
+        return EbaySaverState.addUniqueFilter(sEbaySearch, OPTION, country)
+    }
+
+    // Additional options: these are the options that needs to be passed via 
+    // header
+
+    static getUserAddressHeader(country: keyof typeof Countries, postcode: Number) {
+        // TODO: implement a setting system and save this in setting
+        country = country 
+        postcode = postcode 
+
+        return [
+            "X-EBAY-C-ENDUSERCTX", `contextualLocation=${encodeURIComponent(`country=${country},zip=${postcode}`)}}`
+        ]
+    }
+
 
 }

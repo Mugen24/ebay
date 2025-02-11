@@ -1,7 +1,11 @@
-- SortOption doesn't work
-- Category does not seem to appear. FieldGroup is bugged
+- Item pagination request (maybe try out generator?)
+- Setting system
+- Save and load config, user country and location setting
+- Ebay item date does not parse probably
+- Auction end-date
 - Item entry card could be nicer
 
+- Allow item location option (partial only AU and US)
 - Frontpage save searches should re-fetch ebay api every x seconds
 - Repeated selling type (Auction, Best offer etc) seems to be accumulating more than the normal amount. 
 - Duplicated react key somewhere
@@ -22,3 +26,20 @@ writes enum for the type as well
 - Cleaner prompt when asking for manual ebay login. EbayScraper
 - auction doesn't work
 - listing doesn't show auction items
+
+MarketPlaceId: https://developer.ebay.com/api-docs/static/rest-request-components.html#HTTP
+
+Specify user location: https://developer.ebay.com/api-docs/buy/static/ref-buy-browse-filters.html#deliveryCountry
+
+
+Input rough user location of estimate delivery:
+    https://developer.ebay.com/api-docs/buy/static/api-browse.html
+    X-EBAY-C-ENDUSERCTX: contextualLocation=country%3DUS%2Czip%3D19406 // must be url encoded
+
+    itemSummaries.shippingOptions.minEstimatedDeliveryDate	string	
+
+    The start date of the delivery window (earliest projected delivery date). This value is returned in UTC format (yyyy-MM-ddThh:mm:ss.sssZ), which you can convert into the local time of the buyer.
+
+    Note: For the best accuracy, always include the contextualLocation values in the X-EBAY-C-ENDUSERCTX request header.
+
+    Occurrence: Conditional

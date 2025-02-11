@@ -43,22 +43,26 @@ export class EbayApi {
         return new EbayApi(parsed_token.access_token);
     }
 
-    async search( config: EbaySearch | string ): Promise<EbaySearchReturn> {
+    async search( config: EbaySearch | string , optionalConfig: Record<string,any> = {}): Promise<EbaySearchReturn> {
         let res: AxiosResponse;
         //config is url returned by EbaySeachReturn[next]
         console.log("Calling Ebay Search: " + JSON.stringify(config))
         if (typeof config === "string") {
-            res = await this.axios.get(config)
+            res = await this.axios.get(config, {
+                headers: optionalConfig["headerParam"] ?? {}
+            })
         }
         else {
             res = await this.axios.get("/buy/browse/v1/item_summary/search", 
                 {
-                    params: config
+                    params: config,
+                    headers: optionalConfig["headerParam"] ?? {}
                 }
             )
         }
-        logging.debug("Response:", res)
-        logging.debug("Item:", res.data.itemSummaries[0])
+        logging.debug("Optional config", optionalConfig)
+        // logging.debug("Response:", res)
+        // logging.debug("Item:", res.data.itemSummaries[0]?.shippingOptions[0]?.shippingCost)
         logging.debug("Item:", res.data.itemSummaries[0]?.shippingOptions)
         return res.data;
     }
