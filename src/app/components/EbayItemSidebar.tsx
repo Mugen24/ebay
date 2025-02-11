@@ -17,7 +17,7 @@ export function EbayItemSideBar() {
     function setCategory(categoryId: string) {
         logging.info("Set category: ", categoryId)
         state.category_ids = categoryId
-        setState(state)
+        setState({...state})
     }
 
     function setFilterState<T extends keyof FilterType>(filterKey: T, filterValues: FilterType[T]) {
@@ -32,7 +32,7 @@ export function EbayItemSideBar() {
     function setSortState(choiceArgs: SortField) {
         logging.info("Set sort state: ", choiceArgs)
         state.sort = choiceArgs
-        setState(state)
+        setState({...state})
     }
 
     function saveConfigState(){

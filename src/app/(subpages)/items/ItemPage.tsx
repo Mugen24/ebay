@@ -24,7 +24,6 @@ export function ClientPage() {
             let temp_state = EbaySaverState.parse(urlQuery)
             temp_state= EbaySaverState.addCategoryRequest(temp_state)
             setState(temp_state)
-            temp_state = EbaySaverState.removeCategoryRequest(temp_state)
         })()
     }, [query, setState])
 

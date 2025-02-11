@@ -1,6 +1,7 @@
 import { useQueryState } from "@/app/hooks/useQuerytState";
 import { extractCategoryDistributions } from "../../actions/utils";
 import { Category, CategoryDistribution } from "../../types/EbayApiTypes/ebaySeachTypes";
+import logging from "@/app/utils/logger";
 
 export function Category_button({cat, setCategory}: 
     {
@@ -26,14 +27,16 @@ export default function CategoryContainer({setCategory}:
 
     const {resp} = useQueryState()
     const categories = resp["refinement"]?.["categoryDistributions"] ?? [];
+    logging.debug("Parsing category: ", categories)
     
     const CATEGORY_LIMIT = 10;
     const reactCategories = []
     const hiddenCategories = []
 
-    categories.sort((a, b) => {
-        return Number(b.matchCount) - Number(a.matchCount)
-    })
+    // The return categories is already sorted 
+    // categories.sort((a, b) => {
+    //     return Number(b.matchCount) - Number(a.matchCount)
+    // })
 
     for (let category_counter = 0; category_counter < categories.length; category_counter++) {
         const category = categories[category_counter];
@@ -41,5 +44,6 @@ export default function CategoryContainer({setCategory}:
             <Category_button key={category.categoryId} cat={category} setCategory={setCategory}></Category_button>
         )
     } 
+
     return reactCategories
 }

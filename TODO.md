@@ -1,3 +1,7 @@
+- SortOption doesn't work
+- Category does not seem to appear. FieldGroup is bugged
+- Item entry card could be nicer
+
 - Frontpage save searches should re-fetch ebay api every x seconds
 - Repeated selling type (Auction, Best offer etc) seems to be accumulating more than the normal amount. 
 - Duplicated react key somewhere
