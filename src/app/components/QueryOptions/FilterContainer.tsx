@@ -11,7 +11,7 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
     saveConfigState: () => void,
 }) {
     
-    const {state, setState, setAddress} = useQueryState();
+    const {state, setState, setAddress, setItemLocation} = useQueryState();
     // TODO: move all this login into EbaySaverState
     const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
         logging.debug("buyingOptionHandler: ", event)
@@ -48,9 +48,8 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
 
     const locationOptionsHandler: (event: React.FormEvent<HTMLFormElement>) => void = (event) => {
         if (event.target?.value) {
-            EbaySaverState.setLocation(state, event.target?.value)
+            setItemLocation(event.target?.value)
         }
-        setState({...state})
     }
 
     const addressHandler: (event: React.FormEvent<HTMLFormElement>) => void = (event) => {

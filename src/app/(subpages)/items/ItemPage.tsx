@@ -9,9 +9,6 @@ import { useEffect, useState } from "react";
 import { EbayItemSideBar } from '../../components/EbayItemSidebar';
 import { SearchBar } from "@/app/components/SearchBar";
 import styles from "./structure.module.css"
-import { EbaySearchReturn } from "@/app/types/EbayApiTypes/ebaySeachTypes";
-import { search } from "@/app/hooks/useApi";
-import logging from "@/app/utils/logger";
 import { QueryStateProvider, useQueryState } from "@/app/hooks/useQuerytState";
 import { ButtonList } from "@/app/components/baseComponents/ButtonList";
 
@@ -29,12 +26,10 @@ export function ClientPage() {
     const query = useSearchParams().toString()
     console.log(query)
     useEffect(() => {
-        (async () => {
-            const urlQuery= URLSearchParamsToJson(new URLSearchParams(query))
-            let temp_state = EbaySaverState.parse(urlQuery)
-            temp_state= EbaySaverState.addCategoryRequest(temp_state)
-            setState(temp_state)
-        })()
+        const urlQuery= URLSearchParamsToJson(new URLSearchParams(query))
+        let temp_state = EbaySaverState.parse(urlQuery)
+        temp_state= EbaySaverState.addCategoryRequest(temp_state)
+        setState(temp_state)
     }, [query, setState])
 
     // Fetching pagination

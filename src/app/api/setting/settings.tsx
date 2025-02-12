@@ -1,32 +1,29 @@
-import { readFileSync, writeFileSync } from 'node:fs';
-import logging from './logger';
+import { readFileSync, writeFileSync} from 'node:fs';
+import logging from '../../utils/logger';
 import path from 'node:path';
-import { EbaySearch } from '../types/EbayApiTypes/ebaySeachTypes';
-import { SEbaySearch } from '../EbayApi/EbaySaverState';
 
-export interface Favourite {
-    // Required the parsed version of ebaySearch using EbaySaverState
-    state: SEbaySearch,
-    readEbayItemNumbers: number[],
-    lastAccess: EpochTimeStamp
-}
 
-export interface SettingType {
-    theme: "light" | "dark",
-    favourites: Favourite
-}
-
-class Setting {
-    static SETTING_PATH = process.env["SETTING_PATH"] ?? "./config/setting.txt"
+export class Setting {
+    static SETTING_PATH = process.env["SETTING_PATH"] ?? "./config/setting.json"
     static loadFromFile() {
+        logging.debug("Loading setting: ", path.resolve(this.SETTING_PATH))
         try {
+
             const file = readFileSync(Setting.SETTING_PATH, {
                 encoding: "utf-8"
             })
-            return JSON.parse(file)
-        } catch (error) {
-            logging.error("Setting error: ", error)
-            return {}
+            return [true, JSON.parse(file)]
+        } catch (error: any) {
+            // logging.debug(error.name)
+            // logging.debug(error.code)
+            if (error.code === "ENOENT") {
+                logging.error("./config/setting.json does not exist at path. Creating file")
+                writeFileSync(Setting.SETTING_PATH, "{}", {encoding: "utf8"})
+                return [true, {}]
+            } else {
+                logging.error("Setting error: ", error)
+            }
+            return [false, error]
         }
     }
 
@@ -38,7 +35,6 @@ class Setting {
             logging.warn("No change in setting detected")
             logging.warn("Original setting", oldSetting)
             logging.warn("Current setting", newSettingStr)
-            return true
         }
 
         try {
@@ -49,7 +45,12 @@ class Setting {
         } 
         catch (error) {
             logging.error("Unable to write setting: ", error)
+            return [false, error]
         }
+        finally {
+            return [true, ""]
+        }
+
 
     }
 

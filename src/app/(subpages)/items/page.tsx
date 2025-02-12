@@ -2,11 +2,14 @@
 import React from "react";
 import { ClientPage } from "./ItemPage";
 import { QueryStateProvider } from '../../hooks/useQuerytState';
+import { SettingProvider } from "@/app/hooks/useSetting";
 
 export default function App() {
     return (
-        <QueryStateProvider>
-            <ClientPage></ClientPage>
-        </QueryStateProvider>
+        <SettingProvider>
+            <QueryStateProvider>
+                <ClientPage></ClientPage>
+            </QueryStateProvider>
+        </SettingProvider>
     )
 }

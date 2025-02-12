@@ -1,5 +1,6 @@
 import { URLSearchParamsToJson } from "@/app/actions/utils";
 import { search } from "@/app/EbayApi/EbayApi";
+import logging from "@/app/utils/logger";
 
 export async function POST(request: Request) {
     const url = new URL(request.url)
@@ -7,8 +8,15 @@ export async function POST(request: Request) {
         url.searchParams
     )
     const body = await request.json()
-    const resp = await search(params, body)
-    return Response.json(resp, {
-        status: 200
-    });
+    try {
+        const resp = await search(params, body)
+        return Response.json(resp, {
+            status: 200
+        });
+    } catch (error){
+        logging.error(error)
+        return  Response.json({}, {
+            status: 404
+        })
+    }
 }

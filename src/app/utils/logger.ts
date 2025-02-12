@@ -27,4 +27,14 @@ export default class logging {
     static info(...params: any[])  {
         console.info('%c [Info]', 'background: #000; color:rgb(24, 209, 24); font-weight: 600', ...params);
     }
+
+    @is_logging
+    static group(label: string) {
+        console.group(label)
+    }
+
+    @is_logging
+    static groupEnd() {
+        console.groupEnd()
+    }
 }

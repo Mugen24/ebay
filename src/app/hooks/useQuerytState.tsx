@@ -1,8 +1,11 @@
-import { createContext, ReactElement, ReactNode, useContext, useEffect, useState, useRef } from 'react';
+import { createContext, ReactElement, ReactNode, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { Countries, EbaySaverState, SEbaySearch } from '../EbayApi/EbaySaverState';
 import { EbaySearch, EbaySearchReturn } from "../types/EbayApiTypes/ebaySeachTypes";
 import logging from "../utils/logger";
 import axios, { Axios, AxiosRequestConfig } from "axios";
+import { useSetting } from './useSetting';
+import { ClientApiManager } from '../utils/clientApiManager';
+import { log } from 'console';
 
 export type QueryStateType = {
     state: SEbaySearch
@@ -12,55 +15,92 @@ export type QueryStateType = {
     setAddress: (country: keyof typeof Countries, postcode: number) => void
     getNoPage: () => number
     toPage: (number: number) => void
+    setItemLocation: (country: keyof typeof Countries) => void
 }
 export const QueryStateContext = createContext({});
 
-class ClientApiManager {
-    baseConfig: AxiosRequestConfig
-    constructor(config?: AxiosRequestConfig) {
-        this.baseConfig = config ?? {
-            baseURL: "api"
-        }
-    }
-
-    async search(query: EbaySearch): Promise<EbaySearchReturn | undefined> {
-        logging.debug("Item Search request", query)
-        const path= `/search`;
-        const searchParam = EbaySaverState.toSearchParams(query)
-        logging.debug(searchParam.toString())
-        return axios.post(
-            `${path}?${searchParam.toString()}`,
-            {
-                "paramHeader": this.baseConfig.data
-            },
-            this.baseConfig
-        )
-        .then(resp => {
-            return resp.data
-        })
-        .catch(error => {
-            logging.warn("Server error:", error)
-            return undefined
-        })
-    }
-
-
-}
 
 
 export function QueryStateProvider({children}: {children: ReactNode}) {
-    const [state, setState] = useState<SEbaySearch>()
-    const [resp, setResp] = useState<EbaySearchReturn>()
+    const [state, setState] = useState<SEbaySearch>({})
+    const [resp, setResp] = useState<EbaySearchReturn>({})
+    const settingObject = useSetting()
     const apiManagerRef = useRef(new ClientApiManager())
+    const setting = settingObject.setting ?? {}
+
+    useEffect(() => {
+        logging.debug("Query state has changed!", state);
+        (async () => {
+            if (state) {
+                const resp = await apiManagerRef.current.search(state)
+                logging.debug("New resp: ", resp)
+                if (resp) {
+                    setResp(resp)
+                } else {
+                    logging.error("Api return nothing")
+                }
+            }
+        })()
+    }, [state])
 
 
-    function setAddress(country: keyof typeof Countries, postcode: Number) {
-        const [key, value] = EbaySaverState.getUserAddressHeader(country, postcode)
-        const apiManager = apiManagerRef.current
-        apiManager.baseConfig.data = apiManager.baseConfig.data ?? {}
-        apiManager.baseConfig.data[key] = `${value}`
-        setState({...state} as SEbaySearch)
-    }
+    const setAddress = useCallback(
+        (country: keyof typeof Countries, postcode: number) => {
+            const [key, value] = EbaySaverState.getUserAddressHeader(country, postcode)
+            const apiManager = apiManagerRef.current
+            apiManager.optionalData.paramHeader = apiManager.optionalData.paramHeader ?? {}
+            apiManager.optionalData.paramHeader[key] = `${value}`
+            settingObject.setShippingLocation(country, postcode)
+            setState({...state} as SEbaySearch)
+        }
+        , [state, setState, settingObject]
+    )
+
+    const setItemLocation = useCallback((country: keyof typeof Countries) => {
+        const tempState= state ?? {}
+        EbaySaverState.setLocation(tempState, country)
+        settingObject.setItemLocation(country)
+        setState({...tempState})
+    }, [
+        state,
+        setState,
+        settingObject
+    ])
+
+
+    useEffect(() => {
+        // Loads defaults from setting
+        logging.group("Loading default setting")
+
+        const defaultItemLocation= setting.itemLocation
+        const defaultShippingAddress = setting.shippingLocation
+        const defaultShippingPostcode= setting.shippingPostcode
+        if (defaultShippingAddress && defaultShippingPostcode) {
+            logging.info("Default shipping information: ", defaultShippingAddress, defaultShippingPostcode)
+            const [key, value] = EbaySaverState.getUserAddressHeader(defaultShippingAddress, defaultShippingPostcode)
+            const paramHeader = apiManagerRef.current.optionalData.paramHeader ?? {}
+            // TODO: Rework, this particular paramHeader can have other filter
+            if (!paramHeader[key]) {
+                setAddress(defaultShippingAddress, defaultShippingPostcode)
+            }
+        }
+
+        if (defaultItemLocation) {
+            const filter = state?.filter ?? {}
+            if (!filter["itemLocationCountry"]) {
+                logging.info("Default item location: ", defaultItemLocation)
+                setItemLocation(defaultItemLocation)
+            }
+        }
+        logging.groupEnd()
+        }, 
+        [
+            setting,
+            setAddress,
+            state,
+            setItemLocation
+        ]
+    )
 
     function getNoPage() {
         // TODO: could also be fetch from state
@@ -93,20 +133,6 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         }
     }
 
-    useEffect(() => {
-        logging.debug("Query state has changed!", state);
-        (async () => {
-            if (state) {
-                const resp = await apiManagerRef.current.search(state)
-                logging.debug("New resp: ", resp)
-                if (resp) {
-                    setResp(resp)
-                } else {
-                    logging.error("Api return nothing")
-                }
-            }
-        })()
-    }, [state])
 
     const value = {
         state,
@@ -115,7 +141,8 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         setResp,
         setAddress,
         getNoPage,
-        toPage
+        toPage,
+        setItemLocation,
     }
 
     return (

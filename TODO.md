@@ -1,4 +1,3 @@
-- Setting system
 - Save and load config, user country and location setting
 - Ebay item date does not parse probably
 - Auction end-date
@@ -26,6 +25,15 @@ writes enum for the type as well
 - Cleaner prompt when asking for manual ebay login. EbayScraper
 - auction doesn't work
 - listing doesn't show auction items
+
+BUG:
+    - Page refuse to load after fast reset?? mb
+        - Possible cause:
+            - itemLocationCountry gets loaded before the state can receive the useParam
+            - causing it or override useParam which has the essension q=?? parameter
+        - Fix: 
+            Removing self calling async function within itemPage useEffect. 
+            hopefully that will fix it
 
 MarketPlaceId: https://developer.ebay.com/api-docs/static/rest-request-components.html#HTTP
 
