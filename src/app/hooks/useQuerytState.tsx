@@ -9,7 +9,9 @@ export type QueryStateType = {
     setState: (sEbaySearch: SEbaySearch) => void
     resp: EbaySearchReturn
     setResp: (resp: EbaySearchReturn) => void
-    setAddress: (country: keyof typeof Countries, postcode: Number) => void
+    setAddress: (country: keyof typeof Countries, postcode: number) => void
+    getNoPage: () => number
+    toPage: (number: number) => void
 }
 export const QueryStateContext = createContext({});
 
@@ -47,7 +49,7 @@ class ClientApiManager {
 
 
 export function QueryStateProvider({children}: {children: ReactNode}) {
-    const [state, setState] = useState<EbaySaverState>()
+    const [state, setState] = useState<SEbaySearch>()
     const [resp, setResp] = useState<EbaySearchReturn>()
     const apiManagerRef = useRef(new ClientApiManager())
 
@@ -57,7 +59,38 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         const apiManager = apiManagerRef.current
         apiManager.baseConfig.data = apiManager.baseConfig.data ?? {}
         apiManager.baseConfig.data[key] = `${value}`
-        setState({...state})
+        setState({...state} as SEbaySearch)
+    }
+
+    function getNoPage() {
+        // TODO: could also be fetch from state
+        const pageLimit = resp?.limit 
+        const pageOffset = resp?.offset
+        const pageNext = resp?.next
+        const pagePrev= resp?.prev
+        const total = resp?.total
+
+        if (total && pageLimit) return Math.floor(Number(total) / Number(pageLimit))
+        
+        logging.warn("Need intial response first", state)
+        return undefined
+    }
+
+    function toPage(number: number) {
+        logging.debug("Jumping to page: ", number)
+        let offsetDefault = 50
+        if (state?.limit) {
+            offsetDefault = Number(state.limit)
+        }
+        logging.debug("Offset by: ", offsetDefault)
+
+        if (state) {
+            state.offset = `${offsetDefault * number}`
+            logging.debug(state)
+            setState({...state})
+        } else {
+            logging.warn("Need intial query first", state)
+        }
     }
 
     useEffect(() => {
@@ -80,7 +113,9 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         setState,
         resp,
         setResp,
-        setAddress
+        setAddress,
+        getNoPage,
+        toPage
     }
 
     return (

@@ -1,9 +1,9 @@
-- Item pagination request (maybe try out generator?)
 - Setting system
 - Save and load config, user country and location setting
 - Ebay item date does not parse probably
 - Auction end-date
 - Item entry card could be nicer
+- Set number of item per page
 
 - Allow item location option (partial only AU and US)
 - Frontpage save searches should re-fetch ebay api every x seconds

@@ -13,9 +13,19 @@ import { EbaySearchReturn } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import { search } from "@/app/hooks/useApi";
 import logging from "@/app/utils/logger";
 import { QueryStateProvider, useQueryState } from "@/app/hooks/useQuerytState";
+import { ButtonList } from "@/app/components/baseComponents/ButtonList";
 
 export function ClientPage() {
-    const {state, setState, resp, setResp} = useQueryState()
+    const {
+        state,
+        setState,
+        resp,
+        setResp,
+        getNoPage,
+        toPage
+    } = useQueryState()
+
+
     const query = useSearchParams().toString()
     console.log(query)
     useEffect(() => {
@@ -27,6 +37,12 @@ export function ClientPage() {
         })()
     }, [query, setState])
 
+    // Fetching pagination
+    const noPage = getNoPage()
+    let pageNumbers: number[] = []
+    if (noPage) {
+        pageNumbers = [...Array(noPage).keys()]
+    }
 
     if (!resp) {
         return <>
@@ -47,6 +63,9 @@ export function ClientPage() {
                     <ItemsContainer/>
                 </div>
             </div>
+            <div>
+                <ButtonList items={pageNumbers} onClick={toPage}></ButtonList>
+            </div>
         </div>
     )
 }
@@ -60,6 +79,8 @@ export function ItemsContainer() {
             ebayItems.push(<EbayItem key={item.itemId} ebayItem={item}/>)
         }
     }
+
+
 
     return (
         <div>

@@ -57,11 +57,11 @@ export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
     const shippingPrice = shippingObject[0]?.shippingCost.value
     const shippingCurrency= shippingObject[0]?.shippingCost.currency
 
-    const epid = ebayItem.epid
+    const ebayItemNumber = ebayItem.itemId.split("|")[1]
 
     return (
         <div className={styles.ebay_item}>
-            <p>Epid: {epid}</p>
+            <p>Ebay item number: {ebayItemNumber}</p>
             <img src={ebayItem.image?.imageUrl} alt={ebayItem.title}/>
             <div>
                 <a href={ebayItem.itemWebUrl}><p>{ebayItem.title}</p></a>

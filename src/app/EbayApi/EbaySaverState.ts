@@ -26,7 +26,9 @@ export const Countries = {
 }
 
 
-export interface SEbaySearch extends EbaySearch {}
+export interface SEbaySearch extends EbaySearch {
+    filter?: Record<string, any>
+}
 
 export class EbaySaverState {
     static parse(searchState: EbaySearch): SEbaySearch {
@@ -115,6 +117,8 @@ export class EbaySaverState {
     }
 
     static constructFilter(sEbaySearch: SEbaySearch): EbaySearch {
+        const parsedEbaySearch: EbaySearch = sEbaySearch
+
         const filter = sEbaySearch.filter
         logging.debug("Constructing filter: \n", filter)
         if (!filter) return sEbaySearch
@@ -124,7 +128,7 @@ export class EbaySaverState {
 
         if (Object.keys(filter).length <= 0) {
             logging.warn("Empty filter");
-            sEbaySearch.filter = ""
+            parsedEbaySearch.filter = ""
             return sEbaySearch
         }
 
@@ -142,7 +146,7 @@ export class EbaySaverState {
 
         let filterString = "";
         filterString += optionStrings.join(',');
-        sEbaySearch.filter = filterString
+        parsedEbaySearch.filter = filterString
         return sEbaySearch
     }
 
