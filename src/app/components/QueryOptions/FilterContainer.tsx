@@ -2,8 +2,9 @@ import { Countries, EbaySaverState, Filter as FilterType } from "@/app/EbayApi/E
 import { useQueryState } from "@/app/hooks/useQuerytState";
 import { ConditionOption, SortField } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import logging from "@/app/utils/logger";
-import React from "react";
+import React, { useEffect } from "react";
 import { formToJson } from '../../actions/utils';
+import { useSetting } from "@/app/hooks/useSetting";
 
 export function Filter({setFilterState, setSortState, saveConfigState}: {
     setFilterState: <T extends keyof FilterType>(filterKey: T, filterValue: FilterType[T]) => void,
@@ -12,6 +13,9 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
 }) {
     
     const {state, setState, setAddress, setItemLocation} = useQueryState();
+    const {setting} = useSetting()
+    const userLocationCountryMap = Object.keys(Countries)
+
     // TODO: move all this login into EbaySaverState
     const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
         logging.debug("buyingOptionHandler: ", event)
@@ -70,12 +74,17 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
             <form onSubmit={addressHandler}>
                 <label htmlFor="Country">Country</label>
                 <select name="country" id="country">
-                    <option value="US">United State</option>
-                    <option value="AU">Australia</option>
+                    {Object.keys(Countries).map((c) => {
+                        if (c === setting.shippingLocation) {
+                            return <option selected={true} key={c} value={Countries[c]}>{c}</option>
+                        } else {
+                            return <option key={c} value={Countries[c]}>{c}</option>
+                        }
+                    })}
                 </select>
 
                 <label htmlFor="Postcode">Postcode</label>
-                <input type="text" id="Postcode" name="postcode" defaultValue="0000"/>
+                <input type="text" id="Postcode" name="postcode" defaultValue={setting.shippingPostcode}/>
 
                 <input type="submit" value={"enter"}/>
             </form>
@@ -87,7 +96,7 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
                         return (
                             <div key={`${country}_container`}>
                                 <label key={`${country}_label`} htmlFor={country} >{country}</label>
-                                <input type="radio" key={country} id={country} name="country" value={country}/>
+                                <input type="radio" checked={country === setting.itemLocation} key={country} id={country} name="country" value={country}/>
                             </div>
                         )
                     })

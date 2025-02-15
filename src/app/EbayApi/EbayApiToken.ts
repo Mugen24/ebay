@@ -4,6 +4,12 @@ import { EbaySearch, EbaySearchReturn } from "@/app/types/EbayApiTypes/ebaySeach
 import { EbayGetItemReturn, EbayGetItem } from "@/app/types/EbayApiTypes/ebayGetItemTypes";
 import logging from "../utils/logger";
 import { ShippingOption } from '../types/EbayApiTypes/ebaySeachTypes';
+import { error, log } from "console";
+import { Outcome } from "../types/Outcome";
+import { headers } from 'next/headers';
+import { OptionalDataType } from "../types/clientApiTypes";
+import { MarketplaceId } from "../types/marketplaceIds";
+import { GetCategoryTreeRequest, GetCategoryTreeResponse, GetDefaultCategoryTreeRequest, GetDefaultCategoryTreeResponse } from "../types/EbayApiTypes/CategoryTree";
 
 export class EbayApi {
     static scopes = ["https://api.ebay.com/oauth/api_scope"];
@@ -21,8 +27,20 @@ export class EbayApi {
         })
         async function responseErrorHandler(res: AxiosError) {
             if (res.status != 200) {
-                console.log(res.response?.request)
-                throw new Error(JSON.stringify(await res.toJSON()))
+                logging.group("Ebay api error")
+                logging.error("Request: ")
+                logging.error(res.request.headers)
+                logging.error(res.request.body)
+
+                logging.error("Response")
+                logging.error( res.response?.status)
+                // logging.error( res.response?.headers)
+                logging.error( res.response?.data)
+                // throw new Error(JSON.stringify(await res.toJSON()))
+                return Response.json({}, {
+                    status: 404,
+                    statusText: "Ebay Error"
+                })
             }
         }
         this.axios.interceptors.response.use((res: AxiosResponse) => {
@@ -43,36 +61,58 @@ export class EbayApi {
         return new EbayApi(parsed_token.access_token);
     }
 
-    async search( config: EbaySearch | string , optionalConfig: Record<string,any> = {}): Promise<EbaySearchReturn> {
-        let res: AxiosResponse;
+    async search( config: EbaySearch | string , optionalConfig: Record<string,any> = {}): Promise<Outcome<EbaySearchReturn>> {
+        let resp: AxiosResponse;
         //config is url returned by EbaySeachReturn[next]
-        console.log("Calling Ebay Search: " + JSON.stringify(config))
+        logging.group("Calling EbaySearch")
+        logging.debug("Query: " + JSON.stringify(config))
+        logging.debug("Optional config", optionalConfig)
+
         if (typeof config === "string") {
-            res = await this.axios.get(config, {
+            resp = await this.axios.get(config, {
                 headers: optionalConfig["headerParam"] ?? {}
             })
         }
         else {
-            res = await this.axios.get("/buy/browse/v1/item_summary/search", 
+            resp = await this.axios.get("/buy/browse/v1/item_summary/search", 
                 {
                     params: config,
                     headers: optionalConfig["headerParam"] ?? {}
                 }
             )
         }
-        logging.debug("Optional config", optionalConfig)
-        // logging.debug("Response:", res)
-        // logging.debug("Item:", res.data.itemSummaries[0]?.shippingOptions[0]?.shippingCost)
-        logging.debug("Item:", res.data.itemSummaries[0]?.shippingOptions)
-        return res.data;
+        logging.debug("Item:", resp.data.itemSummaries[0])
+        logging.groupEnd()
+        return [resp.status === 200, resp.data]
     }
 
-    async getItem( options: EbayGetItem ): Promise<EbayGetItemReturn> {
-        const res = await this.axios.get("/buy/browse/v1/item", {
+    async getItem( options: EbayGetItem, optionalConfig: OptionalDataType): Promise<Outcome<EbayGetItemReturn>> {
+        const resp = await this.axios.get("/buy/browse/v1/item", {
             params: options
         })
-        return res.data
+        return [resp.status === 200, resp.data]
     }
+
+    async getDefaultCategoryTree(request: GetDefaultCategoryTreeRequest, optionalConfig?: OptionalDataType): Promise<Outcome<GetDefaultCategoryTreeResponse>> {
+        const path = "/commerce/taxonomy/v1/get_default_category_tree_id"
+        const resp = await this.axios(
+            path, {
+                params: request
+            }
+        )
+        return [resp.status === 200, resp.data]
+    }
+
+    async getCategoryTree(request: GetCategoryTreeRequest): Promise<Outcome<GetCategoryTreeResponse>> {
+        const path = "/commerce/taxonomy/v1/category_tree/"
+        const resp = await axios.get(
+            path, {
+                params: request
+            }
+        )
+        return [resp.status === 200, resp.data]
+    }
+
 
 }
 

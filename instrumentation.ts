@@ -1,5 +1,5 @@
-import { EmailNotificationListener } from './src/app/server_components/EmailNotificationClient';
-import { getSearchListener } from "./src/app/server_components/SearchListener";
+import { EmailNotificationListener } from './src/app/server/EmailNotificationClient';
+import { getSearchListener } from "./src/app/server/SearchListener";
 export function register() {
     console.log("registering")
     const listener = getSearchListener()

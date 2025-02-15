@@ -3,20 +3,22 @@ import { search } from "@/app/EbayApi/EbayApi";
 import logging from "@/app/utils/logger";
 
 export async function POST(request: Request) {
+    logging.group("Server: fetch ebay api search")
     const url = new URL(request.url)
     const params = URLSearchParamsToJson(
         url.searchParams
     )
     const body = await request.json()
-    try {
-        const resp = await search(params, body)
-        return Response.json(resp, {
+    let response;
+    const [outcome, data] = await search(params, body)
+    if (outcome) {
+        response = Response.json(data, {
             status: 200
         });
-    } catch (error){
-        logging.error(error)
-        return  Response.json({}, {
+    } else {
+        response = Response.json(data, {
             status: 404
         })
     }
+    return response
 }

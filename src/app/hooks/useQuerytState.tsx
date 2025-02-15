@@ -104,15 +104,23 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
 
     function getNoPage() {
         // TODO: could also be fetch from state
+        logging.group("Calculating pages")
         const pageLimit = resp?.limit 
         const pageOffset = resp?.offset
         const pageNext = resp?.next
         const pagePrev= resp?.prev
         const total = resp?.total
 
-        if (total && pageLimit) return Math.floor(Number(total) / Number(pageLimit))
+        if (total && pageLimit) {
+            const noPage = Math.floor(Number(total) / Number(pageLimit))
+            logging.debug("NoPage", resp)
+            logging.debug("NoPage", noPage)
+            logging.groupEnd()
+            return noPage
+        }
         
         logging.warn("Need intial response first", state)
+        logging.groupEnd()
         return undefined
     }
 

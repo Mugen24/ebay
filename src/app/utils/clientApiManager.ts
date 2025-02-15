@@ -4,10 +4,8 @@ import { EbaySearch, EbaySearchReturn, DistanceFromPickupLocation } from '../typ
 import { EbaySaverState } from "../EbayApi/EbaySaverState";
 import logging from "./logger";
 import { SettingType } from "../types/SettingType";
+import { OptionalDataType } from "../types/clientApiTypes";
 
-export type OptionalDataType = {
-    "paramHeader"?: Record<string, string>
-}
 
 export class ClientApiManager {
     optionalData: OptionalDataType

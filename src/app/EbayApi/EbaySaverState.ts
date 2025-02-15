@@ -21,8 +21,8 @@ const SINGLE_OPTIONS = [
 
 export const Countries = {
     // More valid country code
-    "AU": "AU",
-    "US": "US",
+    "AU": "EBAY_AU",
+    "US": "EBAY_US",
 }
 
 
@@ -152,7 +152,8 @@ export class EbaySaverState {
 
     // TODO: fix the stupid type 
     static addUniqueFilter(sEbaySearch: SEbaySearch, filterKey: any, filterValue: any, clear: Boolean = false, toggle = false) {
-        logging.debug("Adding unique filter\n", sEbaySearch.filter, filterKey, filterValue)
+        logging.group("Adding unique filter\n")
+        logging.debug("Params", sEbaySearch.filter, filterKey, filterValue)
         const filter = sEbaySearch.filter ?? {}
         if (MULTI_OPTIONS.includes(filterKey)) {
             if (!filter[filterKey] || clear) {
@@ -176,6 +177,7 @@ export class EbaySaverState {
 
         sEbaySearch.filter = filter
         logging.debug("New filter", filter)
+        logging.groupEnd()
         return sEbaySearch
     }
 
@@ -183,6 +185,11 @@ export class EbaySaverState {
         ebaySearch = EbaySaverState.constructFilter({...ebaySearch})
         logging.debug("Converting search param\n", ebaySearch)
         return new URLSearchParams(ebaySearch as unknown as Record<string, any>)
+    }
+
+    static toEbaySearch(ebaySearch: SEbaySearch): EbaySearch {
+        ebaySearch = EbaySaverState.constructFilter(ebaySearch)
+        return ebaySearch
     }
 
     static saveToConfig(ebaySearch: SEbaySearch) {

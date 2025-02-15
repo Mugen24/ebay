@@ -22,11 +22,20 @@ export function EbayItemSideBar() {
 
     function setFilterState<T extends keyof FilterType>(filterKey: T, filterValues: FilterType[T]) {
         logging.info("Set filter state: ", filterKey, ":", filterValues)
-        for (const value of filterValues) {
-            EbaySaverState.addUniqueFilter(state, filterKey, value,  true)
-            const newState= {...state}
-            setState(newState)
+        if (filterValues.length === 0) {
+            EbaySaverState.addUniqueFilter(state, filterKey, filterValues[0],  true)
         }
+        else {
+            // For array for values
+            // First value must clean the previous value
+            EbaySaverState.addUniqueFilter(state, filterKey, filterValues[0],  true)
+            // Any subsequently should be clear the previous value
+            for (let i = 1; i < filterValues.length; i++) {
+                EbaySaverState.addUniqueFilter(state, filterKey, filterValues[i])
+            }
+        }
+
+        setState({...state})
     }
 
     function setSortState(choiceArgs: SortField) {

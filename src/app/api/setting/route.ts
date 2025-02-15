@@ -1,9 +1,9 @@
-import { Setting } from "@/app/api/setting/settings"
+import { setting } from "@/app/server/Init"
+import { Setting } from "@/app/server/setting/settings"
 
 export async function POST(request: Request) {
-    const [outcome, desc] = Setting.loadFromFile()
-    if (outcome) {
-        return Response.json(desc, {
+    if (setting){
+        return Response.json(setting.setting, {
             status: 200,
             statusText: "ok"
         })
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
     const body = await request.json()
-    const [outcome, desc] = Setting.saveToFile(body)
+    const [outcome, desc] = setting.saveToFile(body)
     if (outcome) return Response.json({},{
         status: 200,
         statusText: "ok"

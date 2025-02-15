@@ -1,0 +1,1 @@
+export type Outcome<T> = [boolean, T]

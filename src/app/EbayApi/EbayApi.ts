@@ -1,10 +1,17 @@
-import { EbayApi as EbayApiToken} from "./EbayApiToken";
+import { EbayApi as EbayApiToken, EbayApi } from './EbayApiToken';
 import { EbayScraper as EbayApiScrapper} from "./EbayApiScrapper";
-import { EbaySearch } from "../types/EbayApiTypes/ebaySeachTypes";
+import { Category, EbaySearch } from "../types/EbayApiTypes/ebaySeachTypes";
+import { OptionalDataType } from "../types/clientApiTypes";
+import { EbayGetItem } from "../types/EbayApiTypes/ebayGetItemTypes";
+import { throws } from "node:assert";
+import { GetDefaultCategoryTreeRequest } from '../types/EbayApiTypes/CategoryTree';
+import { categoriesManager } from '../server/Init';
+import { Outcome } from '../types/Outcome';
+import { Categories } from '../server/setting/categoryManager';
 
-const ebayApiToken: Promise<EbayApiToken> = EbayApiToken.authenticate()
+export const ebayApiToken: Promise<EbayApiToken> = EbayApiToken.authenticate()
 // const ebayApiScrapper: Promise<EbayApiScrapper> = EbayApiScrapper.authenticate()
-let ebayApiScrapper: EbayApiScrapper;
+export let ebayApiScrapper: EbayApiScrapper;
 
 async function loadScrapper(){
     if (!ebayApiScrapper) {
@@ -17,9 +24,23 @@ async function loadScrapper(){
     } else return
 }
 
-export async function search(ebaySearch: EbaySearch, optionalConfig: Record<string, any> = {}) {
+export async function search(ebaySearch: EbaySearch, optionalConfig: OptionalDataType  = {}) {
     const ebayApi = await ebayApiToken;
     return ebayApi.search(ebaySearch, optionalConfig)
+}
+
+export async function getItem(itemData: EbayGetItem, optionalConfig: OptionalDataType = {}) {
+    const ebayApi = await ebayApiToken;
+    return ebayApi.getItem(itemData, optionalConfig)
+}
+
+
+export function getCategoryIds(request: GetDefaultCategoryTreeRequest): Outcome<Categories | undefined> {
+    if (categoriesManager && categoriesManager.categories) {
+        return [true, categoriesManager.categories]
+    } else {
+        return [false, undefined]
+    }
 }
 
 export async function getItemHistoricalLowest(searchTerm: string, minPrice: number) {

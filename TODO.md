@@ -1,24 +1,24 @@
-- Save and load config, user country and location setting
-- Ebay item date does not parse probably
-- Auction end-date
+- Rework server components (BIG TASK)
+- Changing setting should make changes the the url 
+  - The user can then walk back option
+
 - Item entry card could be nicer
 - Set number of item per page
+- Fetch general category in main page
+
+- Scrape pagination for dynamic loading, the resp.total is unreliable and not recommend by ebay
+- to check if last page. check if offset = current offset
 
 - Allow item location option (partial only AU and US)
 - Frontpage save searches should re-fetch ebay api every x seconds
-- Repeated selling type (Auction, Best offer etc) seems to be accumulating more than the normal amount. 
-- Duplicated react key somewhere
-- Autocomplete the category
-- No pagination on when searching on item
 - Extract set category and filter in its own function,
-writes enum for the type as well
-- Save search doesn't work
+
 - Search lowest price for the searched item
-    - take category from the main item to the lowest price search
-    - UI: most probably be a right sidebar
-    - Have user manually picked the sold item
-    and save it for subsequent search as a suggestion
-    . But still give them the full search.
+- take category from the main item to the lowest price search
+- UI: most probably be a right sidebar
+- Have user manually picked the sold item
+and save it for subsequent search as a suggestion
+. But still give them the full search.
 
 - Automated reminder when new item is listed
 - Bid sniping

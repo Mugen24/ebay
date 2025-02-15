@@ -2,6 +2,7 @@
 import logging from '@/app/utils/logger';
 import { ItemSummary, CurrentBidPrice, ShippingOption } from '../../types/EbayApiTypes/ebaySeachTypes';
 import styles from "./structure.module.css"
+import { Timer } from './Timer';
 // const StyleEbayItem = styled.div`
 //     padding: 3px;
 //     display: flex;
@@ -59,6 +60,9 @@ export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
 
     const ebayItemNumber = ebayItem.itemId.split("|")[1]
 
+    const createDate = new Date(ebayItem.itemCreationDate)
+    const endDate = new Date(ebayItem.itemEndDate)
+
     return (
         <div className={styles.ebay_item}>
             <p>Ebay item number: {ebayItemNumber}</p>
@@ -79,12 +83,13 @@ export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
             <p>{originalCurrency} {originalCurrencyPrice}</p>
             <p>{currency}: {price}</p>
             <p>Conditions: {condition}</p>
-            <p>date: {ebayItem.itemCreationDate}</p>
+            <p>date: {new Date(ebayItem.itemCreationDate).toLocaleDateString()}</p>
             <p>Auction: {originalBidCurrency} {originalBidCurrencyPrice}</p>
             <p>         {currentBidPriceCurrency} {currentBidPrice}</p>
 
             <p>Shipping</p>
             <p>Price: {shippingPrice} {shippingCurrency}</p>
+            {<Timer startDate={createDate} endDate={endDate}></Timer>}
         </div>
     )
 }
