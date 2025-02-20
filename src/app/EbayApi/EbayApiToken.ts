@@ -25,17 +25,19 @@ export class EbayApi {
                 "Authorization": `Bearer ${this.token}`
             }
         })
-        async function responseErrorHandler(res: AxiosError) {
+        async function responseErrorHandler(res: AxiosResponse) {
             if (res.status != 200) {
                 logging.group("Ebay api error")
                 logging.error("Request: ")
-                logging.error(res.request.headers)
-                logging.error(res.request.body)
+                logging.error(res.headers)
+                logging.error(res.request)
 
                 logging.error("Response")
-                logging.error( res.response?.status)
+                logging.error(res.status)
                 // logging.error( res.response?.headers)
-                logging.error( res.response?.data)
+                logging.error(res.data)
+
+                logging.error(res)
                 // throw new Error(JSON.stringify(await res.toJSON()))
                 return Response.json({}, {
                     status: 404,
@@ -86,7 +88,7 @@ export class EbayApi {
         return [resp.status === 200, resp.data]
     }
 
-    async getItem( options: EbayGetItem, optionalConfig: OptionalDataType): Promise<Outcome<EbayGetItemReturn>> {
+    async getItem( options: EbayGetItem, optionalConfig?: OptionalDataType): Promise<Outcome<EbayGetItemReturn>> {
         const resp = await this.axios.get("/buy/browse/v1/item", {
             params: options
         })
@@ -94,22 +96,23 @@ export class EbayApi {
     }
 
     async getDefaultCategoryTree(request: GetDefaultCategoryTreeRequest, optionalConfig?: OptionalDataType): Promise<Outcome<GetDefaultCategoryTreeResponse>> {
+        logging.group("Getting root tree")
         const path = "/commerce/taxonomy/v1/get_default_category_tree_id"
-        const resp = await this.axios(
+        const resp = await this.axios.get(
             path, {
                 params: request
             }
         )
+        logging.groupEnd()
         return [resp.status === 200, resp.data]
     }
 
     async getCategoryTree(request: GetCategoryTreeRequest): Promise<Outcome<GetCategoryTreeResponse>> {
-        const path = "/commerce/taxonomy/v1/category_tree/"
-        const resp = await axios.get(
-            path, {
-                params: request
-            }
-        )
+        logging.group("Getting category tree")
+        const path = "/commerce/taxonomy/v1/category_tree"
+        const resp = await this.axios.get(`${path}/${request.category_tree_id}`)
+        logging.debug("Resp: ", resp.data)
+        logging.groupEnd()
         return [resp.status === 200, resp.data]
     }
 

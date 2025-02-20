@@ -1,10 +1,11 @@
+"use client"
 import { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { Favourite, SettingType, Theme } from '../types/SettingType';
 import axios from "axios";
 import logging from "../utils/logger";
 import { ShippingOption } from '../types/EbayApiTypes/ebaySeachTypes';
 import { Countries, SEbaySearch } from "../EbayApi/EbaySaverState";
-import { ClientApiManager } from "../utils/clientApiManager";
+import { clientApiManager } from "../utils/clientApiManager";
 
 export type SettingContextType = {
     setting: SettingType
@@ -23,69 +24,81 @@ export type SettingContextType = {
 }
 
 const SettingContext = createContext({})
+
 export function SettingProvider({children}: {children: ReactNode}) {
-    const [setting, _setSetting] = useState<SettingType>({})
-    const clientApiManagerRef = useRef(new ClientApiManager())
+    const [setting, _setSetting] = useState<SettingType>()
     // const [theme, _setTheme] = useState<Theme>("light")
     // const [favourites, _setFavourites] = useState<Favourite[]>([])
 
 
     useEffect(() => {
         (async () => {
-            const setting = await clientApiManagerRef.current.getSetting()
+            const setting = await clientApiManager.getSetting()
             _setSetting(setting)
         })()
     }, [])
 
-    function setSetting(){
-        clientApiManagerRef.current.setSetting(setting)
+    function setSetting<K extends keyof SettingType>(newSetting: Record<K, SettingType[K]>){
+        if (setting) {
+            _setSetting({
+                ...setting,
+                ...newSetting
+            })
+        }
     }
 
     function setTheme(theme: Theme) {
-        _setSetting({
-            ...setting,
-            theme: theme
-        })
+        if (setting) {
+            _setSetting({
+                ...setting,
+                theme: theme
+            })
+        } 
     }
 
     function addFavourite(ebaySearch: SEbaySearch) {
-        const favourites = setting.favourites ?? {}
-        favourites[Date.now()] = {
+        const favourites = setting?.favouriteQueries ?? {}
+        const id = Date.now()
+        favourites[id] = {
+                id: String(id),
                 state: ebaySearch,
                 readEbayItemNumbers: [],
-            }
+        }
 
-        _setSetting({
-            ...setting,
-            favourites: favourites
-        })
+        setSetting({favouriteQueries: favourites})
     }
 
     function removeFavourite(id: EpochTimeStamp) {
-        const favourites = setting.favourites ?? {}
+        const favourites = setting?.favouriteQueries ?? {}
         delete favourites[id]
+        setSetting({
+            favouriteQueries: favourites
+        })
     }
 
     function setExpireOffset(offset: number) {
-        _setSetting({
-            ...setting,
-            expiresOffset: offset
+        setSetting({
+            defaultRefreshIntervalSecond: offset
         })
     }
 
     function setShippingLocation(country: keyof typeof Countries, postcode: number): void {
-        _setSetting({
-            ...setting,
+        setSetting({
             shippingLocation: country,
             shippingPostcode: postcode
         })
     }
 
     function setItemLocation(location: keyof typeof Countries) {
-        _setSetting({
-            ...setting,
+        setSetting({
             itemLocation: location
         })
+    }
+
+    if (!setting) {
+        return (
+            <h1>Loading</h1>
+        )
     }
 
 

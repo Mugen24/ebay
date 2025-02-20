@@ -1,48 +1,144 @@
 import { clearInterval, setInterval } from 'timers';
-import { Setting } from "./setting/settings";
-import { getItem, search } from "../EbayApi/EbayApi";
-import { EbaySaverState } from "../EbayApi/EbaySaverState";
-import { EbaySearchReturn } from "../types/EbayApiTypes/ebaySeachTypes";
-import { FavouriteQueries, WatchItems, FavouriteQueriesData, WatchItemsData, SettingType, Favourite } from '../types/SettingType';
+import { Favourite, FavouriteQueryData, WatchItemData, WatchItem, WatchItems, EbayItemId, FavouriteQueries } from '../types/SettingType';
 import logging from "../utils/logger";
-import { setting } from './Init';
+import { clientApiManager } from '../utils/clientApiManager';
 
 
-class SearchListener {
-    // listeners: Array<(data: SearchConfigDataType) => void>
-    _running: boolean
+abstract class SearchListener<T, M> {
+    abstract query: T
+    abstract listeners: Array<(data: M) => void>
+    _running: boolean = false
     timeout: number
-    cached: boolean
-    queries: FavouriteQueries
-    items: WatchItems
     _interval?: any
-    constructor(queries: FavouriteQueries, items: WatchItems) {
-        // this.listeners = []
-        this._running = false
-        this.timeout = 6000
-        this.cached = true
-        this.queries = queries
-        this.items = items 
+    constructor(timeout: number) {
+        this.timeout = timeout
+    }
+
+    abstract run(data: T): M 
+
+    addListener(listener: (data: M) => void) {
+        this.listeners.push(listener)
     }
 
     start() {
         logging.debug("ListenerStart")
-        for (const timeStamp of Object.keys(this.queries)) {
-            const state =  this.queries[Number(timeStamp)].state
-            setInterval(() => {
-            }, 1000);
-
-        }
+        this._running = true
+        setInterval(() => {
+            const data = this.run(this.query)
+            this.listeners.forEach(l => l(data))
+        }, this.timeout);
     }
 
 
     stop() {
         logging.debug("ListenerStop")
         clearInterval(this._interval)
+        this._interval = undefined
+        this._running = false
     }
 }
 
-const singletonSearchListener = new SearchListener(setting?.setting.favouriteQueries ?? {}, setting.setting.watchedItems ?? {})
-export function getSearchListener() {
-    return singletonSearchListener
+class EbaySearchListener extends SearchListener<Favourite, Promise<FavouriteQueryData | undefined>> {
+    query: Favourite
+    listeners: ((data: Promise<FavouriteQueryData | undefined>) => void)[];
+    constructor(ebaySearch: Favourite) {
+        super(ebaySearch.refreshIntervalSecond)
+        this.query = ebaySearch
+        this.listeners = []
+    }
+
+    async run(): Promise<FavouriteQueryData | undefined> {
+        return clientApiManager.search(this.query.state)
+        .then(([outcome, resp])=> {
+            if (outcome) {
+                return [this.query.id, resp]
+            } else {
+                return undefined
+            }
+        })
+    }
 }
+
+class EbayItemListener extends SearchListener<WatchItem, Promise<WatchItemData | undefined>> {
+    query: WatchItem
+    listeners: ((data: Promise<WatchItemData| undefined>) => void)[];
+    constructor(ebayGetItem: WatchItem) {
+        super(ebayGetItem.refreshIntervalSecond)
+        this.listeners = []
+        this.query = ebayGetItem
+    }
+
+    async run(): Promise<WatchItemData | undefined>{
+        return clientApiManager.getItem(this.query.itemData)
+        .then(([outcome, resp]) => {
+            if (outcome) {
+                return [this.query.id, resp]
+            } else {
+                return undefined
+            }
+        })
+    }
+}
+
+export class EbayItemListeners {
+    sources: Record<WatchItem["id"], EbayItemListener> = {}
+    constructor(watchItems: WatchItems) {
+        for (const item of Object.values(watchItems)) {
+            this.sources[item.id] = (new EbayItemListener(item))
+        }
+    }
+
+    addListener(listener: ((data: Promise<WatchItemData| undefined>) => void)) {
+        for (const source of Object.values(this.sources)) {
+            source.addListener(listener)
+        }
+    }
+
+    run() {
+        for (const source of Object.values(this.sources)) {
+            source.run()
+        }
+    }
+    stop() {
+        for (const source of Object.values(this.sources)) {
+            source.stop()
+        }
+    }
+
+    remove(id: EbayItemId) {
+        this.sources[id].stop()
+        delete this.sources[id]
+    }
+}
+
+export class EbaySearchListeners{
+    sources: Record<Favourite["id"], EbaySearchListener> = {}
+    constructor(fItems: FavouriteQueries) {
+        for (const item of Object.values(fItems)) {
+            this.sources[item.id] = (new EbaySearchListener(item))
+        }
+    }
+
+    addListener(listener: ((data: Promise<FavouriteQueryData | undefined>) => void)) {
+        for (const source of Object.values(this.sources)) {
+            source.addListener(listener)
+        }
+    }
+
+    run() {
+        for (const source of Object.values(this.sources)) {
+            source.run()
+        }
+    }
+    stop() {
+        for (const source of Object.values(this.sources)) {
+            source.stop()
+        }
+    }
+
+    remove(id: Favourite["id"]) {
+        this.sources[id].stop()
+        delete this.sources[id]
+    }
+}
+

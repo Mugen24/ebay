@@ -7,7 +7,8 @@ import { Filter as FilterType} from "../EbayApi/EbaySaverState"
 import { Filter } from "./QueryOptions/FilterContainer"
 import { useQueryState } from "../hooks/useQuerytState"
 import logging from "../utils/logger"
-import { SortField } from "../types/EbayApiTypes/ebaySeachTypes"
+import { Category, SortField } from "../types/EbayApiTypes/ebaySeachTypes"
+import { Categories } from "../server/setting/categoryManager"
 
 export function EbayItemSideBar() {
     const {state, setState, resp} = useQueryState()
@@ -48,10 +49,12 @@ export function EbayItemSideBar() {
         EbaySaverState.saveToConfig(state)
     }
 
+    const categories = resp.refinement.categoryDistributions as Category[]
+
     return (
         <div className={styles.side_bar}>
             <Filter setFilterState={setFilterState} setSortState={setSortState} saveConfigState={saveConfigState}/>
-            <CategoryContainer setCategory={setCategory}></CategoryContainer>
+            <CategoryContainer categories={categories} setCategory={setCategory}></CategoryContainer>
         </div>
     )
 }

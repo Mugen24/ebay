@@ -1,32 +1,53 @@
+"use client"
 import { ReactElement } from "react";
-import { EbaySearch, EbaySearchReturn, ItemSummary } from "../types/EbayApiTypes/ebaySeachTypes";
-import { search } from "../EbayApi/EbayApi";
-import { EbayItem } from '../components/baseComponents/EbayItem';
-import styles from './structure.module.css'
-import { ItemGallery } from "../components/ItemGallery";
-// import { SearchConfigDataType, getSearchListener } from './SearchListener';
+import { EbayItemId, EpochTimeStamp } from "../types/SettingType";
+import { FavouriteQueryElement } from "../components/baseComponents/FavouriteQueryElement";
+import { WatchItemElement } from "../components/baseComponents/WatchItemElement";
+import { useSetting } from "../hooks/useSetting";
+import { clientApiManager } from "../utils/clientApiManager";
+import logging from "../utils/logger";
 
-// const searchListener = getSearchListener()
 
-// export async function SavedQueryGallery() {
-//     const itemGalleries: ReactElement<typeof ItemGallery>[] = [];
-//     const data = await searchListener.oneOffSearch()
+export function SavedQueryGallery() 
+    {
+        const {setting} = useSetting()
 
-//     for (const [term, items] of Object.entries(data)) {
-//         const itemComponents: ReactElement<typeof EbayItem>[] = []
-//         for (let itemSummary of items) {
-//             itemComponents.push(<EbayItem key={`${itemSummary.itemId}:${itemSummary.epid}`} ebayItem={itemSummary}/>);
-//         }
+        const favouriteQueries = setting.favouriteQueries
+        const favouriteQueriesElement: Record<EpochTimeStamp, ReactElement<typeof FavouriteQueryElement>> = {}
 
-//         //TODO: change to a better key
-//         // maybe hash the items?
-//         itemGalleries.push(<ItemGallery key={`P:${term}`} ebayItems={itemComponents}/>);
-//     }
-//     return (
-//         <div className={styles.save_search_dashboard}>
-//             {itemGalleries}
-//         </div>
-//     )
-// }
+        Object.keys(favouriteQueries).forEach(async (id) => {
+            const [outcome, searchResponse] = await clientApiManager.search(favouriteQueries[id].state)
+            if (outcome) {
+                favouriteQueriesElement[id] = <FavouriteQueryElement favourite={favouriteQueries[id]} ebaySearchReturn={searchResponse}/>
+            } else {
+                logging.warn("Unable to search for queries", favouriteQueries[id])
+            }
+        })
+
+        const watchItems = setting.watchedItems
+        const watchItemsElements: Record<EbayItemId, ReactElement<typeof WatchItemElement>> = {}
+        Object.keys(watchItems).forEach(async (id) => {
+            const [outcome, itemRes] = await clientApiManager.getItem(watchItems[id].itemData)
+            if (outcome) {
+                watchItemsElements[id] = <WatchItemElement watchItem={watchItems[id]} ebayGetItemReturn={itemRes}/>
+            } else {
+                logging.warn("Unable to fetch watchItems")
+            }
+        })
+
+
+        return (
+            <>
+                <div>
+                    {Object.values(favouriteQueriesElement)}
+                </div>
+                <div>
+                    {Object.values(watchItemsElements)}
+                </div>
+            </>
+        )
+
+    }
+
 
 

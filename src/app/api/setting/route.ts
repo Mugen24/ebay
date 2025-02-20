@@ -1,5 +1,4 @@
-import { setting } from "@/app/server/Init"
-import { Setting } from "@/app/server/setting/settings"
+import { setting } from "@/app/server/setting/settings"
 
 export async function POST(request: Request) {
     if (setting){

@@ -3,20 +3,22 @@ import logging from '../../utils/logger';
 import path from 'node:path';
 import { Outcome } from '@/app/types/Outcome';
 import { FavouriteQueries, SettingType, Theme } from '@/app/types/SettingType';
-import { MarketplaceId } from '../../types/marketplaceIds';
 
 
-export class Setting {
+class Setting {
     static SETTING_PATH = process.env["SETTING_PATH"] ?? "./config/setting.json"
     static DEFAULTS: SettingType = {
         theme: "dark",
         favouriteQueries: {},
         watchedItems: {},
-        defaultRefreshIntervalSecond: 10 * 60,
+        shippingLocation: "AU",
+        shippingPostcode: 2100,
+        itemLocation: "AU",
         marketPlaceId: "EBAY_AU",
+        defaultRefreshIntervalSecond: 10 * 60,
     }
-
     setting: SettingType
+
     constructor() {
         const [outcome, setting] = this.loadFromFile()
         if (outcome) {
@@ -25,7 +27,8 @@ export class Setting {
             throw new Error("Can't fetch setting")
         }
     }
-    loadFromFile(): Outcome<SettingType> {
+
+    loadFromFile(): Outcome<SettingType | {}> {
         logging.debug("Loading setting: ", path.resolve(Setting.SETTING_PATH))
         try {
 
@@ -76,3 +79,5 @@ export class Setting {
     }
 
 }
+
+export const setting = new Setting()

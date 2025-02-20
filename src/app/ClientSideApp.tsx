@@ -3,28 +3,23 @@ import React, { Context, createContext, Dispatch, ReactElement, ReactNode, useEf
 import { SearchBar } from "./components/SearchBar";
 import styles from "./structure.module.css";
 import { EbaySaverState } from "./EbayApi/EbaySaverState";
+import { SavedQueryGallery } from "./server/SavedQueryGalleryClient";
+import { useCategories } from "./hooks/useCategories";
 
-export type HomePageContextType = {
-  ebayState: EbaySaverState,
-  setEbayState: Dispatch<EbaySaverState>
-} | {}
 
-export const HomePageContext: Context<HomePageContextType> = createContext({})
 
 export default function ClientSideApp({children}: {children?: ReactNode}) {
-    const [ebayState, setEbayState] = useState(new EbaySaverState())
-
+    const {categories} = useCategories()
+    console.log(categories)
     return (
-      <HomePageContext.Provider value={{
-        ebayState,
-        setEbayState
-      }}>
         <div className={styles.main_layout}>
           <section className={styles.center_content}>
             <SearchBar></SearchBar>
           </section>
+          <section>
+            <SavedQueryGallery/>
+          </section>
           {children}
         </div > 
-      </HomePageContext.Provider>
     )
 }

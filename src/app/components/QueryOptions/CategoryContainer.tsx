@@ -5,7 +5,7 @@ import logging from "@/app/utils/logger";
 
 export function Category_button({cat, setCategory}: 
     {
-        cat: CategoryDistribution,
+        cat: Category,
         setCategory: (categoryId: string) => void
     }
     ) 
@@ -20,23 +20,18 @@ export function Category_button({cat, setCategory}:
     )
 }
 
-export default function CategoryContainer({setCategory}: 
+export default function CategoryContainer({categories, setCategory}: 
     {
+        categories: Category[],
         setCategory: (categoryId: string) => void
     }) {
 
     const {resp} = useQueryState()
-    const categories = resp["refinement"]?.["categoryDistributions"] ?? [];
     logging.debug("Parsing category: ", categories)
     
     const CATEGORY_LIMIT = 10;
     const reactCategories = []
     const hiddenCategories = []
-
-    // The return categories is already sorted 
-    // categories.sort((a, b) => {
-    //     return Number(b.matchCount) - Number(a.matchCount)
-    // })
 
     for (let category_counter = 0; category_counter < categories.length; category_counter++) {
         const category = categories[category_counter];

@@ -1,1 +1,1 @@
-export type Outcome<T> = [boolean, T]
+export type Outcome<T> = [true, T] | [false, any]
