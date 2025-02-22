@@ -67,11 +67,10 @@ export function ItemsContainer() {
         }
     }
 
-
-
     return (
         <div>
             <h1>Search: {state.q}</h1>
+            {ebayItems}
         </div>
     )
 }

@@ -1,4 +1,4 @@
-import { createContext, ReactElement, ReactNode, useContext, useEffect, useState, useRef, useCallback } from 'react';
+import { createContext, ReactElement, ReactNode, useContext, useEffect, useState, useRef, useCallback, useReducer, ReducerWithoutAction, Reducer, ReducerAction } from 'react';
 import { Countries, EbaySaverState, SEbaySearch } from '../EbayApi/EbaySaverState';
 import { EbaySearch, EbaySearchReturn } from "../types/EbayApiTypes/ebaySeachTypes";
 import logging from "../utils/logger";
@@ -23,73 +23,55 @@ export const QueryStateContext = createContext({});
 
 
 
+type stateActionType = 
+    | {type: 'updateState', results: SEbaySearch}
+    | {type: 'loading'}
+
+function reducer(state: SEbaySearch, action: stateActionType) {
+    if (action.type === "updateState") {
+        const updatedState = action.results
+        return {
+            ...state,
+            ...updatedState
+        }
+    }
+    throw new Error(`State not implemented: ${action}`)
+}
+
 export function QueryStateProvider({children}: {children: ReactNode}) {
-    const [state, _setState] = useState<SEbaySearch>({})
+
+    const [state, stateDispatch] = useReducer<Reducer<SEbaySearch, stateActionType>>(reducer, {})
+
     const [resp, setResp] = useState<EbaySearchReturn>()
     const settingObject = useSetting()
     const setting = settingObject.setting
     const query = useSearchParams().toString()
-
-    const setState = useCallback((newState: SEbaySearch, clear=false) => {
-        logging.debug("UpdateState: ", newState)
-        logging.debug("New State:", {...state, newState})
-        const isNewState = Object.keys(newState).some((key) => {
-            const typedKey = key as keyof SEbaySearch
-            return (state[typedKey] !== newState[typedKey]) 
+    const setState = useCallback((newState: SEbaySearch) => {
+        stateDispatch({
+            "type": "updateState",
+            "results": newState
         })
-
-        if (isNewState) {
-            if (clear) {
-                _setState((state) => newState)
-            } else {
-                _setState((old) => {
-                    return {
-                        ...old,
-                        ...newState,
-                    }
-                })
-            }
-        }
-    }, [state])
-
-    logging.debug("Debug state: ", state)
+    }, [])
 
     useEffect(() => {
+        logging.debug("URL query:", query)
+        const urlQuery = URLSearchParamsToJson(new URLSearchParams(query))
+        let temp_state = EbaySaverState.parse(urlQuery)
+        temp_state = EbaySaverState.addCategoryRequest(temp_state)
+        stateDispatch({"type": "updateState", "results": temp_state})
+    }, [query])
 
+    useEffect(() => {
         (async () => {
-            logging.debug("Query state has changed!", state);
-            logging.debug("URL query:", query)
-            const urlQuery = URLSearchParamsToJson(new URLSearchParams(query))
-            let temp_state = EbaySaverState.parse(urlQuery)
-            temp_state = EbaySaverState.addCategoryRequest(temp_state)
-            /*
-            setState((state) => {
-                return {
-                    ...state,
-                    ...temp_state
-                }
-            })
-            */
-            // setState(temp_state)
-            const newState = {
-                ...state,
-                ...temp_state
-            }
-            logging.debug("newState:", newState)
-
-            if (newState) {
-                const [outcome, data] = await clientApiManager.search(newState)
-                logging.debug("New resp: ", data)
-                if (outcome) {
-                    setResp(data)
-                } else {
-                    logging.error("Api return nothing")
-                }
+            const [outcome, data] = await clientApiManager.search(state)
+            logging.debug("New resp: ", data)
+            if (outcome) {
+                setResp(data)
+            } else {
+                logging.error("Api return nothing")
             }
         })()
-
-    }, [query, setState, state])
-
+    }, [state])
 
 
 
@@ -116,14 +98,13 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
     ])
 
 
-    /*
     useEffect(() => {
         // Loads defaults from setting
         logging.group("Loading default setting")
-
         const defaultItemLocation= setting.itemLocation
         const defaultShippingAddress = setting.shippingLocation
         const defaultShippingPostcode= setting.shippingPostcode
+
         if (defaultShippingAddress && defaultShippingPostcode) {
             logging.info("Default shipping information: ", defaultShippingAddress, defaultShippingPostcode)
             const [key, value] = EbaySaverState.getUserAddressHeader(defaultShippingAddress, defaultShippingPostcode)
@@ -152,7 +133,6 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
             state?.filter
         ]
     )
-    */
 
     function getNoPage() {
          // TODO: could also be fetch from state
