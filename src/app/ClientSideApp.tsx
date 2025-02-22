@@ -5,6 +5,7 @@ import styles from "./structure.module.css";
 import { EbaySaverState } from "./EbayApi/EbaySaverState";
 import { SavedQueryGallery } from "./server/SavedQueryGalleryClient";
 import { useCategories } from "./hooks/useCategories";
+import { CategoriesList } from "./components/baseComponents/CategoriesList";
 
 
 
@@ -13,6 +14,7 @@ export default function ClientSideApp({children}: {children?: ReactNode}) {
     console.log(categories)
     return (
         <div className={styles.main_layout}>
+          <CategoriesList/>
           <section className={styles.center_content}>
             <SearchBar></SearchBar>
           </section>

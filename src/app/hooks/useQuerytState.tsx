@@ -4,14 +4,16 @@ import { EbaySearch, EbaySearchReturn } from "../types/EbayApiTypes/ebaySeachTyp
 import logging from "../utils/logger";
 import axios, { Axios, AxiosRequestConfig } from "axios";
 import { useSetting } from './useSetting';
-import { ClientApiManager } from '../utils/clientApiManager';
 import { log } from 'console';
+import { clientApiManager } from '../utils/clientApiManager';
+import { useSearchParams } from 'next/navigation';
+import { URLSearchParamsToJson } from '../actions/utils';
 
 export type QueryStateType = {
     state: SEbaySearch
-    setState: (sEbaySearch: SEbaySearch) => void
+    // setState: (sEbaySearch: SEbaySearch) => void
     resp: EbaySearchReturn
-    setResp: (resp: EbaySearchReturn) => void
+    // setResp: (resp: EbaySearchReturn) => void
     setAddress: (country: keyof typeof Countries, postcode: number) => void
     getNoPage: () => number
     toPage: (number: number) => void
@@ -22,38 +24,84 @@ export const QueryStateContext = createContext({});
 
 
 export function QueryStateProvider({children}: {children: ReactNode}) {
-    const [state, setState] = useState<SEbaySearch>({})
-    const [resp, setResp] = useState<EbaySearchReturn>({})
+    const [state, _setState] = useState<SEbaySearch>({})
+    const [resp, setResp] = useState<EbaySearchReturn>()
     const settingObject = useSetting()
-    const apiManagerRef = useRef(new ClientApiManager())
-    const setting = settingObject.setting ?? {}
+    const setting = settingObject.setting
+    const query = useSearchParams().toString()
+
+    const setState = useCallback((newState: SEbaySearch, clear=false) => {
+        logging.debug("UpdateState: ", newState)
+        logging.debug("New State:", {...state, newState})
+        const isNewState = Object.keys(newState).some((key) => {
+            const typedKey = key as keyof SEbaySearch
+            return (state[typedKey] !== newState[typedKey]) 
+        })
+
+        if (isNewState) {
+            if (clear) {
+                _setState((state) => newState)
+            } else {
+                _setState((old) => {
+                    return {
+                        ...old,
+                        ...newState,
+                    }
+                })
+            }
+        }
+    }, [state])
+
+    logging.debug("Debug state: ", state)
 
     useEffect(() => {
-        logging.debug("Query state has changed!", state);
+
         (async () => {
-            if (state) {
-                const resp = await apiManagerRef.current.search(state)
-                logging.debug("New resp: ", resp)
-                if (resp) {
-                    setResp(resp)
+            logging.debug("Query state has changed!", state);
+            logging.debug("URL query:", query)
+            const urlQuery = URLSearchParamsToJson(new URLSearchParams(query))
+            let temp_state = EbaySaverState.parse(urlQuery)
+            temp_state = EbaySaverState.addCategoryRequest(temp_state)
+            /*
+            setState((state) => {
+                return {
+                    ...state,
+                    ...temp_state
+                }
+            })
+            */
+            // setState(temp_state)
+            const newState = {
+                ...state,
+                ...temp_state
+            }
+            logging.debug("newState:", newState)
+
+            if (newState) {
+                const [outcome, data] = await clientApiManager.search(newState)
+                logging.debug("New resp: ", data)
+                if (outcome) {
+                    setResp(data)
                 } else {
                     logging.error("Api return nothing")
                 }
             }
         })()
-    }, [state])
+
+    }, [query, setState, state])
+
+
 
 
     const setAddress = useCallback(
         (country: keyof typeof Countries, postcode: number) => {
             const [key, value] = EbaySaverState.getUserAddressHeader(country, postcode)
-            const apiManager = apiManagerRef.current
-            apiManager.optionalData.paramHeader = apiManager.optionalData.paramHeader ?? {}
-            apiManager.optionalData.paramHeader[key] = `${value}`
+            clientApiManager.optionalData.paramHeader = clientApiManager.optionalData.paramHeader ?? {}
+            clientApiManager.optionalData.paramHeader[key] = `${value}`
             settingObject.setShippingLocation(country, postcode)
             setState({...state} as SEbaySearch)
         }
-        , [state, setState, settingObject]
+        ,[state, setState, settingObject]
     )
 
     const setItemLocation = useCallback((country: keyof typeof Countries) => {
@@ -68,6 +116,7 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
     ])
 
 
+    /*
     useEffect(() => {
         // Loads defaults from setting
         logging.group("Loading default setting")
@@ -78,7 +127,7 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         if (defaultShippingAddress && defaultShippingPostcode) {
             logging.info("Default shipping information: ", defaultShippingAddress, defaultShippingPostcode)
             const [key, value] = EbaySaverState.getUserAddressHeader(defaultShippingAddress, defaultShippingPostcode)
-            const paramHeader = apiManagerRef.current.optionalData.paramHeader ?? {}
+            const paramHeader = clientApiManager.optionalData.paramHeader ?? {}
             // TODO: Rework, this particular paramHeader can have other filter
             if (!paramHeader[key]) {
                 setAddress(defaultShippingAddress, defaultShippingPostcode)
@@ -95,33 +144,36 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         logging.groupEnd()
         }, 
         [
-            setting,
             setAddress,
-            state,
-            setItemLocation
+            setItemLocation,
+            setting.itemLocation,
+            setting.shippingLocation,
+            setting.shippingPostcode,
+            state?.filter
         ]
     )
+    */
 
     function getNoPage() {
-        // TODO: could also be fetch from state
-        logging.group("Calculating pages")
-        const pageLimit = resp?.limit 
-        const pageOffset = resp?.offset
-        const pageNext = resp?.next
-        const pagePrev= resp?.prev
-        const total = resp?.total
+         // TODO: could also be fetch from state
+         logging.group("Calculating pages")
+         const pageLimit = resp?.limit 
+         const pageOffset = resp?.offset
+         const pageNext = resp?.next
+         const pagePrev= resp?.prev
+         const total = resp?.total
 
-        if (total && pageLimit) {
-            const noPage = Math.floor(Number(total) / Number(pageLimit))
-            logging.debug("NoPage", resp)
-            logging.debug("NoPage", noPage)
-            logging.groupEnd()
-            return noPage
-        }
-        
-        logging.warn("Need intial response first", state)
-        logging.groupEnd()
-        return undefined
+         if (total && pageLimit) {
+             const noPage = Math.floor(Number(total) / Number(pageLimit))
+             logging.debug("NoPage", resp)
+             logging.debug("NoPage", noPage)
+             logging.groupEnd()
+             return noPage
+         }
+         
+         logging.warn("Need intial response first", state)
+         logging.groupEnd()
+         return undefined
     }
 
     function toPage(number: number) {
@@ -144,9 +196,9 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
 
     const value = {
         state,
-        setState,
+        // setState,
         resp,
-        setResp,
+        // setResp,
         setAddress,
         getNoPage,
         toPage,

@@ -3,7 +3,6 @@
 import { URLSearchParamsToJson, extractItems } from "@/app/actions/utils";
 import { EbaySaverState } from "@/app/EbayApi/EbaySaverState";
 import { EbayItem } from "@/app/components/baseComponents/EbayItem";
-import { ItemGallery } from "@/app/components/ItemGallery";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { EbayItemSideBar } from '../../components/EbayItemSidebar';
@@ -11,26 +10,17 @@ import { SearchBar } from "@/app/components/SearchBar";
 import styles from "./structure.module.css"
 import { QueryStateProvider, useQueryState } from "@/app/hooks/useQuerytState";
 import { ButtonList } from "@/app/components/baseComponents/ButtonList";
+import logging from "@/app/utils/logger";
 
 export function ClientPage() {
     const {
         state,
-        setState,
         resp,
-        setResp,
         getNoPage,
-        toPage
+        toPage,
     } = useQueryState()
 
 
-    const query = useSearchParams().toString()
-    console.log(query)
-    useEffect(() => {
-        const urlQuery= URLSearchParamsToJson(new URLSearchParams(query))
-        let temp_state = EbaySaverState.parse(urlQuery)
-        temp_state= EbaySaverState.addCategoryRequest(temp_state)
-        setState(temp_state)
-    }, [query, setState])
 
     // Fetching pagination
     const noPage = getNoPage()
@@ -68,6 +58,8 @@ export function ClientPage() {
 
 export function ItemsContainer() {
     const {state, resp} = useQueryState();
+    logging.debug("Items Container Update:", state)
+    logging.debug("Items Container Update:", resp)
     const ebayItems = [];
     if (resp) {
         for (const item of extractItems(resp)) {
@@ -80,7 +72,6 @@ export function ItemsContainer() {
     return (
         <div>
             <h1>Search: {state.q}</h1>
-            <ItemGallery ebayItems={ebayItems}/>
         </div>
     )
 }

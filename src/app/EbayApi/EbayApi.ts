@@ -1,11 +1,11 @@
-import { EbayApi as EbayApiToken } from './EbayApiToken';
+import { EbayApiToken } from './EbayApiToken';
 import { EbayScraper as EbayApiScrapper} from "./EbayApiScrapper";
 import { EbaySearch } from "../types/EbayApiTypes/ebaySeachTypes";
 import { OptionalDataType } from "../types/clientApiTypes";
 import { EbayGetItem } from "../types/EbayApiTypes/ebayGetItemTypes";
 import { GetCategoryTreeRequest, GetDefaultCategoryTreeRequest } from '../types/EbayApiTypes/CategoryTree';
 import { Outcome } from '../types/Outcome';
-import { Categories, categoryManager } from '../server/setting/categoryManager';
+// import { Categories, categoryManager } from '../server/setting/categoryManager';
 import logging from '../utils/logger';
 
 
@@ -36,13 +36,13 @@ class EbayApi {
     }
 
 
-    getCategoryIds(request: GetDefaultCategoryTreeRequest): Outcome<Categories | undefined> {
-        if (categoryManager && categoryManager.categories) {
-            return [true, categoryManager.categories]
-        } else {
-            return [false, undefined]
-        }
-    }
+    //getCategoryIds(request: GetDefaultCategoryTreeRequest): Outcome<Categories | undefined> {
+    //    if (categoryManager && categoryManager.categories) {
+    //        return [true, categoryManager.categories]
+    //    } else {
+    //        return [false, undefined]
+    //    }
+    //}
 
     async getDefaultCategoryTree(request: GetDefaultCategoryTreeRequest) {
         if (this.ebayApiToken) {

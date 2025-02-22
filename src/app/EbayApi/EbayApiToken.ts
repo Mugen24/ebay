@@ -1,17 +1,13 @@
 import EbayAuthToken from "ebay-oauth-nodejs-client"
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
+import axios, { AxiosInstance, AxiosResponse } from "axios";
 import { EbaySearch, EbaySearchReturn } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import { EbayGetItemReturn, EbayGetItem } from "@/app/types/EbayApiTypes/ebayGetItemTypes";
 import logging from "../utils/logger";
-import { ShippingOption } from '../types/EbayApiTypes/ebaySeachTypes';
-import { error, log } from "console";
 import { Outcome } from "../types/Outcome";
-import { headers } from 'next/headers';
 import { OptionalDataType } from "../types/clientApiTypes";
-import { MarketplaceId } from "../types/marketplaceIds";
 import { GetCategoryTreeRequest, GetCategoryTreeResponse, GetDefaultCategoryTreeRequest, GetDefaultCategoryTreeResponse } from "../types/EbayApiTypes/CategoryTree";
 
-export class EbayApi {
+export class EbayApiToken {
     static scopes = ["https://api.ebay.com/oauth/api_scope"];
     token: string;
     axios: AxiosInstance;
@@ -30,19 +26,16 @@ export class EbayApi {
                 logging.group("Ebay api error")
                 logging.error("Request: ")
                 logging.error(res.headers)
-                logging.error(res.request)
+                // logging.error(res.request)
 
                 logging.error("Response")
                 logging.error(res.status)
                 // logging.error( res.response?.headers)
-                logging.error(res.data)
+                logging.error(res.data?.errors ?? "")
 
-                logging.error(res)
+                // logging.error(res)
                 // throw new Error(JSON.stringify(await res.toJSON()))
-                return Response.json({}, {
-                    status: 404,
-                    statusText: "Ebay Error"
-                })
+                return [false, {}]
             }
         }
         this.axios.interceptors.response.use((res: AxiosResponse) => {
@@ -58,9 +51,9 @@ export class EbayApi {
                 redirectUri: process.env.REDIRECT_URI!,
             }
         )
-        let token = await ebayAuth.getApplicationToken("PRODUCTION", EbayApi.scopes)
+        let token = await ebayAuth.getApplicationToken("PRODUCTION", EbayApiToken.scopes)
         const parsed_token= JSON.parse(token);
-        return new EbayApi(parsed_token.access_token);
+        return new EbayApiToken(parsed_token.access_token);
     }
 
     async search( config: EbaySearch | string , optionalConfig: Record<string,any> = {}): Promise<Outcome<EbaySearchReturn>> {
@@ -83,7 +76,12 @@ export class EbayApi {
                 }
             )
         }
-        logging.debug("Item:", resp.data.itemSummaries[0])
+        try {
+            logging.debug("Item:", resp.data.itemSummaries[0])
+        } catch {
+            
+        }
+
         logging.groupEnd()
         return [resp.status === 200, resp.data]
     }

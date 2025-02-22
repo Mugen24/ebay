@@ -34,9 +34,9 @@ export class EbaySaverState {
     static parse(searchState: EbaySearch): SEbaySearch {
         logging.info("Parsing searchState:", searchState)
         // this.data = JSON.parse(JSON.stringify(searchState))
-        if (!searchState.q) {
-            throw new Error("'q' params is required")
-        }
+        //if (!searchState.q) {
+        //    throw new Error("'q' params is required")
+        //}
 
         const q = searchState.q;
         const gtin = searchState.gtin;

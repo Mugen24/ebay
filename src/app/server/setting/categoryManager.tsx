@@ -7,6 +7,7 @@ import { GetDefaultCategoryTreeResponse } from '../../types/EbayApiTypes/Categor
 import path from "node:path";
 import { setting } from "./settings";
 import { ebayApi } from "@/app/EbayApi/EbayApi";
+import { debug } from "node:console";
 
 export type CategoryId = number
 export type CategoryName = string
@@ -57,6 +58,8 @@ class CategoryManager{
     }
 
     async isCategoriesUptoDate(): Promise<Boolean> {
+        logging.debug("asdfasdfasl;dfkjasl;dfjaslodf")
+        logging.debug("system:", ebayApi)
         const [outcome, rootCat] = await ebayApi.getDefaultCategoryTree({
             "marketplace_id": this.marketplaceId
         }) 
