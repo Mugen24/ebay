@@ -1,6 +1,6 @@
 import { createContext, ReactElement, ReactNode, useContext, useEffect, useState, useRef, useCallback, useReducer, ReducerWithoutAction, Reducer, ReducerAction, Dispatch } from 'react';
 import { Countries, EbaySaverState, Filter, SEbaySearch } from '../EbayApi/EbaySaverState';
-import { Category, EbaySearch, EbaySearchReturn } from "../types/EbayApiTypes/ebaySeachTypes";
+import { Category, EbaySearch, EbaySearchReturn, SortField } from "../types/EbayApiTypes/ebaySeachTypes";
 import logging from "../utils/logger";
 import { useSetting } from './useSetting';
 import { clientApiManager } from '../utils/clientApiManager';
@@ -31,6 +31,7 @@ type stateActionType =
     | {type: 'updateState', results: SEbaySearch}
     | {type: 'updateCategory', results: Category["categoryId"]}
     | {type: 'updateFilterState', results: updateFilterStateType<any>}
+    | {type: 'updateSortState', results: SortField}
     | {type: 'loading'}
 
 function reducer(state: SEbaySearch, action: stateActionType): SEbaySearch {
@@ -67,6 +68,14 @@ function reducer(state: SEbaySearch, action: stateActionType): SEbaySearch {
         }
         return {
             ...state
+        }
+    }
+
+    if (action.type === "updateSortState") {
+        logging.info("Updating sort")
+        state.sort = action.results
+        return {
+            ...state,
         }
     }
 

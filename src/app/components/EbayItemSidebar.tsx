@@ -19,7 +19,7 @@ export function EbayItemSideBar() {
         logging.info("Set category: ", categoryId)
         //state.category_ids = categoryId
         //setState({...state})
-        //
+        
         stateDispatch({
             "type": "updateCategory",
             "results": categoryId
@@ -27,27 +27,24 @@ export function EbayItemSideBar() {
     }
 
     function setFilterState<T extends keyof FilterType>(filterKey: T, filterValues: FilterType[T]) {
-        logging.info("Set filter state: ", filterKey, ":", filterValues)
-        if (filterValues.length === 0) {
-            EbaySaverState.addUniqueFilter(state, filterKey, filterValues[0],  true)
-        }
-        else {
-            // For array for values
-            // First value must clean the previous value
-            EbaySaverState.addUniqueFilter(state, filterKey, filterValues[0],  true)
-            // Any subsequently should be clear the previous value
-            for (let i = 1; i < filterValues.length; i++) {
-                EbaySaverState.addUniqueFilter(state, filterKey, filterValues[i])
+        //setState({...state})
+        stateDispatch({
+            "type": "updateFilterState",
+            "results": {
+                "key": filterKey,
+                "value": filterValues
             }
-        }
-
-        setState({...state})
+        })
     }
 
     function setSortState(choiceArgs: SortField) {
         logging.info("Set sort state: ", choiceArgs)
-        state.sort = choiceArgs
-        setState({...state})
+        // state.sort = choiceArgs
+        // setState({...state})
+        stateDispatch({
+            "type": "updateSortState",
+            "results": choiceArgs
+        })
     }
 
     function saveConfigState(){

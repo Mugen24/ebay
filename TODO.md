@@ -1,4 +1,3 @@
-- Rework server components (BIG TASK)
 - Changing setting should make changes the the url 
   - The user can then walk back option
 
