@@ -1,13 +1,12 @@
-import { createContext, ReactElement, ReactNode, useContext, useEffect, useState, useRef, useCallback, useReducer, ReducerWithoutAction, Reducer, ReducerAction } from 'react';
-import { Countries, EbaySaverState, SEbaySearch } from '../EbayApi/EbaySaverState';
-import { EbaySearch, EbaySearchReturn } from "../types/EbayApiTypes/ebaySeachTypes";
+import { createContext, ReactElement, ReactNode, useContext, useEffect, useState, useRef, useCallback, useReducer, ReducerWithoutAction, Reducer, ReducerAction, Dispatch } from 'react';
+import { Countries, EbaySaverState, Filter, SEbaySearch } from '../EbayApi/EbaySaverState';
+import { Category, EbaySearch, EbaySearchReturn } from "../types/EbayApiTypes/ebaySeachTypes";
 import logging from "../utils/logger";
-import axios, { Axios, AxiosRequestConfig } from "axios";
 import { useSetting } from './useSetting';
-import { log } from 'console';
 import { clientApiManager } from '../utils/clientApiManager';
 import { useSearchParams } from 'next/navigation';
 import { URLSearchParamsToJson } from '../actions/utils';
+import { CategoryId } from '../server/setting/categoryManager';
 
 export type QueryStateType = {
     state: SEbaySearch
@@ -18,16 +17,23 @@ export type QueryStateType = {
     getNoPage: () => number
     toPage: (number: number) => void
     setItemLocation: (country: keyof typeof Countries) => void
+    stateDispatch: Dispatch<ReducerAction<Reducer<SEbaySearch, stateActionType>>>
 }
 export const QueryStateContext = createContext({});
 
 
+type updateFilterStateType<G extends keyof Filter> = {
+    "key": G,
+    "value": Filter[G]
+}
 
 type stateActionType = 
     | {type: 'updateState', results: SEbaySearch}
+    | {type: 'updateCategory', results: Category["categoryId"]}
+    | {type: 'updateFilterState', results: updateFilterStateType<any>}
     | {type: 'loading'}
 
-function reducer(state: SEbaySearch, action: stateActionType) {
+function reducer(state: SEbaySearch, action: stateActionType): SEbaySearch {
     if (action.type === "updateState") {
         const updatedState = action.results
         return {
@@ -35,6 +41,35 @@ function reducer(state: SEbaySearch, action: stateActionType) {
             ...updatedState
         }
     }
+
+    if (action.type === "updateCategory") {
+        return {
+            ...state,
+            "category_ids": action.results
+        }
+    }
+    if (action.type === "updateFilterState") {
+        const filterKey = action.results["key"]
+        const filterValues = action.results["value"]
+
+        logging.info("Set filter state: ", filterKey, ":", filterValues)
+        if (filterValues.length === 0) {
+            EbaySaverState.addUniqueFilter(state, filterKey, filterValues[0],  true)
+        }
+        else {
+            // For array for values
+            // First value must clean the previous value
+            EbaySaverState.addUniqueFilter(state, filterKey, filterValues[0],  true)
+            // Any subsequently should be clear the previous value
+            for (let i = 1; i < filterValues.length; i++) {
+                EbaySaverState.addUniqueFilter(state, filterKey, filterValues[i])
+            }
+        }
+        return {
+            ...state
+        }
+    }
+
     throw new Error(`State not implemented: ${action}`)
 }
 
@@ -179,6 +214,7 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         // setState,
         resp,
         // setResp,
+        stateDispatch,
         setAddress,
         getNoPage,
         toPage,

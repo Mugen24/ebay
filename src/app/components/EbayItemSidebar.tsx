@@ -11,14 +11,19 @@ import { Category, SortField } from "../types/EbayApiTypes/ebaySeachTypes"
 import { Categories } from "../server/setting/categoryManager"
 
 export function EbayItemSideBar() {
-    const {state, setState, resp} = useQueryState()
+    const {state, stateDispatch, resp} = useQueryState()
     logging.info("Sidebar initialise")
     logging.debug(state)
 
     function setCategory(categoryId: string) {
         logging.info("Set category: ", categoryId)
-        state.category_ids = categoryId
-        setState({...state})
+        //state.category_ids = categoryId
+        //setState({...state})
+        //
+        stateDispatch({
+            "type": "updateCategory",
+            "results": categoryId
+        })
     }
 
     function setFilterState<T extends keyof FilterType>(filterKey: T, filterValues: FilterType[T]) {
