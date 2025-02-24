@@ -7,16 +7,15 @@ import { clientApiManager } from '../utils/clientApiManager';
 import { useSearchParams } from 'next/navigation';
 import { URLSearchParamsToJson } from '../actions/utils';
 import { CategoryId } from '../server/setting/categoryManager';
+import { setting } from '../server/setting/settings';
 
 export type QueryStateType = {
     state: SEbaySearch
     // setState: (sEbaySearch: SEbaySearch) => void
     resp: EbaySearchReturn
     // setResp: (resp: EbaySearchReturn) => void
-    setAddress: (country: keyof typeof Countries, postcode: number) => void
     getNoPage: () => number
     toPage: (number: number) => void
-    setItemLocation: (country: keyof typeof Countries) => void
     stateDispatch: Dispatch<ReducerAction<Reducer<SEbaySearch, stateActionType>>>
 }
 export const QueryStateContext = createContext({});
@@ -32,64 +31,162 @@ type stateActionType =
     | {type: 'updateCategory', results: Category["categoryId"]}
     | {type: 'updateFilterState', results: updateFilterStateType<any>}
     | {type: 'updateSortState', results: SortField}
+    | {type: 'updateUserAddress', results: {
+        "country": keyof typeof Countries,
+        "postcode": number,
+      }}
+    | {type: 'updateItemLocation', results: {
+        "country": keyof typeof Countries
+      }}
+    | {type: 'updateSetting'}
     | {type: 'loading'}
 
-function reducer(state: SEbaySearch, action: stateActionType): SEbaySearch {
-    if (action.type === "updateState") {
-        const updatedState = action.results
-        return {
-            ...state,
-            ...updatedState
-        }
-    }
-
-    if (action.type === "updateCategory") {
-        return {
-            ...state,
-            "category_ids": action.results
-        }
-    }
-    if (action.type === "updateFilterState") {
-        const filterKey = action.results["key"]
-        const filterValues = action.results["value"]
-
-        logging.info("Set filter state: ", filterKey, ":", filterValues)
-        if (filterValues.length === 0) {
-            EbaySaverState.addUniqueFilter(state, filterKey, filterValues[0],  true)
-        }
-        else {
-            // For array for values
-            // First value must clean the previous value
-            EbaySaverState.addUniqueFilter(state, filterKey, filterValues[0],  true)
-            // Any subsequently should be clear the previous value
-            for (let i = 1; i < filterValues.length; i++) {
-                EbaySaverState.addUniqueFilter(state, filterKey, filterValues[i])
-            }
-        }
-        return {
-            ...state
-        }
-    }
-
-    if (action.type === "updateSortState") {
-        logging.info("Updating sort")
-        state.sort = action.results
-        return {
-            ...state,
-        }
-    }
-
-    throw new Error(`State not implemented: ${action}`)
-}
 
 export function QueryStateProvider({children}: {children: ReactNode}) {
 
-    const [state, stateDispatch] = useReducer<Reducer<SEbaySearch, stateActionType>>(reducer, {})
-
     const [resp, setResp] = useState<EbaySearchReturn>()
     const settingObject = useSetting()
-    const setting = settingObject.setting
     const query = useSearchParams().toString()
+
+
+    const reducer = (state: SEbaySearch, action: stateActionType): SEbaySearch => {
+        if (action.type === "updateState") {
+            const updatedState = action.results
+            return {
+                ...state,
+                ...updatedState
+            }
+        }
+
+        if (action.type === "updateCategory") {
+            const newState = {
+                ...state,
+                "category_ids": action.results
+            }
+            window.history.pushState(null, "", `?${EbaySaverState.toSearchParams(newState).toString()}`)
+            return newState
+        }
+        if (action.type === "updateFilterState") {
+            const filterKey = action.results["key"]
+            const filterValues = action.results["value"]
+
+            logging.info("Set filter state: ", filterKey, ":", filterValues)
+            if (filterValues.length === 0) {
+                EbaySaverState.addUniqueFilter(state, filterKey, filterValues[0],  true)
+            }
+            else {
+                // For array for values
+                // First value must clean the previous value
+                EbaySaverState.addUniqueFilter(state, filterKey, filterValues[0],  true)
+                // Any subsequently should be clear the previous value
+                for (let i = 1; i < filterValues.length; i++) {
+                    EbaySaverState.addUniqueFilter(state, filterKey, filterValues[i])
+                }
+            }
+
+            window.history.pushState(null, "", `?${EbaySaverState.toSearchParams(state).toString()}`)
+            return {
+                ...state
+            }
+        }
+
+        if (action.type === "updateSortState") {
+            logging.info("Updating sort")
+            state.sort = action.results
+            window.history.pushState(null, "", `?${EbaySaverState.toSearchParams(state).toString()}`)
+            return {
+                ...state,
+            }
+        }
+
+        if (action.type === "updateUserAddress") {
+            const [key, value] = EbaySaverState.makeUserAddressHeader(action.results.country, action.results.postcode)
+            clientApiManager.optionalData.paramHeader = clientApiManager.optionalData.paramHeader ?? {}
+            clientApiManager.optionalData.paramHeader[key] = `${value}`
+            if (!settingObject.isLoading) {
+                 settingObject.setShippingLocation(action.results.country, action.results.postcode)
+            } else {
+                 logging.debug("Setting not loaded cannot save useAddress")
+            }
+            //Just to refresh and refetch
+            return {...state}
+        }
+
+        if (action.type === "updateItemLocation") {
+            EbaySaverState.setLocation(state, action.results.country)
+            if (!settingObject.isLoading) {
+                settingObject.setItemLocation(action.results.country)
+            } else {
+                logging.debug("Setting not loaded cannot save ItemLocation")
+            }
+            return {...state}
+        }
+
+        if (action.type === "updateSetting") {
+            if (settingObject.isLoading) return state
+            const setting = settingObject.setting.current
+            if (!setting) return state
+            logging.group("Loading default setting")
+            logging.debug("isLoading: ", `${settingObject.isLoading}`)
+            logging.debug("setting: ", `${JSON.stringify(settingObject.setting)}`)
+            const defaultItemLocation = setting.itemLocation
+            const defaultShippingAddress = setting.shippingLocation
+            const defaultShippingPostcode = setting.shippingPostcode
+
+            if (defaultShippingAddress && defaultShippingPostcode) {
+                logging.info("Default shipping information: ", defaultShippingAddress, defaultShippingPostcode)
+                /*
+                const [key, value] = EbaySaverState.getUserAddressHeader(defaultShippingAddress, defaultShippingPostcode)
+                const paramHeader = clientApiManager.optionalData.paramHeader ?? {}
+                // TODO: Rework, this particular paramHeader can have other filter
+                if (!paramHeader[key]) {
+                    setAddress(defaultShippingAddress, defaultShippingPostcode)
+                }
+                */
+                const [key, value] = EbaySaverState.makeUserAddressHeader(defaultShippingAddress, defaultShippingPostcode)
+                clientApiManager.optionalData.paramHeader = clientApiManager.optionalData.paramHeader ?? {}
+                clientApiManager.optionalData.paramHeader[key] = `${value}`
+                if (!settingObject.isLoading) {
+                    settingObject.setShippingLocation(defaultShippingAddress, defaultShippingPostcode)
+                } else {
+                    logging.debug("Setting not loaded cannot save useAddress")
+                }
+            //Just to refresh and refetch
+            }
+
+            if (defaultItemLocation) {
+                /*
+                const filter = state?.filter ?? {}
+                if (!filter["itemLocationCountry"]) {
+                    logging.info("Default item location: ", defaultItemLocation)
+                    setItemLocation(defaultItemLocation)
+                }
+                */
+
+                EbaySaverState.setLocation(state, defaultItemLocation)
+                if (!settingObject.isLoading) {
+                    settingObject.setItemLocation(defaultItemLocation)
+                } else {
+                    logging.debug("Setting not loaded cannot save ItemLocation")
+                }
+            }
+            return {...state}
+        }
+
+        throw new Error(`State not implemented: ${action}`)
+    }
+
+    function initState(query: any) {
+        logging.debug("URL query:", query)
+        const urlQuery = URLSearchParamsToJson(new URLSearchParams(query))
+        let temp_state = EbaySaverState.parse(urlQuery)
+        logging.debug("Initial State: ", temp_state)
+        temp_state = EbaySaverState.addCategoryRequest(temp_state)
+        //stateDispatch({"type": "updateState", "results": temp_state})
+        return temp_state
+    }
+    const [state, stateDispatch] = useReducer<Reducer<SEbaySearch, stateActionType>>(reducer, initState(query))
+
     const setState = useCallback((newState: SEbaySearch) => {
         stateDispatch({
             "type": "updateState",
@@ -119,6 +216,7 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
 
 
 
+    /*
     const setAddress = useCallback(
         (country: keyof typeof Countries, postcode: number) => {
             const [key, value] = EbaySaverState.getUserAddressHeader(country, postcode)
@@ -131,7 +229,7 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
     )
 
     const setItemLocation = useCallback((country: keyof typeof Countries) => {
-        const tempState= state ?? {}
+        const tempState = state ?? {}
         EbaySaverState.setLocation(tempState, country)
         settingObject.setItemLocation(country)
         setState({...tempState})
@@ -140,41 +238,74 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         setState,
         settingObject
     ])
+    */
 
 
     useEffect(() => {
         // Loads defaults from setting
+        logging.group("Setting loaded updating setting")
+        stateDispatch({
+            "type": "updateSetting"
+        })
+        if (settingObject.isLoading) return 
+        if (!settingObject.setting.current) return 
+
+        const setting = settingObject.setting.current
         logging.group("Loading default setting")
-        const defaultItemLocation= setting.itemLocation
+        logging.debug("isLoading: ", `${settingObject.isLoading}`)
+        logging.debug("setting: ", `${JSON.stringify(settingObject.setting)}`)
+        const defaultItemLocation = setting.itemLocation
         const defaultShippingAddress = setting.shippingLocation
-        const defaultShippingPostcode= setting.shippingPostcode
+        const defaultShippingPostcode = setting.shippingPostcode
 
         if (defaultShippingAddress && defaultShippingPostcode) {
             logging.info("Default shipping information: ", defaultShippingAddress, defaultShippingPostcode)
+            /*
             const [key, value] = EbaySaverState.getUserAddressHeader(defaultShippingAddress, defaultShippingPostcode)
             const paramHeader = clientApiManager.optionalData.paramHeader ?? {}
             // TODO: Rework, this particular paramHeader can have other filter
             if (!paramHeader[key]) {
                 setAddress(defaultShippingAddress, defaultShippingPostcode)
             }
+            */
+            const [key, value] = EbaySaverState.makeUserAddressHeader(defaultShippingAddress, defaultShippingPostcode)
+            clientApiManager.optionalData.paramHeader = clientApiManager.optionalData.paramHeader ?? {}
+            clientApiManager.optionalData.paramHeader[key] = `${value}`
+            if (!settingObject.isLoading) {
+                settingObject.setShippingLocation(defaultShippingAddress, defaultShippingPostcode)
+            } else {
+                logging.debug("Setting not loaded cannot save useAddress")
+            }
+        //Just to refresh and refetch
         }
 
         if (defaultItemLocation) {
+            /*
             const filter = state?.filter ?? {}
             if (!filter["itemLocationCountry"]) {
                 logging.info("Default item location: ", defaultItemLocation)
                 setItemLocation(defaultItemLocation)
             }
+            */
+
+            stateDispatch({
+                "type": "updateItemLocation",
+                "results": {
+                    "country": defaultItemLocation
+                }
+            })
+            if (!settingObject.isLoading) {
+                settingObject.setItemLocation(defaultItemLocation)
+            } else {
+                logging.debug("Setting not loaded cannot save ItemLocation")
+            }
         }
+        //return {...state}
         logging.groupEnd()
         }, 
         [
-            setAddress,
-            setItemLocation,
-            setting.itemLocation,
-            setting.shippingLocation,
-            setting.shippingPostcode,
-            state?.filter
+            settingObject.isLoading,
+            settingObject
         ]
     )
 
@@ -224,10 +355,8 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         resp,
         // setResp,
         stateDispatch,
-        setAddress,
         getNoPage,
         toPage,
-        setItemLocation,
     }
 
     return (

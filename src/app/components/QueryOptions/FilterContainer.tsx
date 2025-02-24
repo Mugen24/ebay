@@ -12,9 +12,10 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
     saveConfigState: () => void,
 }) {
     
-    const {state, setState, setAddress, setItemLocation} = useQueryState();
-    const {setting} = useSetting()
+    const {state, stateDispatch} = useQueryState();
+    const settingOb = useSetting()
     const userLocationCountryMap = Object.keys(Countries)
+    const setting = settingOb.setting?.current
 
     // TODO: move all this login into EbaySaverState
     const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
@@ -52,7 +53,13 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
 
     const locationOptionsHandler: (event: React.FormEvent<HTMLFormElement>) => void = (event) => {
         if (event.target?.value) {
-            setItemLocation(event.target?.value)
+            // setItemLocation(event.target?.value)
+            stateDispatch({
+                "type": "updateItemLocation",
+                "results": {
+                    "country": event.target?.value
+                }
+            })
         }
     }
 
@@ -63,46 +70,59 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
         const postcode= formData.get("postcode")
         console.log(formToJson(formData))
         if (country && postcode) {
-            setAddress(country as keyof typeof Countries, Number(postcode))
+            stateDispatch({
+                "type": "updateUserAddress",
+                "results": {
+                    "country": country as keyof typeof Countries,
+                    "postcode": Number(postcode)
+                }
+            })
+            // setAddress(country as keyof typeof Countries, Number(postcode))
         }
     }
 
     return (
     <div>
-        <section>
-            <h1>Delivery Location: </h1>
-            <form onSubmit={addressHandler}>
-                <label htmlFor="Country">Country</label>
-                <select name="country" id="country">
-                    {Object.keys(Countries).map((c) => {
-                        if (c === setting.shippingLocation) {
-                            return <option selected={true} key={c} value={Countries[c]}>{c}</option>
-                        } else {
-                            return <option key={c} value={Countries[c]}>{c}</option>
+        {
+            setting ? 
+            <>
+                <section>
+                    <h1>Delivery Location: </h1>
+                    <form onSubmit={addressHandler}>
+                        <label htmlFor="Country">Country</label>
+                        <select name="country" id="country">
+                            {Object.keys(Countries).map((c) => {
+                                if (c === setting.shippingLocation) {
+                                    return <option selected={true} key={c} value={Countries[c]}>{c}</option>
+                                } else {
+                                    return <option key={c} value={Countries[c as keyof typeof Countries]}>{c}</option>
+                                }
+                            })}
+                        </select>
+
+                        <label htmlFor="Postcode">Postcode</label>
+                        <input type="text" id="Postcode" name="postcode" defaultValue={setting.shippingPostcode}/>
+
+                        <input type="submit" value={"enter"}/>
+                    </form>
+                </section>
+                <section>
+                    <form onChange={locationOptionsHandler}>
+                        {
+                            Object.keys(Countries).map(country => {
+                                return (
+                                    <div key={`${country}_container`}>
+                                        <label key={`${country}_label`} htmlFor={country} >{country}</label>
+                                        <input type="radio" checked={country === setting.itemLocation} key={country} id={country} name="country" value={country}/>
+                                    </div>
+                                )
+                            })
                         }
-                    })}
-                </select>
-
-                <label htmlFor="Postcode">Postcode</label>
-                <input type="text" id="Postcode" name="postcode" defaultValue={setting.shippingPostcode}/>
-
-                <input type="submit" value={"enter"}/>
-            </form>
-        </section>
-        <section>
-            <form onChange={locationOptionsHandler}>
-                {
-                    Object.keys(Countries).map(country => {
-                        return (
-                            <div key={`${country}_container`}>
-                                <label key={`${country}_label`} htmlFor={country} >{country}</label>
-                                <input type="radio" checked={country === setting.itemLocation} key={country} id={country} name="country" value={country}/>
-                            </div>
-                        )
-                    })
-                }
-            </form>
-        </section>
+                    </form>
+                </section>
+            </>
+            : <></>
+        }
 
         <section>
             <button className="primary_button" value="All" onClick={buyingOptionsHandler}>All</button>

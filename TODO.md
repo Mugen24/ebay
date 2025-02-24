@@ -1,8 +1,8 @@
-- Changing setting should make changes the the url 
+- Changing setting should make changes the the url + change should be added to browser stack so that the user can walk back the option
   - The user can then walk back option
 
 - Item entry card could be nicer
-- Set number of item per page
+- Change this number perpage into a next and previous system
 - Fetch general category in main page
 
 - Scrape pagination for dynamic loading, the resp.total is unreliable and not recommend by ebay
