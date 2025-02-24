@@ -51,7 +51,7 @@ export function EbayItemSideBar() {
         EbaySaverState.saveToConfig(state)
     }
 
-    const categories = resp.refinement.categoryDistributions as Category[]
+    const categories = resp.refinement?.categoryDistributions ?? [] as Category[]
 
     return (
         <div className={styles.side_bar}>

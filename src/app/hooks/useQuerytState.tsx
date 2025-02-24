@@ -176,13 +176,13 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         throw new Error(`State not implemented: ${action}`)
     }
 
+    //Intialise first state using the searchParam
     function initState(query: any) {
         logging.debug("URL query:", query)
         const urlQuery = URLSearchParamsToJson(new URLSearchParams(query))
         let temp_state = EbaySaverState.parse(urlQuery)
         logging.debug("Initial State: ", temp_state)
-        temp_state = EbaySaverState.addCategoryRequest(temp_state)
-        //stateDispatch({"type": "updateState", "results": temp_state})
+        //temp_state = EbaySaverState.addCategoryRequest(temp_state)
         return temp_state
     }
     const [state, stateDispatch] = useReducer<Reducer<SEbaySearch, stateActionType>>(reducer, initState(query))
@@ -198,19 +198,38 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         logging.debug("URL query:", query)
         const urlQuery = URLSearchParamsToJson(new URLSearchParams(query))
         let temp_state = EbaySaverState.parse(urlQuery)
-        temp_state = EbaySaverState.addCategoryRequest(temp_state)
+        //temp_state = EbaySaverState.addCategoryRequest(temp_state)
         stateDispatch({"type": "updateState", "results": temp_state})
     }, [query])
 
     useEffect(() => {
         (async () => {
-            const [outcome, data] = await clientApiManager.search(state)
-            logging.debug("New resp: ", data)
-            if (outcome) {
-                setResp(data)
+            //first search
+            // Doesn't cause loop hopefully bc it's conditional??
+            logging.group("Loading new response")
+            logging.debug("State: ", state)
+            logging.debug("Resp : ", resp)
+            if (!resp) {
+                logging.debug("No resp")
+                let tempState = {...state}
+                //Add special request for categories
+                tempState = EbaySaverState.addCategoryRequest(tempState)
+                const [outcome, data] = await clientApiManager.search(tempState)
+                if (outcome) {
+                    setResp(data)
+                } else {
+                    logging.error("Api return nothing")
+                }
             } else {
-                logging.error("Api return nothing")
+                const [outcome, data] = await clientApiManager.search(state)
+                logging.debug("New resp: ", data)
+                if (outcome) {
+                    setResp(data)
+                } else {
+                    logging.error("Api return nothing")
+                }
             }
+            logging.groupEnd()
         })()
     }, [state])
 

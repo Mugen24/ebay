@@ -1,5 +1,8 @@
-- Changing setting should make changes the the url + change should be added to browser stack so that the user can walk back the option
-  - The user can then walk back option
+- Cache catogory id for item
+    - Add condition for when to reload category again
+    - When clicking a item category disappear
+
+- Save intermediary state for quicker history navigation
 
 - Item entry card could be nicer
 - Change this number perpage into a next and previous system

@@ -12,7 +12,11 @@ export function SavedQueryGallery()
     {
         const {setting} = useSetting()
 
-        const favouriteQueries = setting.favouriteQueries
+        if (!setting?.current) return (
+            <h1>Loading Gallery...</h1>
+        )
+
+        const favouriteQueries = setting?.current.favouriteQueries
         const favouriteQueriesElement: Record<EpochTimeStamp, ReactElement<typeof FavouriteQueryElement>> = {}
 
         Object.keys(favouriteQueries).forEach(async (id) => {
@@ -24,7 +28,7 @@ export function SavedQueryGallery()
             }
         })
 
-        const watchItems = setting.watchedItems
+        const watchItems = setting.current.watchedItems
         const watchItemsElements: Record<EbayItemId, ReactElement<typeof WatchItemElement>> = {}
         Object.keys(watchItems).forEach(async (id) => {
             const [outcome, itemRes] = await clientApiManager.getItem(watchItems[id].itemData)
