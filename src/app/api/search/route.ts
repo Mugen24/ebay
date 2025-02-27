@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     const body = await request.json()
     let response;
     const [outcome, data] = await ebayApi.search(params, body)
-    logging.debug("Result: ", outcome, data)
+    logging.debug("Result: ", outcome)
     if (outcome) {
         response = Response.json(data, {
             status: 200

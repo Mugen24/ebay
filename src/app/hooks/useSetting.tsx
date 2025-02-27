@@ -48,19 +48,20 @@ export function SettingProvider({children}: {children: ReactNode}) {
     const setting = useRef<SettingType>()
     // const [theme, _setTheme] = useState<Theme>("light")
     // const [favourites, _setFavourites] = useState<Favourite[]>([])
+    const [isLoading, setIsLoading] = useState(true)
 
 
     useEffect(() => {
         (async () => {
             setting.current = await clientApiManager.getSetting()
+            setIsLoading(false)
         })()
     }, [])
 
     function setSetting<K extends keyof SettingType>(newSetting: Record<K, SettingType[K]>){
         if (setting.current) {
             setting.current = {
-                ...setting.current,
-                ...newSetting
+                ...setting.current, ...newSetting
             }
         }
     }
@@ -113,31 +114,31 @@ export function SettingProvider({children}: {children: ReactNode}) {
     }, [])
 
     const value: SettingContextType = useMemo(() => {
-        return {
-            isLoading: false,
-            setting,
-            setTheme,
-            addFavourite,
-            removeFavourite,
-            setExpireOffset,
-            setShippingLocation,
-            setItemLocation,
+        //This guarantee that setting has been loaded
+        if (!isLoading) {
+            return {
+                isLoading: false,
+                setting,
+                setTheme,
+                addFavourite,
+                removeFavourite,
+                setExpireOffset,
+                setShippingLocation,
+                setItemLocation,
+            }
+        } else {
+            return  {
+                isLoading: true,
+                setting,
+                setTheme,
+                addFavourite,
+                removeFavourite,
+                setExpireOffset,
+                setShippingLocation,
+                setItemLocation,
+            }
         }
-    }, [setting, addFavourite,, removeFavourite, setExpireOffset, setItemLocation, setShippingLocation])
-
-    if (!setting.current) {
-        const newVal: SettingContextType = {
-            ...value,
-            "isLoading": true
-
-        }
-        return (
-            <SettingContext.Provider value={value}>
-                {children}
-            </SettingContext.Provider>
-        )
-    }
-
+    }, [isLoading, setting, addFavourite,, removeFavourite, setExpireOffset, setItemLocation, setShippingLocation])
 
 
     return (

@@ -15,7 +15,7 @@ export function CategoriesList() {
             q: "",
             category_ids: categoryId
         }
-        const searchParam = new URLSearchParams(params)
+        const searchParam = new URLSearchParams(params as Record<string, any>)
         window.location.href = `/items` + "?" + searchParam.toString();
     }
 

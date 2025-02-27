@@ -1,4 +1,4 @@
-import { createContext, ReactElement, ReactNode, useContext, useEffect, useState, useRef, useCallback, useReducer, ReducerWithoutAction, Reducer, ReducerAction, Dispatch } from 'react';
+import { createContext, ReactElement, ReactNode, useContext, useEffect, useState, useRef, useCallback, useReducer, ReducerWithoutAction, Reducer, ReducerAction, Dispatch, cache, MutableRefObject } from 'react';
 import { Countries, EbaySaverState, Filter, SEbaySearch } from '../EbayApi/EbaySaverState';
 import { Category, EbaySearch, EbaySearchReturn, SortField } from "../types/EbayApiTypes/ebaySeachTypes";
 import logging from "../utils/logger";
@@ -12,11 +12,12 @@ import { setting } from '../server/setting/settings';
 export type QueryStateType = {
     state: SEbaySearch
     // setState: (sEbaySearch: SEbaySearch) => void
-    resp: EbaySearchReturn
+    resp: EbaySearchReturn | undefined
     // setResp: (resp: EbaySearchReturn) => void
-    getNoPage: () => number
+    getNoPage: () => number | undefined
     toPage: (number: number) => void
     stateDispatch: Dispatch<ReducerAction<Reducer<SEbaySearch, stateActionType>>>
+    cacheCategories: MutableRefObject<Category[]>
 }
 export const QueryStateContext = createContext({});
 
@@ -47,6 +48,7 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
     const [resp, setResp] = useState<EbaySearchReturn>()
     const settingObject = useSetting()
     const query = useSearchParams().toString()
+    const cacheCategories = useRef<Category[]>([])
 
 
     const reducer = (state: SEbaySearch, action: stateActionType): SEbaySearch => {
@@ -113,16 +115,21 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         }
 
         if (action.type === "updateItemLocation") {
-            EbaySaverState.setLocation(state, action.results.country)
+            logging.info("Updating Item location")
+            state = EbaySaverState.setLocation(state, action.results.country)
             if (!settingObject.isLoading) {
                 settingObject.setItemLocation(action.results.country)
             } else {
                 logging.debug("Setting not loaded cannot save ItemLocation")
             }
+
             return {...state}
         }
 
         if (action.type === "updateSetting") {
+            logging.debug("updatingSetting")
+            logging.debug("settingObj: ", settingObject)
+            logging.debug("settingCurr: ", settingObject.setting?.current?.itemLocation)
             if (settingObject.isLoading) return state
             const setting = settingObject.setting.current
             if (!setting) return state
@@ -135,41 +142,14 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
 
             if (defaultShippingAddress && defaultShippingPostcode) {
                 logging.info("Default shipping information: ", defaultShippingAddress, defaultShippingPostcode)
-                /*
-                const [key, value] = EbaySaverState.getUserAddressHeader(defaultShippingAddress, defaultShippingPostcode)
-                const paramHeader = clientApiManager.optionalData.paramHeader ?? {}
-                // TODO: Rework, this particular paramHeader can have other filter
-                if (!paramHeader[key]) {
-                    setAddress(defaultShippingAddress, defaultShippingPostcode)
-                }
-                */
                 const [key, value] = EbaySaverState.makeUserAddressHeader(defaultShippingAddress, defaultShippingPostcode)
                 clientApiManager.optionalData.paramHeader = clientApiManager.optionalData.paramHeader ?? {}
                 clientApiManager.optionalData.paramHeader[key] = `${value}`
-                if (!settingObject.isLoading) {
-                    settingObject.setShippingLocation(defaultShippingAddress, defaultShippingPostcode)
-                } else {
-                    logging.debug("Setting not loaded cannot save useAddress")
-                }
-            //Just to refresh and refetch
             }
-
             if (defaultItemLocation) {
-                /*
-                const filter = state?.filter ?? {}
-                if (!filter["itemLocationCountry"]) {
-                    logging.info("Default item location: ", defaultItemLocation)
-                    setItemLocation(defaultItemLocation)
-                }
-                */
-
-                EbaySaverState.setLocation(state, defaultItemLocation)
-                if (!settingObject.isLoading) {
-                    settingObject.setItemLocation(defaultItemLocation)
-                } else {
-                    logging.debug("Setting not loaded cannot save ItemLocation")
-                }
+                state = EbaySaverState.setLocation(state, defaultItemLocation)
             }
+            logging.debug("Updated Setting", state)
             return {...state}
         }
 
@@ -193,22 +173,46 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
             "results": newState
         })
     }, [])
+    //
+    //UPDATE: state object once setting is loaded
+    useEffect(() => {
+        // Loads defaults from setting
+        if (!settingObject.isLoading) {
+            logging.group("Setting loaded updating setting")
+            stateDispatch({
+                "type": "updateSetting"
+            })
+        } else {
+            logging.group("Setting not loaded yet")
+        }
+        logging.groupEnd()
+        }, 
+        [
+            settingObject.isLoading,
+            settingObject
+        ]
+    )
 
+    //INIT: writes the first initial state using searchParam
+    //TODO: move this into reducer init
     useEffect(() => {
         logging.debug("URL query:", query)
         const urlQuery = URLSearchParamsToJson(new URLSearchParams(query))
         let temp_state = EbaySaverState.parse(urlQuery)
         //temp_state = EbaySaverState.addCategoryRequest(temp_state)
         stateDispatch({"type": "updateState", "results": temp_state})
-    }, [query])
+    }, [])
 
+    //Fetch data from api everytime state changed
     useEffect(() => {
         (async () => {
-            //first search
-            // Doesn't cause loop hopefully bc it's conditional??
             logging.group("Loading new response")
             logging.debug("State: ", state)
             logging.debug("Resp : ", resp)
+            //Do nothing until setting has loaded
+            if (settingObject.isLoading) return 
+
+            // first search
             if (!resp) {
                 logging.debug("No resp")
                 let tempState = {...state}
@@ -217,6 +221,9 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
                 const [outcome, data] = await clientApiManager.search(tempState)
                 if (outcome) {
                     setResp(data)
+                    // Save the categoryOnce so we don't ever have to request it again 
+                    // for the item
+                    cacheCategories.current = data.refinement.categoryDistributions 
                 } else {
                     logging.error("Api return nothing")
                 }
@@ -234,99 +241,6 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
     }, [state])
 
 
-
-    /*
-    const setAddress = useCallback(
-        (country: keyof typeof Countries, postcode: number) => {
-            const [key, value] = EbaySaverState.getUserAddressHeader(country, postcode)
-            clientApiManager.optionalData.paramHeader = clientApiManager.optionalData.paramHeader ?? {}
-            clientApiManager.optionalData.paramHeader[key] = `${value}`
-            settingObject.setShippingLocation(country, postcode)
-            setState({...state} as SEbaySearch)
-        }
-        ,[state, setState, settingObject]
-    )
-
-    const setItemLocation = useCallback((country: keyof typeof Countries) => {
-        const tempState = state ?? {}
-        EbaySaverState.setLocation(tempState, country)
-        settingObject.setItemLocation(country)
-        setState({...tempState})
-    }, [
-        state,
-        setState,
-        settingObject
-    ])
-    */
-
-
-    useEffect(() => {
-        // Loads defaults from setting
-        logging.group("Setting loaded updating setting")
-        stateDispatch({
-            "type": "updateSetting"
-        })
-        if (settingObject.isLoading) return 
-        if (!settingObject.setting.current) return 
-
-        const setting = settingObject.setting.current
-        logging.group("Loading default setting")
-        logging.debug("isLoading: ", `${settingObject.isLoading}`)
-        logging.debug("setting: ", `${JSON.stringify(settingObject.setting)}`)
-        const defaultItemLocation = setting.itemLocation
-        const defaultShippingAddress = setting.shippingLocation
-        const defaultShippingPostcode = setting.shippingPostcode
-
-        if (defaultShippingAddress && defaultShippingPostcode) {
-            logging.info("Default shipping information: ", defaultShippingAddress, defaultShippingPostcode)
-            /*
-            const [key, value] = EbaySaverState.getUserAddressHeader(defaultShippingAddress, defaultShippingPostcode)
-            const paramHeader = clientApiManager.optionalData.paramHeader ?? {}
-            // TODO: Rework, this particular paramHeader can have other filter
-            if (!paramHeader[key]) {
-                setAddress(defaultShippingAddress, defaultShippingPostcode)
-            }
-            */
-            const [key, value] = EbaySaverState.makeUserAddressHeader(defaultShippingAddress, defaultShippingPostcode)
-            clientApiManager.optionalData.paramHeader = clientApiManager.optionalData.paramHeader ?? {}
-            clientApiManager.optionalData.paramHeader[key] = `${value}`
-            if (!settingObject.isLoading) {
-                settingObject.setShippingLocation(defaultShippingAddress, defaultShippingPostcode)
-            } else {
-                logging.debug("Setting not loaded cannot save useAddress")
-            }
-        //Just to refresh and refetch
-        }
-
-        if (defaultItemLocation) {
-            /*
-            const filter = state?.filter ?? {}
-            if (!filter["itemLocationCountry"]) {
-                logging.info("Default item location: ", defaultItemLocation)
-                setItemLocation(defaultItemLocation)
-            }
-            */
-
-            stateDispatch({
-                "type": "updateItemLocation",
-                "results": {
-                    "country": defaultItemLocation
-                }
-            })
-            if (!settingObject.isLoading) {
-                settingObject.setItemLocation(defaultItemLocation)
-            } else {
-                logging.debug("Setting not loaded cannot save ItemLocation")
-            }
-        }
-        //return {...state}
-        logging.groupEnd()
-        }, 
-        [
-            settingObject.isLoading,
-            settingObject
-        ]
-    )
 
     function getNoPage() {
          // TODO: could also be fetch from state
@@ -368,7 +282,7 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
     }
 
 
-    const value = {
+    const value: QueryStateType = {
         state,
         // setState,
         resp,
@@ -376,6 +290,7 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         stateDispatch,
         getNoPage,
         toPage,
+        cacheCategories,
     }
 
     return (

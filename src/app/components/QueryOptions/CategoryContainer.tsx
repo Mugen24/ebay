@@ -22,21 +22,17 @@ export function Category_button({cat, setCategory}:
     )
 }
 
-export default function CategoryContainer({categories, setCategory}: 
+export default function CategoryContainer({setCategory}: 
     {
-        categories: Category[],
+        // categories: Category[],
         setCategory: (categoryId: string) => void
     }) {
 
-    const { state } = useQueryState()
-    const cacheCategories = useRef<Category[]>([])
+    const { state, resp, cacheCategories } = useQueryState()
 
-    logging.debug("Parsing category: ", categories)
+    logging.debug("Parsing category: ", cacheCategories.current)
 
     // Caches the categories and expects the parent to update
-    if (categories) {
-        cacheCategories.current = categories
-    } 
     
     const CATEGORY_LIMIT = 10;
     const reactCategories = []

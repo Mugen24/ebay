@@ -1,6 +1,8 @@
+- Fix debugging statement, it's all over the place
 - Cache catogory id for item
     - Add condition for when to reload category again
     - When clicking a item category disappear
+
 
 - Save intermediary state for quicker history navigation
 
