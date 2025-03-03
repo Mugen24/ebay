@@ -138,7 +138,7 @@ export function SettingProvider({children}: {children: ReactNode}) {
                 setItemLocation,
             }
         }
-    }, [isLoading, setting, addFavourite,, removeFavourite, setExpireOffset, setItemLocation, setShippingLocation])
+    }, [isLoading, setting, addFavourite, removeFavourite, setExpireOffset, setItemLocation, setShippingLocation])
 
 
     return (

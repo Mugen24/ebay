@@ -1,4 +1,5 @@
 - Fix debugging statement, it's all over the place
+- TODO: move the reduce function out into a separate function 
 - Cache catogory id for item
     - Add condition for when to reload category again
     - When clicking a item category disappear
