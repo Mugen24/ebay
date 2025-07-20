@@ -1,9 +1,9 @@
 'use client'
-import { EbaySaverState } from "../EbayApi/EbaySaverState"
+import { EbaySaverState } from "../server/EbayApi/EbaySaverState"
 import { extractCategoryDistributions } from "@/app/actions/utils"
 import CategoryContainer from "./QueryOptions/CategoryContainer"
 import styles from "./structure.module.css"
-import { Filter as FilterType} from "../EbayApi/EbaySaverState"
+import { Filter as FilterType} from "../server/EbayApi/EbaySaverState"
 import { Filter } from "./QueryOptions/FilterContainer"
 import { useQueryState } from "../hooks/useQuerytState"
 import logging from "../utils/logger"

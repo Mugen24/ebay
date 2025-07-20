@@ -1,13 +1,13 @@
 import { createContext, ReactElement, ReactNode, useContext, useEffect, useState, useRef, useCallback, useReducer, ReducerWithoutAction, Reducer, ReducerAction, Dispatch, cache, MutableRefObject } from 'react';
-import { Countries, EbaySaverState, Filter, SEbaySearch } from '../EbayApi/EbaySaverState';
+import { Countries, EbaySaverState, Filter, SEbaySearch } from '../server/EbayApi/EbaySaverState';
 import { Category, EbaySearch, EbaySearchReturn, SortField } from "../types/EbayApiTypes/ebaySeachTypes";
 import logging from "../utils/logger";
-import { useSetting } from './useSetting';
+import { useSetting } from './useStateManagement';
 import { clientApiManager } from '../utils/clientApiManager';
 import { useSearchParams } from 'next/navigation';
 import { URLSearchParamsToJson } from '../actions/utils';
 import { CategoryId } from '../server/setting/categoryManager';
-import { setting } from '../server/setting/settings';
+import { settingManager } from '../server/setting/settings';
 
 export type QueryStateType = {
     state: SEbaySearch
@@ -190,7 +190,7 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
     //UPDATE: state object once setting is loaded
     useEffect(() => {
         // Loads defaults from setting
-        logging.debug("Detect setting change: ", setting)
+        logging.debug("Detect setting change: ", settingManager)
         if (!settingObject.isLoading) {
             stateDispatch({
                 "type": "updateSetting"

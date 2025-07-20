@@ -1,5 +1,5 @@
 import { URLSearchParamsToJson } from "@/app/actions/utils";
-import { ebayApi } from "@/app/EbayApi/EbayApi";
+import { ebayApi } from "@/app/server/EbayApi/EbayApi";
 import logging from "@/app/utils/logger";
 
 export async function POST(request: Request) {

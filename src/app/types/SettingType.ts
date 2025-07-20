@@ -1,4 +1,4 @@
-import { Countries, SEbaySearch } from "../EbayApi/EbaySaverState"
+import { Countries, SEbaySearch } from "../server/EbayApi/EbaySaverState"
 import { EbayGetItem, EbayGetItemReturn } from "./EbayApiTypes/ebayGetItemTypes";
 import { EbaySearchReturn } from "./EbayApiTypes/ebaySeachTypes";
 import { MarketplaceId } from "./marketplaceIds";

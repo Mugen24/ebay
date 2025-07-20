@@ -3,7 +3,7 @@ import { extractCategoryDistributions } from "../../actions/utils";
 import { Category, CategoryDistribution } from "../../types/EbayApiTypes/ebaySeachTypes";
 import logging from "@/app/utils/logger";
 import { useEffect, useRef } from "react";
-import { SEbaySearch } from "@/app/EbayApi/EbaySaverState";
+import { SEbaySearch } from "@/app/server/EbayApi/EbaySaverState";
 
 export function Category_button({cat, setCategory}: 
     {

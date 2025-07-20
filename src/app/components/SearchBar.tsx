@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { formToJSON } from "axios";
 import { EbaySearch } from "../types/EbayApiTypes/ebaySeachTypes";
 import { styled } from "styled-components";
-import { EbaySaverState, SEbaySearch } from "../EbayApi/EbaySaverState";
+import { EbaySaverState, SEbaySearch } from "../server/EbayApi/EbaySaverState";
 
 export const SearchBarStyle = styled.div`
     width: 80%;

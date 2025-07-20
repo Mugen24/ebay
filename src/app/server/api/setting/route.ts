@@ -1,8 +1,8 @@
-import { setting } from "@/app/server/setting/settings"
+import { settingManager } from "@/app/server/setting/settings"
 
 export async function POST(request: Request) {
-    if (setting){
-        return Response.json(setting.setting, {
+    if (settingManager){
+        return Response.json(settingManager.setting, {
             status: 200,
             statusText: "ok"
         })
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
     const body = await request.json()
-    const [outcome, desc] = setting.saveToFile(body)
+    const [outcome, desc] = settingManager.saveToFile(body)
     if (outcome) return Response.json({},{
         status: 200,
         statusText: "ok"

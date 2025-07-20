@@ -3,9 +3,11 @@ import logging from '../../utils/logger';
 import path from 'node:path';
 import { Outcome } from '@/app/types/Outcome';
 import { FavouriteQueries, SettingType, Theme } from '@/app/types/SettingType';
+import { Database } from 'sqlite';
+import { assert } from 'node:console';
 
 
-class Setting {
+export class Setting {
     static SETTING_PATH = process.env["SETTING_PATH"] ?? "./config/setting.json"
     static DEFAULTS: SettingType = {
         theme: "dark",
@@ -18,66 +20,46 @@ class Setting {
         defaultRefreshIntervalSecond: 10 * 60,
     }
     setting: SettingType
+    db: Database
 
-    constructor() {
-        const [outcome, setting] = this.loadFromFile()
-        if (outcome) {
-            this.setting = Object.assign(Setting.DEFAULTS, setting)
-        } else {
-            throw new Error("Can't fetch setting")
-        }
+    private constructor(database: Database) {
+        this.db = database
+
+        this.setting = Setting.DEFAULTS
     }
 
-    loadFromFile(): Outcome<SettingType | {}> {
-        logging.debug("Loading setting: ", path.resolve(Setting.SETTING_PATH))
-        try {
+    async get_settings() {
+        const setting: SettingType | undefined = await this.db.get(`
+            select 
+                theme,
+                favouriteQueries,
+                watchedItems,
+                shippingLocation,
+                shippingPostcode,
+                itemLocation,
+                marketPlaceId,
+                defaultRefreshIntervalSecond
+            from  
+                setting
+            where 
+                -- TODO: handle individual user
+                1 = 1
+        `)
 
-            const file = readFileSync(Setting.SETTING_PATH, {
-                encoding: "utf-8"
-            })
-
-            const jFile: SettingType = JSON.parse(file)
-            return [true, jFile]
-
-        } catch (error: any) {
-            if (error.code === "ENOENT") {
-                logging.error("./config/setting.json does not exist at path. Creating file")
-                writeFileSync(Setting.SETTING_PATH, "{}", {encoding: "utf8"})
-                return [true, {}]
-            } else {
-                logging.error("Setting error: ", error)
-            }
-            return [false, error]
-        }
+        this.setting = setting ? setting : Setting.DEFAULTS
     }
 
-    saveToFile(newSettingStr: string): Outcome<any> {
-        const oldSetting = this.loadFromFile()
-        const oldSettingStr= JSON.stringify(oldSetting)
-        // const setting = JSON.stringify(this._setting)
-        if (oldSettingStr === newSettingStr) {
-            logging.warn("No change in setting detected")
-            logging.warn("Original setting", oldSetting)
-            logging.warn("Current setting", newSettingStr)
-        }
-
-        try {
-            writeFileSync(Setting.SETTING_PATH, newSettingStr, {
-                encoding: "utf8",
-                flag: "w+"
-            })
-        } 
-        catch (error) {
-            logging.error("Unable to write setting: ", error)
-            return [false, error]
-        }
-        finally {
-            return [true, ""]
-        }
-
-
+    async set_setting() {
+        assert(this.setting)
+        await this.db.run(`
+            insert into setting values (:setting)
+        `, this.setting)
     }
 
+    static async init(database: Database) {
+        const setting = new Setting(database)
+        await setting.get_settings()
+        return setting
+    }
 }
 
-export const setting = new Setting()

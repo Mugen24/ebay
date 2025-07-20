@@ -1,4 +1,4 @@
-import { ebayApi } from "@/app/EbayApi/EbayApi";
+import { ebayApi } from "@/app/server/EbayApi/EbayApi";
 import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {

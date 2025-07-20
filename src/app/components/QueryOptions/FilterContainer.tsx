@@ -1,10 +1,10 @@
-import { Countries, EbaySaverState, Filter as FilterType } from "@/app/EbayApi/EbaySaverState";
+import { Countries, EbaySaverState, Filter as FilterType } from "@/app/server/EbayApi/EbaySaverState";
 import { useQueryState } from "@/app/hooks/useQuerytState";
 import { ConditionOption, SortField } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import logging from "@/app/utils/logger";
 import React, { useEffect } from "react";
 import { formToJson } from '../../actions/utils';
-import { useSetting } from "@/app/hooks/useSetting";
+import { useSetting } from "@/app/hooks/useStateManagement";
 
 export function Filter({setFilterState, setSortState, saveConfigState}: {
     setFilterState: <T extends keyof FilterType>(filterKey: T, filterValue: FilterType[T]) => void,

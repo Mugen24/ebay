@@ -1,11 +1,12 @@
 import { useCategories } from "@/app/hooks/useCategories";
+import { useStateManager } from "@/app/hooks/useStateManagement";
 import { EbaySearch } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import { useRouter } from "next/router";
 import { ReactElement, useState } from "react";
 
 
 export function CategoriesList() {
-    const {categories} = useCategories()
+    const { categories } = useStateManager()
     const [categoryId, setCategoryIds] = useState()
     const catElements: ReactElement[] = []
 

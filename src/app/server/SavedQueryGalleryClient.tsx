@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 import { EbayItemId, EpochTimeStamp } from "../types/SettingType";
 import { FavouriteQueryElement } from "../components/baseComponents/FavouriteQueryElement";
 import { WatchItemElement } from "../components/baseComponents/WatchItemElement";
-import { useSetting } from "../hooks/useSetting";
+import { useSetting } from "../hooks/useStateManagement";
 import { clientApiManager } from "../utils/clientApiManager";
 import logging from "../utils/logger";
 

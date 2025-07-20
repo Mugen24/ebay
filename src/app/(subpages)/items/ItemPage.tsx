@@ -1,7 +1,7 @@
 'use client'
 
 import { URLSearchParamsToJson, extractItems } from "@/app/actions/utils";
-import { EbaySaverState } from "@/app/EbayApi/EbaySaverState";
+import { EbaySaverState } from "@/app/server/EbayApi/EbaySaverState";
 import { EbayItem } from "@/app/components/baseComponents/EbayItem";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -23,6 +23,7 @@ export function ClientPage() {
 
 
     // Fetching pagination
+    // !TODO: remove not recommended by ebay
     const noPage = getNoPage()
     let pageNumbers: number[] = []
     if (noPage) {

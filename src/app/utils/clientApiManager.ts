@@ -1,7 +1,7 @@
 "use  client"
 import axios, { AxiosResponse } from "axios";
 import { EbaySearch, EbaySearchReturn, DistanceFromPickupLocation } from '../types/EbayApiTypes/ebaySeachTypes';
-import { EbaySaverState } from "../EbayApi/EbaySaverState";
+import { EbaySaverState } from "../server/EbayApi/EbaySaverState";
 import logging from "./logger";
 import { SettingType } from "../types/SettingType";
 import { OptionalDataType } from "../types/clientApiTypes";

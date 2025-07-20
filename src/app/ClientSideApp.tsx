@@ -2,17 +2,16 @@
 import React, { Context, createContext, Dispatch, ReactElement, ReactNode, useEffect, useState } from "react"
 import { SearchBar } from "./components/SearchBar";
 import styles from "./structure.module.css";
-import { EbaySaverState } from "./EbayApi/EbaySaverState";
 import { SavedQueryGallery } from "./server/SavedQueryGalleryClient";
-import { useCategories } from "./hooks/useCategories";
 import { CategoriesList } from "./components/baseComponents/CategoriesList";
+import { StateProvider } from '@/app/hooks/useStateManagement';
 
 
 
-export default function ClientSideApp({children}: {children?: ReactNode}) {
-    const {categories} = useCategories()
-    console.log(categories)
+export default function ClientSideApp({serverData, children}: {serverData: Record<string, any>, children?: ReactNode}) {
+    // const {categories} = useCategories()
     return (
+      <StateProvider serverData={serverData}>
         <div className={styles.main_layout}>
           <CategoriesList/>
           <section className={styles.center_content}>
@@ -23,5 +22,6 @@ export default function ClientSideApp({children}: {children?: ReactNode}) {
           </section>
           {children}
         </div > 
+      </StateProvider>
     )
 }
