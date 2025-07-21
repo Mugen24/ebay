@@ -51,11 +51,15 @@ export class CategoryManager{
 
 
     static async init(setting: Setting, database: Database) {
-        const {version, categories} = await database.get(`
+        const data = await database.get(`
             select version, categories from Categories
-        `)
+        `) 
+
+        const version = data ? data.version : null
+        const categories= data ? data.categories : null
 
         const categoriesManager = new CategoryManager(setting, database, version, categories) 
+        await categoriesManager.update()
         return categoriesManager
     }
 

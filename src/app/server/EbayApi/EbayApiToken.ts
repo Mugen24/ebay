@@ -52,7 +52,11 @@ export class EbayApiToken {
             }
         )
         let token = await ebayAuth.getApplicationToken("PRODUCTION", EbayApiToken.scopes)
+
         const parsed_token= JSON.parse(token);
+        if (process.env.ROLLUP_ENV === "DEBUG") {
+            console.log(`TOKEN: ${parsed_token}`)
+        }
         return new EbayApiToken(parsed_token.access_token);
     }
 

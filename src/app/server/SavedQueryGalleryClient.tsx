@@ -3,20 +3,17 @@ import { ReactElement } from "react";
 import { EbayItemId, EpochTimeStamp } from "../types/SettingType";
 import { FavouriteQueryElement } from "../components/baseComponents/FavouriteQueryElement";
 import { WatchItemElement } from "../components/baseComponents/WatchItemElement";
-import { useSetting } from "../hooks/useStateManagement";
+import { useStateManager } from "../hooks/useStateManagement";
 import { clientApiManager } from "../utils/clientApiManager";
 import logging from "../utils/logger";
 
 
 export function SavedQueryGallery() 
     {
-        const {setting} = useSetting()
+        const {setting} = useStateManager()
 
-        if (!setting?.current) return (
-            <h1>Loading Gallery...</h1>
-        )
 
-        const favouriteQueries = setting?.current.favouriteQueries
+        const favouriteQueries = setting.favouriteQueries
         const favouriteQueriesElement: Record<EpochTimeStamp, ReactElement<typeof FavouriteQueryElement>> = {}
 
         Object.keys(favouriteQueries).forEach(async (id) => {
@@ -28,7 +25,7 @@ export function SavedQueryGallery()
             }
         })
 
-        const watchItems = setting.current.watchedItems
+        const watchItems = setting.watchedItems
         const watchItemsElements: Record<EbayItemId, ReactElement<typeof WatchItemElement>> = {}
         Object.keys(watchItems).forEach(async (id) => {
             const [outcome, itemRes] = await clientApiManager.getItem(watchItems[id].itemData)

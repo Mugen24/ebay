@@ -23,6 +23,7 @@ export const StateContext= createContext({})
 
 export function StateProvider({serverData, children}: {serverData: Record<string, any>, children: ReactNode}) {
     const [setting, _setSetting] = useState<SettingType>(serverData!.setting)
+    const [categories, _setCategories] = useState<Categories>(serverData!.categories)
     // const categories= useState<Categories>(serverData.categoryManager)
     function setSetting(value: Record<string, any>) {
         _setSetting({
@@ -80,6 +81,7 @@ export function StateProvider({serverData, children}: {serverData: Record<string
         //This guarantee that setting has been loaded
         return  {
             setting,
+            categories,
             setTheme,
             addFavourite,
             removeFavourite,
@@ -87,7 +89,7 @@ export function StateProvider({serverData, children}: {serverData: Record<string
             setShippingLocation,
             setItemLocation,
         }
-    }, [setting, setTheme, addFavourite, removeFavourite, setItemLocation, setShippingLocation, setRefreshInterval])
+    }, [setting, categories, setTheme, addFavourite, removeFavourite, setItemLocation, setShippingLocation, setRefreshInterval])
 
 
     return (

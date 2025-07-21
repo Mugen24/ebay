@@ -12,7 +12,7 @@ import { Categories } from "../server/setting/categoryManager";
 
 class ClientApiManager {
     optionalData: OptionalDataType
-    static BASE = "api"
+    static BASE = "/server/api"
     constructor() {
         this.optionalData = {}
     }

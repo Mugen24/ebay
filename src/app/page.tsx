@@ -2,7 +2,6 @@
 import ClientSideApp from "./ClientSideApp";
 
 // import { CategoryProvider } from "./hooks/useCategories";
-import { ServerContext } from "./Init";
 import logging from "./utils/logger";
 import { Setting } from "./server/setting/settings";
 import { Categories, CategoryManager  } from "./server/setting/categoryManager";

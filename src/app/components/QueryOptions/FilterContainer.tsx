@@ -4,7 +4,7 @@ import { ConditionOption, SortField } from "@/app/types/EbayApiTypes/ebaySeachTy
 import logging from "@/app/utils/logger";
 import React, { useEffect } from "react";
 import { formToJson } from '../../actions/utils';
-import { useSetting } from "@/app/hooks/useStateManagement";
+import { useStateManager } from "@/app/hooks/useStateManagement";
 
 export function Filter({setFilterState, setSortState, saveConfigState}: {
     setFilterState: <T extends keyof FilterType>(filterKey: T, filterValue: FilterType[T]) => void,
@@ -13,9 +13,8 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
 }) {
     
     const {state, stateDispatch} = useQueryState();
-    const settingOb = useSetting()
+    const {setting} = useStateManager()
     const userLocationCountryMap = Object.keys(Countries)
-    const setting = settingOb.setting?.current
 
     // TODO: move all this login into EbaySaverState
     const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {

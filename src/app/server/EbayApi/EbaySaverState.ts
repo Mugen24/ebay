@@ -1,4 +1,3 @@
-'use client'
 import { AspectFilter, BuyingOption, CompatibilityFilter, ConditionOption, EbaySearch, SortField } from '../../types/EbayApiTypes/ebaySeachTypes';
 import logging from "../../utils/logger"
 

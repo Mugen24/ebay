@@ -9,7 +9,6 @@ import { StateProvider } from '@/app/hooks/useStateManagement';
 
 
 export default function ClientSideApp({serverData, children}: {serverData: Record<string, any>, children?: ReactNode}) {
-    // const {categories} = useCategories()
     return (
       <StateProvider serverData={serverData}>
         <div className={styles.main_layout}>

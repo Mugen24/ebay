@@ -1,13 +1,12 @@
+'use client';
 import { createContext, ReactElement, ReactNode, useContext, useEffect, useState, useRef, useCallback, useReducer, ReducerWithoutAction, Reducer, ReducerAction, Dispatch, cache, MutableRefObject } from 'react';
 import { Countries, EbaySaverState, Filter, SEbaySearch } from '../server/EbayApi/EbaySaverState';
 import { Category, EbaySearch, EbaySearchReturn, SortField } from "../types/EbayApiTypes/ebaySeachTypes";
 import logging from "../utils/logger";
-import { useSetting } from './useStateManagement';
 import { clientApiManager } from '../utils/clientApiManager';
-import { useSearchParams } from 'next/navigation';
 import { URLSearchParamsToJson } from '../actions/utils';
-import { CategoryId } from '../server/setting/categoryManager';
-import { settingManager } from '../server/setting/settings';
+import { useStateManager } from './useStateManagement';
+import { useSearchParams } from 'next/navigation';
 
 export type QueryStateType = {
     state: SEbaySearch
@@ -44,11 +43,10 @@ type stateActionType =
     | {type: 'loading'}
 
 
-export function QueryStateProvider({children}: {children: ReactNode}) {
+export function QueryStateProvider({serverData, children}: {serverData: any, children: ReactNode}) {
 
-    const [resp, setResp] = useState<EbaySearchReturn>()
-    const settingObject = useSetting()
-    const query = useSearchParams().toString()
+    const [resp, setResp] = useState<EbaySearchReturn>(serverData.itemData)
+    const stateManager = useStateManager()
     const cacheCategories = useRef<Category[]>([])
 
 
@@ -109,25 +107,15 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
             const [key, value] = EbaySaverState.makeUserAddressHeader(action.results.country, action.results.postcode)
             clientApiManager.optionalData.paramHeader = clientApiManager.optionalData.paramHeader ?? {}
             clientApiManager.optionalData.paramHeader[key] = `${value}`
-            if (!settingObject.isLoading) {
-                 settingObject.setShippingLocation(action.results.country, action.results.postcode)
-            } else {
-                 logging.warn("Setting not loaded cannot save useAddress")
-            }
-            //Just to refresh and refetch
+            stateManager.setShippingLocation(action.results.country, action.results.postcode)
             newState = {
                 ...state
             }
         }
-
         else if (action.type === "updateItemLocation") {
             logging.info("Updating Item location")
             state = EbaySaverState.setLocation(state, action.results.country)
-            if (!settingObject.isLoading) {
-                settingObject.setItemLocation(action.results.country)
-            } else {
-                logging.warn("Setting not loaded cannot save ItemLocation")
-            }
+            stateManager.setItemLocation(action.results.country)
 
             newState = {
                 ...state
@@ -135,8 +123,7 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         }
 
         else if (action.type === "updateSetting") {
-            if (settingObject.isLoading) return state
-            const setting = settingObject.setting.current
+            const setting = stateManager.setting
             if (!setting) return state
 
             const defaultItemLocation = setting.itemLocation
@@ -169,16 +156,17 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         return newState
     }
 
-    //Intialise first state using the searchParam
-    function initState(query: any) {
-        logging.debug("Detect query change:", query)
-        const urlQuery = URLSearchParamsToJson(new URLSearchParams(query))
-        let temp_state = EbaySaverState.parse(urlQuery)
-        logging.debug("New state from query: ", temp_state)
-        //temp_state = EbaySaverState.addCategoryRequest(temp_state)
-        return temp_state
-    }
-    const [state, stateDispatch] = useReducer<Reducer<SEbaySearch, stateActionType>>(reducer, initState(query))
+    const [state, stateDispatch] = useReducer(
+        reducer,
+        useSearchParams(),
+        (query)  => {
+            logging.debug("Detect query change:", query)
+            const urlQuery = URLSearchParamsToJson(new URLSearchParams(query))
+            let temp_state = EbaySaverState.parse(urlQuery)
+            logging.debug("New state from query: ", temp_state)
+            return temp_state
+        }
+    )
 
     const setState = useCallback((newState: SEbaySearch) => {
         stateDispatch({
@@ -186,36 +174,16 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
             "results": newState
         })
     }, [])
-    //
+
     //UPDATE: state object once setting is loaded
     useEffect(() => {
         // Loads defaults from setting
-        logging.debug("Detect setting change: ", settingManager)
-        if (!settingObject.isLoading) {
-            stateDispatch({
-                "type": "updateSetting"
-            })
-        } else {
-            logging.group("Setting not loaded yet")
-        }
-        }, 
-        [
-            settingObject.isLoading,
-            settingObject
-        ]
+        logging.debug("Detect setting change: ", stateManager.setting)
+        stateDispatch({
+            "type": "updateSetting"
+        })
+        }, []
     )
-
-    //INIT: writes the first initial state using searchParam
-    //TODO: move this into reducer init
-    /*
-    useEffect(() => {
-        logging.debug("Parsing new State", query)
-        const urlQuery = URLSearchParamsToJson(new URLSearchParams(query))
-        let temp_state = EbaySaverState.parse(urlQuery)
-        //temp_state = EbaySaverState.addCategoryRequest(temp_state)
-        stateDispatch({"type": "updateState", "results": temp_state})
-    }, [])
-    */
 
     //Fetch data from api everytime state changed
     useEffect(() => {
@@ -223,8 +191,6 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
             logging.group("Loading new response")
             logging.debug("State: ", state)
             logging.debug("Resp: ", resp)
-            //Do nothing until setting has loaded
-            if (settingObject.isLoading) return 
 
             // first search
             if (!resp) {
@@ -242,6 +208,7 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
                     logging.error("Api return nothing")
                 }
             } else {
+                console.log(state)
                 const [outcome, data] = await clientApiManager.search(state)
                 logging.debug("New resp: ", data)
                 if (outcome) {
