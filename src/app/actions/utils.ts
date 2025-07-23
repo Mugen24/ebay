@@ -1,5 +1,4 @@
 import { ItemSummary } from "../types/EbayApiTypes/ebaySeachTypes"
-import config from "../data/searchConfig.json"
 import path from "path";
 import { EbaySearchReturn } from "../types/EbayApiTypes/ebaySeachTypes";
 
@@ -22,26 +21,26 @@ export function URLSearchParamsToJson(params: URLSearchParams) {
 
 //fromDate instead of just Date.now() in case of checking  
 //date from the past
-export function checkNewListing(item: ItemSummary, fromDate?: Date) {
-    let date;
-    if (fromDate === undefined) {
-        if (config["lastRunTime"]){
-            date = new Date(config["lastRunTime"])
-        } else {
-            date = new Date(Date.now())
-        }
-    } else {
-        date = fromDate
-    }
+// export function checkNewListing(item: ItemSummary, fromDate?: Date) {
+//     let date;
+//     if (fromDate === undefined) {
+//         if (config["lastRunTime"]){
+//             date = new Date(config["lastRunTime"])
+//         } else {
+//             date = new Date(Date.now())
+//         }
+//     } else {
+//         date = fromDate
+//     }
 
-    date.setHours(0)
+//     date.setHours(0)
 
-    const itemDate = new Date(item.itemCreationDate);
-    const minnuteOffset = itemDate.getTimezoneOffset();
+//     const itemDate = new Date(item.itemCreationDate);
+//     const minnuteOffset = itemDate.getTimezoneOffset();
 
-    //Offset the UTC time
-    return (itemDate.getTime() + (minnuteOffset * 60) >= date.getTime())
-}
+//     //Offset the UTC time
+//     return (itemDate.getTime() + (minnuteOffset * 60) >= date.getTime())
+// }
 
 //EbaySearchReturn related helper
 export function extractCategoryDistributions(result: EbaySearchReturn) {

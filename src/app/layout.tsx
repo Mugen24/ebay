@@ -74,7 +74,7 @@ export default function RootLayout({
           <AxiosProvider>
             <StateProvider serverData={serverData}>
               <QueryStateProvider>
-                {children}
+                  {children}
               </QueryStateProvider>
             </StateProvider>
           </AxiosProvider>

@@ -7,7 +7,7 @@ import { CategoriesList } from "./components/baseComponents/CategoriesList";
 
 
 
-export default function ClientSideApp({serverData, children}: {serverData: Record<string, any>, children?: ReactNode}) {
+export default function ClientSideApp({children}: {children?: ReactNode}) {
     return (
         <div className={styles.main_layout}>
           <CategoriesList/>

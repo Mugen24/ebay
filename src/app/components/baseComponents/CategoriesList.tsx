@@ -6,19 +6,10 @@ import Link from "next/link";
 
 
 export function CategoriesList() {
-    const { categories } = useStateManager()
+    const { userData } = useStateManager()
     // const [categoryId, setCategoryIds] = useState()
     const catElements: ReactElement[] = []
-
-    // function onClick(categoryId: string) {
-    //     console.log("Category click")
-    //     const params: EbaySearch = {
-    //         q: "",
-    //         category_ids: categoryId
-    //     }
-    //     const searchParam = new URLSearchParams(params as Record<string, any>)
-    //     window.location.href = `/items` + "?" + searchParam.toString();
-    // }
+    const categories = userData.categories
 
     categories.rootCategoryNode.childCategoryTreeNodes.forEach((category, index) => {
         catElements.push(

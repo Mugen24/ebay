@@ -1,3 +1,4 @@
+"use client";
 import { createContext, ReactNode, useRef, MutableRefObject } from 'react';
 import axios, { Axios, AxiosRequestConfig, InternalAxiosRequestConfig } from "axios";
 export type AxiosContextType = {

@@ -4,10 +4,6 @@
 import { createContext, Dispatch, MutableRefObject, ReactNode, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { Favourite, SettingType, Theme } from '../types/SettingType';
 import { Countries, SEbaySearch } from '../server/EbayApi/EbaySaverState';
-import { EbaySearch } from "../types/EbayApiTypes/ebaySeachTypes";
-import { FavouriteQueryType, FavouriteQueriesType } from '../server/setting/favouriteQueries';
-import axios from "axios";
-import { AxiosContext } from "./useAxios";
 import { Categories } from "../server/setting/categoryManager";
 
 export type StateContextType = {
@@ -16,6 +12,9 @@ export type StateContextType = {
     }
 
 export type UserDataActionType = 
+    | {type: 'updateSetting', results: {
+        setting: SettingType
+    }}
     | {type: 'updateTheme', results: {
         theme: Theme
     }}
@@ -41,7 +40,10 @@ export type UserData = {
 export function StateProvider({serverData, children}: {serverData: UserData, children: ReactNode}) {
     function userStateReducer(userData: UserData, actions: UserDataActionType) {
         const newState = {...userData}
-        if (actions.type === "updateTheme") {
+        if (actions.type === "updateSetting") {
+            newState.setting = actions.results.setting
+        }
+        else if (actions.type === "updateTheme") {
             newState.setting.theme = actions.results.theme
         }
         else if (actions.type === "updateItemLocation") {
@@ -55,19 +57,32 @@ export function StateProvider({serverData, children}: {serverData: UserData, chi
             newState.setting.shippingPostcode = actions.results.postcode
         }
 
-        localStorage.setItem("userData", JSON.stringify(newState))
         return newState
     }
 
     const [userData, handleUserData] = useReducer(
         userStateReducer,
         serverData,
-        (serverData) => 
-        {
-            const userData = JSON.parse(localStorage.getItem("userData") ?? "{}")
-            return Object.assign(userData, serverData)
-        }
     )
+
+    useEffect(() => {
+        try {
+            const userDataSession = localStorage.getItem("ebaySetting") 
+            const userData = JSON.parse(userDataSession)
+            handleUserData({
+                type: "updateSetting",
+                results: userData
+            })
+        } catch (error) {
+            if (! (error instanceof SyntaxError)) {
+                throw error
+            }
+        }
+    }, [])
+
+    useEffect(() => {
+        localStorage.setItem("ebaySetting", JSON.stringify(userData.setting))
+    }, [userData])
 
     const value: StateContextType = useMemo(() => {
         //This guarantee that setting has been loaded

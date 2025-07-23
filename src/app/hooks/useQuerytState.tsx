@@ -1,5 +1,5 @@
 'use client';
-import { createContext, ReactElement, ReactNode, useContext, useEffect, useState, useRef, useCallback, useReducer, ReducerWithoutAction, Reducer, ReducerAction, Dispatch, cache, MutableRefObject } from 'react';
+import { createContext, ReactElement, ReactNode, useContext, useEffect, useReducer, Reducer, ReducerAction, Dispatch, cache, MutableRefObject } from 'react';
 import { Countries, EbaySaverState, Filter, SEbaySearch } from '../server/EbayApi/EbaySaverState';
 import { Category, EbaySearch, EbaySearchReturn, SortField } from "../types/EbayApiTypes/ebaySeachTypes";
 import logging from "../utils/logger";
@@ -8,7 +8,6 @@ import { useStateManager } from './useStateManagement';
 import { useSearchParams } from 'next/navigation';
 import { AxiosContext, AxiosContextType } from './useAxios';
 import axios from 'axios';
-import { join } from 'path';
 
 export type QueryStateType = {
     queryState: SEbaySearch
