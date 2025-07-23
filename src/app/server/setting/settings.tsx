@@ -1,7 +1,3 @@
-import { readFileSync, writeFileSync} from 'node:fs';
-import logging from '../../utils/logger';
-import path from 'node:path';
-import { Outcome } from '@/app/types/Outcome';
 import { FavouriteQueries, SettingType, Theme } from '@/app/types/SettingType';
 import { Database } from 'sqlite';
 import { assert } from 'node:console';
@@ -11,7 +7,6 @@ export class Setting {
     static SETTING_PATH = process.env["SETTING_PATH"] ?? "./config/setting.json"
     static DEFAULTS: SettingType = {
         theme: "dark",
-        favouriteQueries: {},
         watchedItems: {},
         shippingLocation: "AU",
         shippingPostcode: 2100,
@@ -32,7 +27,6 @@ export class Setting {
         const setting: SettingType | undefined = await this.db.get(`
             select 
                 theme,
-                favouriteQueries,
                 watchedItems,
                 shippingLocation,
                 shippingPostcode,
@@ -49,8 +43,8 @@ export class Setting {
         this.setting = setting ? setting : Setting.DEFAULTS
     }
 
-    async set_setting() {
-        assert(this.setting)
+    async save(newSetting: SettingType) {
+        this.setting = newSetting
         await this.db.run(`
             insert into setting values (:setting)
         `, this.setting)

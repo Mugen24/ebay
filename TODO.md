@@ -1,4 +1,8 @@
+- add: saved query
+- add: category + setting caching into cookie
+- add: location selector
 - useStateManagement: write appropriate dep for each function
+
 
 - Factorising
 - Styling

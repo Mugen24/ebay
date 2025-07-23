@@ -1,27 +1,22 @@
-import { settingManager } from "@/app/server/setting/settings"
+import { setting } from '../../../serverInit';
 
-export async function POST(request: Request) {
-    if (settingManager){
-        return Response.json(settingManager.setting, {
-            status: 200,
-            statusText: "ok"
-        })
-    } else {
-        return Response.json({}, {
-            status: 404,
-            statusText: "Server error"
-        })
-    }
+export async function GET(request: Request) {
+    return Response.json(setting.setting, {
+        status: 200,
+        statusText: "ok"
+    })
 }
 
 export async function PUT(request: Request) {
-    const body = await request.json()
-    const [outcome, desc] = settingManager.saveToFile(body)
-    if (outcome) return Response.json({},{
-        status: 200,
-        statusText: "ok"
-    }) 
-    else {
+    const params = await request.json()
+    try {
+        await setting.save(params)
+        return Response.json({},{
+            status: 200,
+            statusText: "ok"
+        }) 
+    }
+    catch {
         return Response.json({}, {
             status: 404,
             statusText: "Server error"
@@ -30,7 +25,4 @@ export async function PUT(request: Request) {
 
 }
 
-export async function Delete(request: Request) {
-
-}
 

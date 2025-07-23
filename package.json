@@ -29,7 +29,7 @@
     "@babel/cli": "^7.25.6",
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.4",
-    "@tailwindcss/postcss": "^4.1.10",
+    "@tailwindcss/postcss": "^4.1.11",
     "@types/ebay-oauth-nodejs-client": "^1.2.4",
     "@types/node": "^22",
     "@types/react": "^18.3.3",

@@ -32,11 +32,10 @@ export type WatchItem = {
 }
 
 export type WatchItems = Record<EbayItemId, WatchItem>
-export type FavouriteQueries = Record<EpochTimeStamp, Favourite>
 
 export interface SettingType {
     theme: Theme,
-    favouriteQueries: FavouriteQueries,
+    // favouriteQueries: FavouriteQueries,
     watchedItems: WatchItems
     // ItemNumber expiredDate should be expiresOffset + readDate
     shippingLocation: keyof typeof Countries,
@@ -45,7 +44,6 @@ export interface SettingType {
     itemLocation: keyof typeof Countries
     // Requires to fetch categories, it different per marketplace 
     marketPlaceId: MarketplaceId
-
     defaultRefreshIntervalSecond?: number
 }
 

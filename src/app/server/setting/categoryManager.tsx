@@ -1,8 +1,6 @@
 import logging from "@/app/utils/logger"
-import { Outcome } from "@/app/types/Outcome"
 import { MarketplaceId } from '../../types/marketplaceIds';
 import { GetCategoryTreeResponse } from "@/app/types/EbayApiTypes/CategoryTree"
-import { GetDefaultCategoryTreeResponse } from '../../types/EbayApiTypes/CategoryTree';
 import { ebayApi } from "@/app/server/EbayApi/EbayApi";
 import { Database } from "sqlite";
 import { Setting } from "./settings";
@@ -13,16 +11,17 @@ export type CategoryName = string
 export type Categories = GetCategoryTreeResponse
 
 
-export class CategoryManager{
+export class CategoryManager {
     categories: Categories 
     marketplaceId: MarketplaceId
     rootCategoryId: string 
     db: Database
 
-    private constructor(setting: Setting, database: Database, rootCategoryId: string, categories: Categories) {
+    private constructor(database: Database, setting: Setting, rootCategoryId: string, categories: Categories) {
+        this.db = database
         this.marketplaceId = setting.setting.marketPlaceId
         this.rootCategoryId = rootCategoryId
-        this.db = database
+        // this.db = database
         this.categories = categories
     }
 
@@ -42,13 +41,12 @@ export class CategoryManager{
             assert(outcome)
 
             this.categories = categories 
-            // this.saveCategories(categories)
+            this.save(this.rootCategoryId, this.categories)
         } 
 
         return this.categories
 
     }
-
 
     static async init(setting: Setting, database: Database) {
         const data = await database.get(`
@@ -56,16 +54,18 @@ export class CategoryManager{
         `) 
 
         const version = data ? data.version : null
-        const categories= data ? data.categories : null
+        const categories= data ? JSON.parse(data.categories) : null
 
-        const categoriesManager = new CategoryManager(setting, database, version, categories) 
+        const categoriesManager = new CategoryManager(database, setting, version, categories) 
         await categoriesManager.update()
         return categoriesManager
     }
 
-    saveCategories(categories: Categories) {
+    save(version: string, categories: Categories) {
         // writeFile(CategoryManager.CATEGORIES_PATH, JSON.stringify(categories))
-        assert(false)
+        this.db.run(`
+            insert into categories (version, categories) values (?, ?)
+        `, [version, JSON.stringify(categories)])
     }
 }
 

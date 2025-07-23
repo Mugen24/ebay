@@ -3,20 +3,17 @@ import { createContext, ReactElement, ReactNode, useContext, useEffect, useState
 import { Countries, EbaySaverState, Filter, SEbaySearch } from '../server/EbayApi/EbaySaverState';
 import { Category, EbaySearch, EbaySearchReturn, SortField } from "../types/EbayApiTypes/ebaySeachTypes";
 import logging from "../utils/logger";
-import { clientApiManager } from '../utils/clientApiManager';
 import { URLSearchParamsToJson } from '../actions/utils';
 import { useStateManager } from './useStateManagement';
 import { useSearchParams } from 'next/navigation';
+import { AxiosContext, AxiosContextType } from './useAxios';
+import axios from 'axios';
+import { join } from 'path';
 
 export type QueryStateType = {
-    state: SEbaySearch
-    // setState: (sEbaySearch: SEbaySearch) => void
-    resp: EbaySearchReturn | undefined
-    // setResp: (resp: EbaySearchReturn) => void
-    getNoPage: () => number | undefined
-    toPage: (number: number) => void
-    stateDispatch: Dispatch<ReducerAction<Reducer<SEbaySearch, stateActionType>>>
-    cacheCategories: MutableRefObject<Category[]>
+    queryState: SEbaySearch
+    response: EbaySearchReturn | undefined
+    queryHandler: Dispatch<ReducerAction<Reducer<SEbaySearch, QueryActionType>>>
 }
 export const QueryStateContext = createContext({});
 
@@ -26,37 +23,33 @@ type updateFilterStateType<G extends keyof Filter> = {
     "value": Filter[G]
 }
 
-type stateActionType = 
-    | {type: 'updateState', results: SEbaySearch}
+type QueryActionType = 
+    | {type: 'updateQuery', results: SEbaySearch}
     | {type: 'updateCategory', results: Category["categoryId"]}
-    | {type: 'updateFilterState', results: updateFilterStateType<any>}
-    | {type: 'updateSortState', results: SortField}
+    | {type: 'updateFilterOption', results: updateFilterStateType<any>}
+    | {type: 'updateSortOption', results: SortField}
     | {type: 'updateUserAddress', results: {
         "country": keyof typeof Countries,
         "postcode": number,
       }}
     | {type: 'updateItemLocation', results: {
-
         "country": keyof typeof Countries
       }}
-    | {type: 'updateSetting'}
-    | {type: 'loading'}
 
 
-export function QueryStateProvider({serverData, children}: {serverData: any, children: ReactNode}) {
+export function QueryStateProvider({children}: {children: ReactNode}) {
+    const {getAxios, getConfig, updateConfig} = useContext<AxiosContextType | undefined>(AxiosContext)!
 
-    const [resp, setResp] = useState<EbaySearchReturn>(serverData.itemData)
     const stateManager = useStateManager()
-    const cacheCategories = useRef<Category[]>([])
+    const response: EbaySearchReturn | undefined = undefined
 
-
-    const reducer = (state: SEbaySearch, action: stateActionType): SEbaySearch => {
+    const reducer = (state: SEbaySearch, action: QueryActionType): SEbaySearch => {
         logging.group("QueryState Reducer")
         logging.debug("Action: ", action)
         logging.debug("OldState: ", state)
 
         let newState: SEbaySearch | undefined = undefined;
-        if (action.type === "updateState") {
+        if (action.type === "updateQuery") {
             const updatedState = action.results
             newState = {
                 ...state,
@@ -72,7 +65,7 @@ export function QueryStateProvider({serverData, children}: {serverData: any, chi
             window.history.pushState(null, "", `?${EbaySaverState.toSearchParams(newState).toString()}`)
         }
 
-        else if (action.type === "updateFilterState") {
+        else if (action.type === "updateFilterOption") {
             const filterKey = action.results["key"]
             const filterValues = action.results["value"]
 
@@ -95,7 +88,7 @@ export function QueryStateProvider({serverData, children}: {serverData: any, chi
             }
         }
 
-        else if (action.type === "updateSortState") {
+        else if (action.type === "updateSortOption") {
             state.sort = action.results
             window.history.pushState(null, "", `?${EbaySaverState.toSearchParams(state).toString()}`)
             newState = {
@@ -105,9 +98,14 @@ export function QueryStateProvider({serverData, children}: {serverData: any, chi
 
         else if (action.type === "updateUserAddress") {
             const [key, value] = EbaySaverState.makeUserAddressHeader(action.results.country, action.results.postcode)
-            clientApiManager.optionalData.paramHeader = clientApiManager.optionalData.paramHeader ?? {}
-            clientApiManager.optionalData.paramHeader[key] = `${value}`
-            stateManager.setShippingLocation(action.results.country, action.results.postcode)
+            const config = getConfig()
+            config.headers = config.headers ?? {}
+            config.headers[key] = value
+            updateConfig(config)
+
+            // stateManager.setShippingLocation(action.results.country, action.results.postcode)
+            // throw new Error("")
+
             newState = {
                 ...state
             }
@@ -115,33 +113,34 @@ export function QueryStateProvider({serverData, children}: {serverData: any, chi
         else if (action.type === "updateItemLocation") {
             logging.info("Updating Item location")
             state = EbaySaverState.setLocation(state, action.results.country)
-            stateManager.setItemLocation(action.results.country)
+            // stateManager.setItemLocation(action.results.country)
+            // throw new Error("")
 
             newState = {
                 ...state
             }
         }
 
-        else if (action.type === "updateSetting") {
-            const setting = stateManager.setting
-            if (!setting) return state
+        // else if (action.type === "updateSetting") {
+        //     const setting = stateManager.userData.setting
+        //     if (!setting) return state
 
-            const defaultItemLocation = setting.itemLocation
-            const defaultShippingAddress = setting.shippingLocation
-            const defaultShippingPostcode = setting.shippingPostcode
+            // const defaultItemLocation = setting.itemLocation
+            // const defaultShippingAddress = setting.shippingLocation
+            // const defaultShippingPostcode = setting.shippingPostcode
 
-            if (defaultShippingAddress && defaultShippingPostcode) {
-                const [key, value] = EbaySaverState.makeUserAddressHeader(defaultShippingAddress, defaultShippingPostcode)
-                clientApiManager.optionalData.paramHeader = clientApiManager.optionalData.paramHeader ?? {}
-                clientApiManager.optionalData.paramHeader[key] = `${value}`
-            }
-            if (defaultItemLocation) {
-                state = EbaySaverState.setLocation(state, defaultItemLocation)
-            }
-            newState = {
-                ...state
-            }
-        }
+            // if (defaultShippingAddress && defaultShippingPostcode) {
+            //     const [key, value] = EbaySaverState.makeUserAddressHeader(defaultShippingAddress, defaultShippingPostcode)
+            //     clientApiManager.optionalData.paramHeader = clientApiManager.optionalData.paramHeader ?? {}
+            //     clientApiManager.optionalData.paramHeader[key] = `${value}`
+            // }
+            // if (defaultItemLocation) {
+            //     state = EbaySaverState.setLocation(state, defaultItemLocation)
+            // }
+        //     newState = {
+        //         ...state
+        //     }
+        // }
 
         else {
             logging.error(`State not implemented: ${action}`)
@@ -156,7 +155,7 @@ export function QueryStateProvider({serverData, children}: {serverData: any, chi
         return newState
     }
 
-    const [state, stateDispatch] = useReducer(
+    const [queryState, queryHandler] = useReducer(
         reducer,
         useSearchParams(),
         (query)  => {
@@ -168,110 +167,49 @@ export function QueryStateProvider({serverData, children}: {serverData: any, chi
         }
     )
 
-    const setState = useCallback((newState: SEbaySearch) => {
-        stateDispatch({
-            "type": "updateState",
-            "results": newState
-        })
-    }, [])
-
-    //UPDATE: state object once setting is loaded
-    useEffect(() => {
-        // Loads defaults from setting
-        logging.debug("Detect setting change: ", stateManager.setting)
-        stateDispatch({
-            "type": "updateSetting"
-        })
-        }, []
-    )
-
     //Fetch data from api everytime state changed
     useEffect(() => {
         (async () => {
             logging.group("Loading new response")
-            logging.debug("State: ", state)
-            logging.debug("Resp: ", resp)
+            logging.debug("State: ", queryState)
+            logging.debug("Resp: ", response)
 
-            // first search
-            if (!resp) {
-                logging.debug("No resp")
-                let tempState = {...state}
-                //Add special request for categories
-                tempState = EbaySaverState.addCategoryRequest(tempState)
-                const [outcome, data] = await clientApiManager.search(tempState)
-                if (outcome) {
-                    setResp(data)
-                    // Save the categoryOnce so we don't ever have to request it again 
-                    // for the item
-                    cacheCategories.current = data.refinement.categoryDistributions 
-                } else {
-                    logging.error("Api return nothing")
-                }
-            } else {
-                console.log(state)
-                const [outcome, data] = await clientApiManager.search(state)
-                logging.debug("New resp: ", data)
-                if (outcome) {
-                    setResp(data)
-                } else {
-                    logging.error("Api return nothing")
-                }
-            }
-            logging.groupEnd()
+            // // first search
+            // if (!resp) {
+            //     logging.debug("No resp")
+            //     let tempState = {...state}
+            //     //Add special request for categories
+            //     tempState = EbaySaverState.addCategoryRequest(tempState)
+            //     const [outcome, data] = await clientApiManager.search(tempState)
+            //     if (outcome) {
+            //         setResp(data)
+            //         // Save the categoryOnce so we don't ever have to request it again 
+            //         // for the item
+            //         cacheCategories.current = data.refinement.categoryDistributions 
+            //     } else {
+            //         logging.error("Api return nothing")
+            //     }
+            // } else {
+            //     console.log(state)
+            //     const [outcome, data] = await clientApiManager.search(state)
+            //     logging.debug("New resp: ", data)
+            //     if (outcome) {
+            //         setResp(data)
+            //     } else {
+            //         logging.error("Api return nothing")
+            //     }
+            // }
+            // logging.groupEnd()
         })()
-    }, [state])
+    }, [queryState])
 
 
-
-    function getNoPage() {
-         // TODO: could also be fetch from state
-         logging.debug("Calculating number of page")
-         const pageLimit = resp?.limit 
-         const pageOffset = resp?.offset
-         const pageNext = resp?.next
-         const pagePrev= resp?.prev
-         const total = resp?.total
-
-         if (total && pageLimit) {
-             const noPage = Math.floor(Number(total) / Number(pageLimit))
-             logging.debug("NoPage", resp)
-             logging.debug("NoPage", noPage)
-             logging.groupEnd()
-             return noPage
-         }
-         
-         logging.warn("Need intial response first", state)
-         logging.groupEnd()
-         return undefined
-    }
-
-    function toPage(number: number) {
-        logging.debug("Jumping to page: ", number)
-        let offsetDefault = 50
-        if (state?.limit) {
-            offsetDefault = Number(state.limit)
-        }
-        logging.debug("Offset by: ", offsetDefault)
-
-        if (state) {
-            state.offset = `${offsetDefault * number}`
-            logging.debug(state)
-            setState({...state})
-        } else {
-            logging.warn("Need intial query first", state)
-        }
-    }
 
 
     const value: QueryStateType = {
-        state,
-        // setState,
-        resp,
-        // setResp,
-        stateDispatch,
-        getNoPage,
-        toPage,
-        cacheCategories,
+        queryState,
+        response,
+        queryHandler,
     }
 
     return (

@@ -1,95 +1,81 @@
 'use client';
 'use strict';
 
-import { createContext, MutableRefObject, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, Dispatch, MutableRefObject, ReactNode, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { Favourite, SettingType, Theme } from '../types/SettingType';
 import { Countries, SEbaySearch } from '../server/EbayApi/EbaySaverState';
-import { clientApiManager } from "../utils/clientApiManager";
-import { Categories } from '../server/setting/categoryManager';
+import { EbaySearch } from "../types/EbayApiTypes/ebaySeachTypes";
+import { FavouriteQueryType, FavouriteQueriesType } from '../server/setting/favouriteQueries';
+import axios from "axios";
+import { AxiosContext } from "./useAxios";
+import { Categories } from "../server/setting/categoryManager";
 
 export type StateContextType = {
-        setting: SettingType,
-        categories: Categories
-        setTheme: (theme: Theme) => void,
-        addFavourite: (ebaySearch: SEbaySearch) => void,
-        removeFavourite: (id: number) => void,
-        setRefreshInterval: (offset: number) => void,
-        setShippingLocation: (country: keyof typeof Countries, postcode: number) => void,
-        setItemLocation: (country: keyof typeof Countries) => void,
+        userData: UserData
+        handleUserData: Dispatch<UserDataActionType>
     }
-       
+
+export type UserDataActionType = 
+    | {type: 'updateTheme', results: {
+        theme: Theme
+    }}
+    | {type: 'updateRefreshInterval', results: {
+        refreshInterval: number
+    }}
+    | {type: 'updateShippingLocation', results: {
+        "country": keyof typeof Countries,
+        "postcode": number,
+    }}
+    | {type: 'updateItemLocation', results: {
+        "country": keyof typeof Countries
+    }}
+
 
 export const StateContext= createContext({})
+export type UserData = {
+    setting: SettingType
+    categories: Categories
+    // favouriteQueries: FavouriteQueriesType
+}
 
-export function StateProvider({serverData, children}: {serverData: Record<string, any>, children: ReactNode}) {
-    const [setting, _setSetting] = useState<SettingType>(serverData!.setting)
-    const [categories, _setCategories] = useState<Categories>(serverData!.categories)
-    // const categories= useState<Categories>(serverData.categoryManager)
-    function setSetting(value: Record<string, any>) {
-        _setSetting({
-            ...setting,
-            ...value
-        })
+export function StateProvider({serverData, children}: {serverData: UserData, children: ReactNode}) {
+    function userStateReducer(userData: UserData, actions: UserDataActionType) {
+        const newState = {...userData}
+        if (actions.type === "updateTheme") {
+            newState.setting.theme = actions.results.theme
+        }
+        else if (actions.type === "updateItemLocation") {
+            newState.setting.itemLocation = actions.results.country
+        }
+        else if (actions.type === "updateRefreshInterval") {
+            newState.setting.defaultRefreshIntervalSecond = actions.results.refreshInterval
+        }
+        else if (actions.type === "updateShippingLocation") {
+            newState.setting.shippingLocation = actions.results.country
+            newState.setting.shippingPostcode = actions.results.postcode
+        }
+
+        localStorage.setItem("userData", JSON.stringify(newState))
+        return newState
     }
 
-    const setTheme = useCallback(
-        (theme: Theme) => {
-            setSetting({
-                theme: theme
-            })
-        }, [setting.theme])
-
-    const addFavourite = useCallback((ebaySearch: SEbaySearch) => {
-        const favourites = setting.favouriteQueries 
-        const id = Date.now()
-        favourites[id] = {
-                id: String(id),
-                state: ebaySearch,
-                readEbayItemNumbers: [],
+    const [userData, handleUserData] = useReducer(
+        userStateReducer,
+        serverData,
+        (serverData) => 
+        {
+            const userData = JSON.parse(localStorage.getItem("userData") ?? "{}")
+            return Object.assign(userData, serverData)
         }
-        setSetting({favouriteQueries: favourites})
-    }, [])
-
-    const removeFavourite = useCallback((id: EpochTimeStamp) => {
-        const favourites = setting.favouriteQueries 
-        delete favourites[id]
-        setSetting({
-            favouriteQueries: favourites
-        })
-    }, [])
-
-    const setRefreshInterval= useCallback((offset: number) => {
-        setSetting({
-            defaultRefreshIntervalSecond: offset
-        })
-    }, [])
-
-    const setShippingLocation = useCallback((country: keyof typeof Countries, postcode: number): void => {
-        setSetting({
-            shippingLocation: country,
-            shippingPostcode: postcode
-        })
-    }, [])
-
-    const setItemLocation = useCallback((country: keyof typeof Countries) => {
-        setSetting({
-            itemLocation: location
-        })
-    }, [])
+    )
 
     const value: StateContextType = useMemo(() => {
         //This guarantee that setting has been loaded
         return  {
-            setting,
-            categories,
-            setTheme,
-            addFavourite,
-            removeFavourite,
-            setRefreshInterval,
-            setShippingLocation,
-            setItemLocation,
+            userData,
+            handleUserData,
         }
-    }, [setting, categories, setTheme, addFavourite, removeFavourite, setItemLocation, setShippingLocation, setRefreshInterval])
+    }, [userData])
 
 
     return (
