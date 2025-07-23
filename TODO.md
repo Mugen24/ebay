@@ -1,3 +1,4 @@
+- fixme: incorrect db writes causing addive values instead of replacing
 - add: saved query
 - add: category + setting caching into cookie
 - add: location selector

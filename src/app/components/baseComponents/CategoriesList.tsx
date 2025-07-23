@@ -13,19 +13,19 @@ export function CategoriesList() {
 
     categories.rootCategoryNode.childCategoryTreeNodes.forEach((category, index) => {
         catElements.push(
-            <Link 
-                        key={index} 
-                        // onClick={() => onClick(category.category.categoryId)}
-                        href={{
-                            pathname: "/items",
-                            query: {
-                                q: "",
-                                category_ids: category.category.categoryId
-                            }
-                        }}
-                      >
-                        {category.category.categoryName}
-                      </Link>
+<Link 
+            key={index} 
+            // onClick={() => onClick(category.category.categoryId)}
+            href={{
+                pathname: "/items",
+                query: {
+                    q: "",
+                    category_ids: category.category.categoryId
+                }
+            }}
+            >
+            {category.category.categoryName}
+            </Link>
         )
     })
 
