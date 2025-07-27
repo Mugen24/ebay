@@ -1,5 +1,5 @@
 import { Countries, EbaySaverState, Filter as FilterType } from "@/app/server/EbayApi/EbaySaverState";
-import { useQueryState } from "@/app/hooks/useQuerytState";
+import { useQueryState } from "@/app/hooks/useQueryState";
 import { ConditionOption, SortField } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import logging from "@/app/utils/logger";
 import React, { useEffect } from "react";

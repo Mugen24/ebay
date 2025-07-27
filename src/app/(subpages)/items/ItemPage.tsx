@@ -6,35 +6,22 @@ import { EbayItem } from "@/app/components/baseComponents/EbayItem";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { EbayItemSideBar } from '../../components/EbayItemSidebar';
-import { SearchBar } from "@/app/components/SearchBar";
+import { SearchBar } from "@/app/components/baseComponents/SearchBar";
 import styles from "./structure.module.css"
-import { QueryStateProvider, useQueryState } from "@/app/hooks/useQuerytState";
+import { QueryStateProvider, useQueryState } from "@/app/hooks/useQueryState";
 import { ButtonList } from "@/app/components/baseComponents/ButtonList";
 import logging from "@/app/utils/logger";
+import { EbaySearchReturn } from "@/app/types/EbayApiTypes/ebaySeachTypes";
+import { useAxios } from "@/app/hooks/useAxios";
 
 export function ClientPage() {
-    const {
-        state,
-        resp,
-        getNoPage,
-        toPage,
-    } = useQueryState()
+    const { queryState, queryHandler, response, updateResponse } = useQueryState()
+    const { getAxios } = useAxios()
+    const axios = getAxios()
 
-
-
-    // Fetching pagination
-    // !TODO: remove not recommended by ebay
-    const noPage = getNoPage()
-    let pageNumbers: number[] = []
-    if (noPage) {
-        pageNumbers = [...Array(noPage).keys()]
-    }
-
-    if (!resp) {
-        return <>
-            <h1>Loading...</h1>
-        </>
-    }
+    useEffect(() => {
+        updateResponse()
+    }, [queryState])
 
     return (
         <div>
@@ -46,32 +33,34 @@ export function ClientPage() {
                     <EbayItemSideBar/>
                 </div>
                 <div className={styles.items_container}>
-                    <ItemsContainer/>
+                    <ItemGallery/>
                 </div>
-            </div>
-            <div>
-                <ButtonList items={pageNumbers} onClick={toPage}></ButtonList>
             </div>
         </div>
     )
 }
 
 
-export function ItemsContainer() {
-    const {state, resp} = useQueryState();
-    logging.debug("Items Container Update:", state)
-    logging.debug("Items Container Update:", resp)
+export function ItemGallery() {
+    const {queryState, response} = useQueryState();
     const ebayItems = [];
-    if (resp) {
-        for (const item of extractItems(resp)) {
+    if (response) {
+        for (const item of extractItems(response)) {
             ebayItems.push(<EbayItem key={item.itemId} ebayItem={item}/>)
         }
     }
 
     return (
-        <div>
-            <h1>Search: {state.q}</h1>
-            {ebayItems}
-        </div>
+        <>
+            <h1>Search: {queryState.q}</h1>
+            <div 
+                className="
+                    grid
+                    grid-cols-4
+                "
+            >
+                {ebayItems}
+            </div>
+        </>
     )
 }

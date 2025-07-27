@@ -1,6 +1,6 @@
 'use client'
 import React, { Context, createContext, Dispatch, ReactElement, ReactNode, useEffect, useState } from "react"
-import { SearchBar } from "./components/SearchBar";
+import { SearchBar } from "./components/baseComponents/SearchBar";
 import styles from "./structure.module.css";
 import { SavedQueryGallery } from "./server/SavedQueryGalleryClient";
 import { CategoriesList } from "./components/baseComponents/CategoriesList";

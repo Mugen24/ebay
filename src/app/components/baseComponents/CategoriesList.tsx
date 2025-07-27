@@ -1,7 +1,5 @@
 import { useStateManager } from "@/app/hooks/useStateManagement";
-import { EbaySearch } from "@/app/types/EbayApiTypes/ebaySeachTypes";
-import { useRouter } from "next/router";
-import { ReactElement, useState } from "react";
+import { ReactElement } from "react";
 import Link from "next/link";
 
 
@@ -14,6 +12,14 @@ export function CategoriesList() {
     categories.rootCategoryNode.childCategoryTreeNodes.forEach((category, index) => {
         catElements.push(
 <Link 
+            className="
+                border-solid
+                border-2
+                p-1
+                rounded-xl
+                hover:border-white
+                hover:text-white
+            "
             key={index} 
             // onClick={() => onClick(category.category.categoryId)}
             href={{
@@ -30,8 +36,18 @@ export function CategoriesList() {
     })
 
     return (
-        <>
+        <div
+            className="
+                p-2
+                mb-2
+                mx-0
+                mt-0
+                flex
+                flex-wrap
+                gap-1
+            "
+        >
             {catElements}
-        </>
+        </div>
     )
 }

@@ -14,13 +14,13 @@ export type Categories = GetCategoryTreeResponse
 export class CategoryManager {
     categories: Categories 
     marketplaceId: MarketplaceId
-    rootCategoryId: string 
+    categoryTreeVersion: string 
     db: Database
 
-    private constructor(database: Database, setting: Setting, rootCategoryId: string, categories: Categories) {
+    private constructor(database: Database, setting: Setting, categoryTreeVersion: string, categories: Categories) {
         this.db = database
         this.marketplaceId = setting.setting.marketPlaceId
-        this.rootCategoryId = rootCategoryId
+        this.categoryTreeVersion = categoryTreeVersion
         // this.db = database
         this.categories = categories
     }
@@ -31,17 +31,18 @@ export class CategoryManager {
         }) 
         assert(outcome)
 
-        if(this.rootCategoryId !== rootCat.categoryTreeVersion) {
+        if(this.categoryTreeVersion !== rootCat.categoryTreeVersion) {
             logging.debug("Fetching new cat")
-            this.rootCategoryId = rootCat.categoryTreeId
+            this.categoryTreeVersion = rootCat.categoryTreeVersion
+
             const [outcome, categories]= await ebayApi.getCategoryTree({
-                "category_tree_id": this.rootCategoryId
+                "category_tree_id": rootCat.categoryTreeId
             })
 
             assert(outcome)
-
             this.categories = categories 
-            this.save(this.rootCategoryId, this.categories)
+
+            await this.save(this.categoryTreeVersion, this.categories)
         } 
 
         return this.categories
@@ -61,10 +62,10 @@ export class CategoryManager {
         return categoriesManager
     }
 
-    save(version: string, categories: Categories) {
+    async save(version: string, categories: Categories) {
         // writeFile(CategoryManager.CATEGORIES_PATH, JSON.stringify(categories))
         this.db.run(`
-            insert into categories (version, categories) values (?, ?)
+            insert or replace into categories (version, categories) values (?, ?)
         `, [version, JSON.stringify(categories)])
     }
 }

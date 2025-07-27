@@ -67,7 +67,7 @@ export function StateProvider({serverData, children}: {serverData: UserData, chi
 
     useEffect(() => {
         try {
-            const userDataSession = localStorage.getItem("ebaySetting") 
+            const userDataSession = localStorage.getItem("ebaySetting") ?? ""
             const userData = JSON.parse(userDataSession)
             handleUserData({
                 type: "updateSetting",

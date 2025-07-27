@@ -1,4 +1,4 @@
-import { FavouriteQueries, SettingType, Theme } from '@/app/types/SettingType';
+import { SettingType, Theme } from '@/app/types/SettingType';
 import { Database } from 'sqlite';
 import { assert } from 'node:console';
 

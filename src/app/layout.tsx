@@ -14,12 +14,13 @@ import sqlite3 from 'sqlite3'
 import { open } from 'sqlite'
 import { FavouriteQueries } from "./server/setting/favouriteQueries";
 import { AxiosProvider } from "./hooks/useAxios";
-import { QueryStateProvider } from "./hooks/useQuerytState";
+import { QueryStateProvider } from "./hooks/useQueryState";
 
 logging.debug("Server started")
 
 const SCHEMA =  `
     create table if not exists setting (
+        version text primary key, 
         theme text,
         watchedItems text,
         shippingLocation text,
@@ -30,18 +31,19 @@ const SCHEMA =  `
     );
 
     create table if not exists categories (
-        version text,
+        version text primary key,
         categories text
     );
 
     create table if not exists favouriteQueries (
         id integer primary key autoincrement,
-        ebaySearch text 
+        ebaySearch text
     );
 `
 
 const db = await open({
     filename: process.env.DATABASE!,
+    // filename: ":memory:",
     driver: sqlite3.Database
 })
 
@@ -69,8 +71,13 @@ export default function RootLayout({
 
   return (
     <>
-      <html lang="en">
-        <body className="bg-blue-500">
+      <html>
+        <body
+          className="
+            bg-gray-900
+            text-gray-400
+          "
+        >
           <AxiosProvider>
             <StateProvider serverData={serverData}>
               <QueryStateProvider>

@@ -1,4 +1,4 @@
-import { useQueryState } from "@/app/hooks/useQuerytState";
+import { useQueryState } from "@/app/hooks/useQueryState";
 import { extractCategoryDistributions } from "../../actions/utils";
 import { Category, CategoryDistribution } from "../../types/EbayApiTypes/ebaySeachTypes";
 import logging from "@/app/utils/logger";

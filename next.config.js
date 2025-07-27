@@ -7,7 +7,10 @@ const nextConfig = {
     config.experiments.topLevelAwait = true 
     return config;
   },
-  reactStrictMode: false
+  reactStrictMode: false,
+  images: {
+    remotePatterns: [new URL("https://i.ebayimg.com/images/**")]
+  }
 };
 
 

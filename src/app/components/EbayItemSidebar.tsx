@@ -5,22 +5,20 @@ import CategoryContainer from "./QueryOptions/CategoryContainer"
 import styles from "./structure.module.css"
 import { Filter as FilterType} from "../server/EbayApi/EbaySaverState"
 import { Filter } from "./QueryOptions/FilterContainer"
-import { useQueryState } from "../hooks/useQuerytState"
+import { useQueryState } from "../hooks/useQueryState"
 import logging from "../utils/logger"
 import { Category, SortField } from "../types/EbayApiTypes/ebaySeachTypes"
 import { Categories } from "../server/setting/categoryManager"
 
 export function EbayItemSideBar() {
-    const {state, stateDispatch, resp} = useQueryState()
-    logging.info("Sidebar initialise")
-    logging.debug(state)
+    const {queryState, queryHandler} = useQueryState()
 
     function setCategory(categoryId: string) {
         logging.info("Set category: ", categoryId)
         //state.category_ids = categoryId
         //setState({...state})
         
-        stateDispatch({
+        queryHandler({
             "type": "updateCategory",
             "results": categoryId
         })
@@ -28,8 +26,8 @@ export function EbayItemSideBar() {
 
     function setFilterState<T extends keyof FilterType>(filterKey: T, filterValues: FilterType[T]) {
         //setState({...state})
-        stateDispatch({
-            "type": "updateFilterState",
+        queryHandler({
+            "type": "updateFilterOption",
             "results": {
                 "key": filterKey,
                 "value": filterValues
@@ -41,21 +39,22 @@ export function EbayItemSideBar() {
         logging.info("Set sort state: ", choiceArgs)
         // state.sort = choiceArgs
         // setState({...state})
-        stateDispatch({
-            "type": "updateSortState",
+        queryHandler({
+            "type": "updateSortOption",
             "results": choiceArgs
         })
     }
 
     function saveConfigState(){
-        EbaySaverState.saveToConfig(state)
+        // EbaySaverState.saveToConfig(state)
+        logging.warn("NOT IMPLEMENTED")
     }
 
 
     return (
         <div className={styles.side_bar}>
             <Filter setFilterState={setFilterState} setSortState={setSortState} saveConfigState={saveConfigState}/>
-            <CategoryContainer setCategory={setCategory}></CategoryContainer>
+            {/* <CategoryContainer setCategory={setCategory}></CategoryContainer> */}
         </div>
     )
 }

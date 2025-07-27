@@ -24,17 +24,7 @@ export class EbayApiToken {
         async function responseErrorHandler(res: AxiosResponse) {
             if (res.status != 200) {
                 logging.group("Ebay api error")
-                logging.error("Request: ")
-                logging.error(res.headers)
-                // logging.error(res.request)
-
-                logging.error("Response")
-                logging.error(res.status)
-                // logging.error( res.response?.headers)
-                logging.error(res.data?.errors ?? "")
-
-                // logging.error(res)
-                // throw new Error(JSON.stringify(await res.toJSON()))
+                logging.error(JSON.parse(JSON.stringify(res)))
                 return [false, {}]
             }
         }
@@ -76,7 +66,7 @@ export class EbayApiToken {
             resp = await this.axios.get("/buy/browse/v1/item_summary/search", 
                 {
                     params: config,
-                    headers: optionalConfig["headerParam"] ?? {}
+                    // headers: optionalConfig["headerParam"] ?? {}
                 }
             )
         }

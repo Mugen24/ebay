@@ -1,41 +1,11 @@
 // import styled from "styled-components"
 import logging from '@/app/utils/logger';
 import { ItemSummary, CurrentBidPrice, ShippingOption } from '../../types/EbayApiTypes/ebaySeachTypes';
+import Image from 'next/image';
 import styles from "./structure.module.css"
 import { Timer } from './Timer';
-// const StyleEbayItem = styled.div`
-//     padding: 3px;
-//     display: flex;
-//     flex-direction: column;
-//     margin: 5px;
-//     &:hover{
-//         box-shadow: 0px 0px 10px 1px ${props => props.theme["highlight"]}
-//     }
-
-//     & > *, * > * {
-//         margin: 0;
-//         font-size: 0.6vw;
-//     }
-//     gap: 5px;
-// `
-
-// const StyleImage = styled.image `
-
-// `
-// const StyleHintWordContainer = styled.div`
-//     display: flex;
-// `
-// const StyleHintWord = styled.p`
-//     color: lightgray;
-//     font-size: xx-small;
-//     margin-right: 5px;
-// `
-
-
-
 export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
     const itemTypes = ebayItem.buyingOptions
-
 
     // OPTIONS = FIXED_PRICE BEST_OFFER AUCTION
     const bidCount = ebayItem.bidCount;
@@ -66,7 +36,16 @@ export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
     return (
         <div className={styles.ebay_item}>
             <p>Ebay item number: {ebayItemNumber}</p>
-            <img src={ebayItem.image?.imageUrl} alt={ebayItem.title}/>
+            {
+                ebayItem.image?.imageUrl ? 
+                    <Image 
+                        width={400} 
+                        height={400} 
+                        src={ebayItem.image?.imageUrl ?? null}
+                        alt={ebayItem.title}
+                    /> :
+                    <></>
+            }
             <div>
                 <a href={ebayItem.itemWebUrl}><p>{ebayItem.title}</p></a>
                 <div style={{
