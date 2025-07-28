@@ -6,6 +6,7 @@ import logging from "../utils/logger";
 import { URLSearchParamsToJson } from '../actions/utils';
 import { useSearchParams } from 'next/navigation';
 import { AxiosContext } from './useAxios';
+import { useRouter } from 'next/navigation';
 
 export type QueryStateType = {
     queryState: SEbaySearch
@@ -22,7 +23,6 @@ type updateFilterStateType<G extends keyof Filter> = {
 }
 
 type QueryActionType = 
-    | {type: 'fetchNewResponse', results?: void}
     | {type: 'updateQuery', results: string}
     | {type: 'updateCategory', results: Category["categoryId"]}
     | {type: 'updateFilterOption', results: updateFilterStateType<any>}
@@ -40,19 +40,13 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
     const {getAxios, getConfig, updateConfig} = useContext(AxiosContext)!
     const [response, _setResponse] = useState<EbaySearchReturn | undefined>(undefined)
     const axios = getAxios()
+    const router = useRouter()
 
     const reducer = (state: SEbaySearch, action: QueryActionType): SEbaySearch => {
-        logging.group("QueryState Reducer")
-        logging.debug("Action: ", action)
-        logging.debug("OldState: ", state)
-        let newState: SEbaySearch | undefined = undefined;
+        let newState: SEbaySearch = {...state};
 
         if (action.type === "updateCategory") {
-            newState = {
-                ...state,
-                "category_ids": action.results
-            }
-            window.history.pushState(null, "", `?${EbaySaverState.toSearchParams(newState).toString()}`)
+            newState["category_ids"] = action.results
         }
 
         else if (action.type === "updateFilterOption") {
@@ -60,30 +54,22 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
             const filterValues = action.results["value"]
 
             if (filterValues.length === 0) {
-                EbaySaverState.addUniqueFilter(state, filterKey, filterValues[0],  true)
+                // TODO: fix only convert when actually querying
+                EbaySaverState.addUniqueFilter(newState, filterKey, filterValues[0],  true)
             }
             else {
                 // For array for values
                 // First value must clean the previous value
-                EbaySaverState.addUniqueFilter(state, filterKey, filterValues[0],  true)
+                EbaySaverState.addUniqueFilter(newState, filterKey, filterValues[0],  true)
                 // Any subsequently should be clear the previous value
                 for (let i = 1; i < filterValues.length; i++) {
-                    EbaySaverState.addUniqueFilter(state, filterKey, filterValues[i])
+                    EbaySaverState.addUniqueFilter(newState, filterKey, filterValues[i])
                 }
-            }
-
-            window.history.pushState(null, "", `?${EbaySaverState.toSearchParams(state).toString()}`)
-            newState = {
-                ...state
             }
         }
 
         else if (action.type === "updateSortOption") {
-            state.sort = action.results
-            window.history.pushState(null, "", `?${EbaySaverState.toSearchParams(state).toString()}`)
-            newState = {
-                ...state
-            }
+            newState.sort = action.results
         }
 
         else if (action.type === "updateUserAddress") {
@@ -92,46 +78,44 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
             config.headers = config.headers ?? {}
             config.headers[key] = value
             updateConfig(config)
-
-            newState = {
-                ...state
-            }
         }
 
         else if (action.type === "updateItemLocation") {
-            logging.info("Updating Item location")
-            state = EbaySaverState.setLocation(state, action.results.country)
-            newState = {
-                ...state
-            }
+            EbaySaverState.setLocation(newState, action.results.country)
         }
 
         else if (action.type === "updateQuery") {
-            newState = {...state}
             newState.q = action.results
         }
 
-        else {
-            logging.error(`State not implemented: ${action}`)
-            return state
-        }
 
-        
-        logging.groupEnd()
+        const url = new URL(window.location.href)
         return newState
     }
+
 
     const [queryState, queryHandler] = useReducer(
         reducer,
         useSearchParams(),
-        (query)  => {
-            logging.debug("Detect query change:", query)
-            const urlQuery = URLSearchParamsToJson(new URLSearchParams(query))
-            let temp_state = EbaySaverState.parse(urlQuery)
-            logging.debug("New state from query: ", temp_state)
-            return temp_state
+        (params)  => {
+            try {
+                const itemData = params.get("query")
+                if (itemData === null) throw new Error("Invalid query")
+                const data = JSON.parse(itemData)
+                return data
+            }
+            catch (e) {
+                console.warn(e)
+                router.push("")
+            }
         }
     )
+
+    // useEffect(() => {
+    //     const url = new URL(window.location.href)
+    //     url.searchParams.set("query", JSON.stringify(queryState))
+    //     window.history.pushState({}, "", url)
+    // }, [queryState])
 
     async function updateResponse() {
         const resp = await axios.post("search", JSON.stringify(queryState))

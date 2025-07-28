@@ -1,66 +1,76 @@
 'use client'
-
-import { URLSearchParamsToJson, extractItems } from "@/app/actions/utils";
-import { EbaySaverState } from "@/app/server/EbayApi/EbaySaverState";
-import { EbayItem } from "@/app/components/baseComponents/EbayItem";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { EbayItemSideBar } from '../../components/EbayItemSidebar';
 import { SearchBar } from "@/app/components/baseComponents/SearchBar";
-import styles from "./structure.module.css"
-import { QueryStateProvider, useQueryState } from "@/app/hooks/useQueryState";
-import { ButtonList } from "@/app/components/baseComponents/ButtonList";
-import logging from "@/app/utils/logger";
-import { EbaySearchReturn } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import { useAxios } from "@/app/hooks/useAxios";
+import { ItemGallery } from "@/app/components/baseComponents/ItemGallery";
+import { useQueryState } from "@/app/hooks/useQueryState";
+import { CategoriesList } from "@/app/components/baseComponents/CategoriesList";
 
 export function ClientPage() {
     const { queryState, queryHandler, response, updateResponse } = useQueryState()
     const { getAxios } = useAxios()
     const axios = getAxios()
+    const searchParam = useSearchParams()
+    const router = useRouter()
+
 
     useEffect(() => {
+        const url = new URL(window.location.href)
+        url.searchParams.set("query", JSON.stringify(queryState))
+        window.history.pushState({}, "", url)
         updateResponse()
     }, [queryState])
 
     return (
-        <div>
-            <div className={styles.center_content}>
+        <div
+            className="
+                grid
+                grid-cols-[300px_1fr_1fr_1fr]
+                grid-rows-[fit-content_70px_70fr]
+                gap-2
+            "
+        >
+            <div
+                className="
+                    col-start-1
+                    col-span-4
+                    row-start-1
+                    row-end-2
+                "
+            >
+                <CategoriesList></CategoriesList>
+            </div>
+            <div 
+                className="
+                    col-start-2
+                    col-span-3
+                    row-start-2
+                    row-end-3
+                "
+            >
                 <SearchBar/>
             </div>
-            <div className={styles.main_page}>
-                <div className={styles.sidebar}>
-                    <EbayItemSideBar/>
-                </div>
-                <div className={styles.items_container}>
-                    <ItemGallery/>
-                </div>
+            <div 
+                className="
+                    col-span-1
+                    col-start-1
+                    row-start-3
+                "
+            >
+                <EbayItemSideBar/>
+            </div>
+            <div 
+                className="
+                    col-span-3
+                    col-start-2
+                    row-start-3
+                "
+            >
+                <ItemGallery/>
             </div>
         </div>
     )
 }
 
-
-export function ItemGallery() {
-    const {queryState, response} = useQueryState();
-    const ebayItems = [];
-    if (response) {
-        for (const item of extractItems(response)) {
-            ebayItems.push(<EbayItem key={item.itemId} ebayItem={item}/>)
-        }
-    }
-
-    return (
-        <>
-            <h1>Search: {queryState.q}</h1>
-            <div 
-                className="
-                    grid
-                    grid-cols-4
-                "
-            >
-                {ebayItems}
-            </div>
-        </>
-    )
-}

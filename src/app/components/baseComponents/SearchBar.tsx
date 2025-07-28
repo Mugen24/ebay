@@ -4,12 +4,13 @@ import { useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQueryState } from "@/app/hooks/useQueryState";
+import { useAxios } from "@/app/hooks/useAxios";
 
 
 
 export function SearchBar() {
     const refSearchForm = useRef<HTMLInputElement>(null);
-    const refLink= useRef<HTMLButtonElement>(null);
+    const refLink= useRef<HTMLAnchorElement>(null);
     const router = useRouter()
     const {queryState, queryHandler} = useQueryState()
 
@@ -39,9 +40,8 @@ export function SearchBar() {
                         refLink.current?.click()
                     }
                 }}
-
             />
-            <Link
+            <button
                 ref={refLink}
                 href={{
                     pathname: "/items"
@@ -53,19 +53,22 @@ export function SearchBar() {
                     hover:text-gray-100
                     text-center
                 "
-                onNavigate={(e) => {
+                onClick={(e) => {
                     if (refSearchForm.current && refSearchForm.current.value) {
+                        queryState["q"] = refSearchForm.current.value
+                        router.push(`items?query=${JSON.stringify(queryState)}`, )
                         queryHandler({
                             "type": "updateQuery",
-                            "results": refSearchForm.current?.value
+                            "results": refSearchForm.current.value
                         })
+
                     } else {
                         e.preventDefault()
                     }
                 }}
             >
                 Search
-            </Link>
+            </button>
         </div>
     )
 }

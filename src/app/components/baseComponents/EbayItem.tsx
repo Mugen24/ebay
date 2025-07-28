@@ -2,7 +2,6 @@
 import logging from '@/app/utils/logger';
 import { ItemSummary, CurrentBidPrice, ShippingOption } from '../../types/EbayApiTypes/ebaySeachTypes';
 import Image from 'next/image';
-import styles from "./structure.module.css"
 import { Timer } from './Timer';
 export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
     const itemTypes = ebayItem.buyingOptions
@@ -34,13 +33,16 @@ export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
     const endDate = new Date(ebayItem.itemEndDate)
 
     return (
-        <div className={styles.ebay_item}>
+        <div
+            className='
+            '
+        >
             <p>Ebay item number: {ebayItemNumber}</p>
             {
                 ebayItem.image?.imageUrl ? 
                     <Image 
-                        width={400} 
-                        height={400} 
+                        width={300} 
+                        height={300} 
                         src={ebayItem.image?.imageUrl ?? null}
                         alt={ebayItem.title}
                     /> :

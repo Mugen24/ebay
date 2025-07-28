@@ -81,7 +81,7 @@ export function StateProvider({serverData, children}: {serverData: UserData, chi
     }, [])
 
     useEffect(() => {
-        localStorage.setItem("ebaySetting", JSON.stringify(userData.setting))
+        // localStorage.setItem("ebaySetting", JSON.stringify(userData.setting))
     }, [userData])
 
     const value: StateContextType = useMemo(() => {

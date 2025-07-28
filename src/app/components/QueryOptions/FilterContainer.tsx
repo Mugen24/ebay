@@ -6,32 +6,53 @@ import React, { useEffect } from "react";
 import { formToJson } from '../../actions/utils';
 import { useStateManager } from "@/app/hooks/useStateManagement";
 
-export function Filter({setFilterState, setSortState, saveConfigState}: {
-    setFilterState: <T extends keyof FilterType>(filterKey: T, filterValue: FilterType[T]) => void,
-    setSortState: (choiceArgs: SortField) => void,
-    saveConfigState: () => void,
+export function Filter({}: {
+    // setFilterState: <T extends keyof FilterType>(filterKey: T, filterValue: FilterType[T]) => void,
+    // setSortState: (choiceArgs: SortField) => void,
+    // saveConfigState: () => void,
 }) {
     
-    const {state, stateDispatch} = useQueryState();
-    const {setting} = useStateManager()
+    const {queryState, queryHandler} = useQueryState();
+    const {userData} = useStateManager()
+    const setting = userData.setting
+
     const userLocationCountryMap = Object.keys(Countries)
 
     // TODO: move all this login into EbaySaverState
     const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
         logging.debug("buyingOptionHandler: ", event)
         const option: string = event.target.value;
+        const key = "buyingOptions"
+        let value = undefined
+
         switch (option.toLowerCase()) {
             case "all": 
-                setFilterState("buyingOptions", ["AUCTION", "BEST_OFFER", "FIXED_PRICE"])
+                // setFilterState("buyingOptions", ["AUCTION", "BEST_OFFER", "FIXED_PRICE"])
+                value = ["AUCTION", "BEST_OFFER", "FIXED_PRICE"]
+                queryHandler({
+                    type: "updateFilterOption",
+                    results: {
+                        key,
+                        value
+                    }
+                })
             break;
             case "auction": 
-                setFilterState("buyingOptions", ["AUCTION"])
+                // setFilterState("buyingOptions", ["AUCTION"])
+                value = ["AUCTION"]
+                queryHandler({
+                    type: "updateFilterOption",
+                    results: {key, value}
+                })
             break;
             case "buy it now": 
-                setFilterState("buyingOptions", ["BEST_OFFER", "FIXED_PRICE"])
+                // setFilterState("buyingOptions", ["BEST_OFFER", "FIXED_PRICE"])
+                value = ["BEST_OFFER", "FIXED_PRICE"]
+                queryHandler({
+                    type: "updateFilterOption",
+                    results: {key, value}
+                })
             break;
-            default:
-                console.error("Buying option did not match", option)
         }
 
     }
@@ -39,21 +60,32 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
     const conditionOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
         if (event.target instanceof HTMLButtonElement) {
             const param = event.target.value;
-            setFilterState("conditions", [param as ConditionOption])
+            const key =  "conditions"
+
+            // setFilterState("conditions", [param as ConditionOption])
+            const value = [param as ConditionOption]
+            queryHandler({
+                type: "updateFilterOption",
+                results: {key, value}
+            })
         }
     }
 
     const sortOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
         if (event.target instanceof HTMLButtonElement) {
             const choice = event.target.value;
-            setSortState(choice as SortField);
+            // setSortState(choice as SortField);
+            queryHandler({
+                type: "updateSortOption",
+                results: choice as SortField
+            })
         }
     }
 
     const locationOptionsHandler: (event: React.FormEvent<HTMLFormElement>) => void = (event) => {
         if (event.target?.value) {
             // setItemLocation(event.target?.value)
-            stateDispatch({
+            queryHandler({
                 "type": "updateItemLocation",
                 "results": {
                     "country": event.target?.value
@@ -69,7 +101,7 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
         const postcode= formData.get("postcode")
         console.log(formToJson(formData))
         if (country && postcode) {
-            stateDispatch({
+            queryHandler({
                 "type": "updateUserAddress",
                 "results": {
                     "country": country as keyof typeof Countries,
@@ -142,8 +174,8 @@ export function Filter({setFilterState, setSortState, saveConfigState}: {
             <button className="primary_button" value={"price"} onClick={sortOptionsHandler}>Price + Postage: Lowest First </button>
         </section>
         <section>
-            <a>Save Search:</a>
-            <button className="primary_button" onClick={saveConfigState}>Save Search</button>
+            <a>Save Search: TODO</a>
+            {/* <button className="primary_button" onClick={saveConfigState}>Save Search</button> */}
         </section>
     </div>
     )
