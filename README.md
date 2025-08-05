@@ -7,7 +7,7 @@
 CLIENT_ID=xxxx \
 CLIENT_SECRET=xxxx \
 REDIRECT_URI=xxxx \
-BASE_URL=http://localhost:3000 \
+BASE_URL=http://localhost:3000 
 
 ## Installation
 Copy the project directory
@@ -32,5 +32,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser
 - [x] Query watch list
 
 - [ ] Auto bidding
+
 
 
