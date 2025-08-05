@@ -2,8 +2,12 @@
 - npm
 - nodejs
 - You need to sign up for an ebay api key and populate it into .env
-    CLIENT_ID=xxxx
-    CLIENT_SECRET=xxxx
+
+## Example of .env
+CLIENT_ID=xxxx
+CLIENT_SECRET=xxxx
+REDIRECT_URI=xxxx
+BASE_URL=http://localhost:3000
 
 ## Installation
 Copy the project directory
@@ -15,6 +19,15 @@ First, run the development server:
 npm run dev
 ```
 ## Running
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser 
 
 ## Functionality
+- [x] Search item
+- Filter option
+    - [x] Category
+    - [x] Condition
+    - [x] Location
+    - [x] Sell type
+- [x] Item watch list
+- [x] Query watch list
+- [] Auto bidding
