@@ -22,27 +22,24 @@ export const Countries = {
 }
 
 
-export interface SEbaySearch extends EbaySearch {
+export interface SEbaySearch extends Omit<EbaySearch, 'fieldgroups'> {
     filter?: Record<string, any>
+    fieldgroups?: Array<string>
 }
 
 export class EbaySaverState {
-    static parse(searchState: EbaySearch): SEbaySearch {
+    static parse(searchState: SEbaySearch): EbaySearch{
         logging.info("Parsing searchState:", searchState)
-        // this.data = JSON.parse(JSON.stringify(searchState))
-        //if (!searchState.q) {
-        //    throw new Error("'q' params is required")
-        //}
 
         const q = searchState.q;
         const gtin = searchState.gtin;
         const charity_ids = searchState.charity_ids;
-        const fieldgroups = searchState.fieldgroups;
+        const fieldgroups = searchState.fieldgroups ? searchState.fieldgroups.join(",") : undefined;
         const compatibility_filter = searchState.compatibility_filter;
         const auto_correct = searchState.auto_correct;
         const category_ids = searchState.category_ids;
 
-        const filter = EbaySaverState.deconstructFilter(searchState).filter;
+        const filter = EbaySaverState.constructFilter(searchState).filter;
 
         const sort = searchState.sort;
         const limit = searchState.limit;
@@ -75,59 +72,19 @@ export class EbaySaverState {
     }
 
     static addCategoryRequest(ebaySearch: SEbaySearch) {
-        ebaySearch.fieldgroups = "ASPECT_REFINEMENTS,CATEGORY_REFINEMENTS,MATCHING_ITEMS"
-        return ebaySearch
-    }
-    static removeCategoryRequest(ebaySearch: SEbaySearch) {
-        ebaySearch.fieldgroups = ""
-        return ebaySearch
-    }
-
-    static deconstructFilter(ebaySearch: EbaySearch) {
-        // filter=buyingOptions:FIXED_PRICE|AUCTION|BEST_OFFER,conditions:NEW|USED
-        let filter = ebaySearch.filter
-        logging.debug("Deconstructing Filter:", filter)
-        if (!filter) {
-            ebaySearch.filter = {}
-            return ebaySearch
-        }
-
-        const options: Record<string, string[]>= {};
-        // const [_ , filterOptions] = filter.split("=")
-        // buyingOptions: .. | .. | .. , conditions: .. | .. | ..
-        // const params = filterOptions.split(",");
-        const params = filter.split(",");
-        for (const param of params) {
-            const key_value_matcher = /(?:(\w+):\W?([a-zA-Z|_]+)\W?)/;
-            const match = param.match(key_value_matcher)
-            if (match && match.length >= 3) {
-                options[match[1]] = match[2].split("|")
-            } else {
-                logging.error("Unable to parse filter")
-                return ebaySearch
-            }
-        }
-        // return options
-        logging.debug("Result\n", options)
-        ebaySearch.filter = options
+        ebaySearch.fieldgroups = ["ASPECT_REFINEMENTS", "CATEGORY_REFINEMENTS", "MATCHING_ITEMS"]
         return ebaySearch
     }
 
     static constructFilter(sEbaySearch: SEbaySearch): EbaySearch {
         const parsedEbaySearch: EbaySearch = {...sEbaySearch}
 
-        const filter = parsedEbaySearch.filter
+        const filter = parsedEbaySearch.filter ?? {}
         logging.debug("Constructing filter: \n", filter)
         if (!filter) return parsedEbaySearch
 
         // Already constructed
         if (filter instanceof String) return parsedEbaySearch
-
-        if (Object.keys(filter).length <= 0) {
-            logging.warn("Empty filter");
-            parsedEbaySearch.filter = ""
-            return parsedEbaySearch
-        }
 
         const optionStrings = [];
         for (const param in filter) {
@@ -147,78 +104,30 @@ export class EbaySaverState {
         return parsedEbaySearch
     }
 
-    // TODO: fix the stupid type 
-    static addUniqueFilter(sEbaySearch: SEbaySearch, filterKey: any, filterValue: any, clear: Boolean = false, toggle = false) {
-        logging.group("Adding unique filter\n")
-        logging.debug("Params", sEbaySearch.filter, filterKey, filterValue)
-        const filter = sEbaySearch.filter ?? {}
-        if (MULTI_OPTIONS.includes(filterKey)) {
-            if (!filter[filterKey] || clear) {
-                filter[filterKey] = [filterValue]
-            }
-            else {
-                if (!Object.values(filter[filterKey]).includes(filterValue)){
-                    filter[filterKey].push(filterValue!)
-                } else if (toggle) {
-                    const index = filter[filterKey].indexOf(filterValue)
-                    delete filter[filterKey][index]
-                }
-            }
-        }
-        else if (SINGLE_OPTIONS.includes(filterKey)) {
-            // if (!filter[filterKey] || clear) {
-            //     filter[filterKey] = filterValue
-            // } 
-            filter[filterKey] = filterValue
-        }
-
-        sEbaySearch.filter = filter
-        logging.debug("New filter", filter)
-        logging.groupEnd()
-        return sEbaySearch
-    }
-
-    static toSearchParams(ebaySearch: SEbaySearch): URLSearchParams{
-        ebaySearch = EbaySaverState.constructFilter({...ebaySearch})
-        logging.debug("Converting search param\n", ebaySearch)
-        return new URLSearchParams(ebaySearch as unknown as Record<string, any>)
-    }
-
-    static toEbaySearch(ebaySearch: SEbaySearch): EbaySearch {
-        ebaySearch = EbaySaverState.constructFilter(ebaySearch)
-        return ebaySearch
-    }
-
-    static saveToConfig(ebaySearch: SEbaySearch) {
-        throw new Error("Not implemented")
-        //saveConfig(ebaySearch)
-    }
-
-    static readConfig(): SEbaySearch {
-        throw new Error("Not implemented")
-        // return loadConfig()
-    }
-
     static setLocation(sEbaySearch: SEbaySearch, country: keyof typeof Countries) {
         const OPTION = "itemLocationCountry";
         // filter=itemLocationCountry:US
 
         logging.debug("Setting location:", country)
-        return EbaySaverState.addUniqueFilter(sEbaySearch, OPTION, country)
+        if (!sEbaySearch["filter"]) {
+            sEbaySearch["filter"] = {}
+        }
+        sEbaySearch["filter"]["itemLocationCountry"] = country
+        return sEbaySearch
     }
 
     // Additional options: these are the options that needs to be passed via 
     // header
 
-    static makeUserAddressHeader(country: keyof typeof Countries, postcode: Number) {
-        // TODO: implement a setting system and save this in setting
-        country = country 
-        postcode = postcode 
+    // static makeUserAddressHeader(country: keyof typeof Countries, postcode: Number) {
+    //     // TODO: implement a setting system and save this in setting
+    //     country = country 
+    //     postcode = postcode 
 
-        return [
-            "X-EBAY-C-ENDUSERCTX", `contextualLocation=${encodeURIComponent(`country=${country},zip=${postcode}`)}}`
-        ]
-    }
+    //     return [
+    //         "X-EBAY-C-ENDUSERCTX", `contextualLocation=${encodeURIComponent(`country=${country},zip=${postcode}`)}}`
+    //     ]
+    // }
 
 
 }

@@ -1,54 +1,14 @@
+- fixme: make each entry load independently (WatchItemButton)
+    - Returning promise cause each to go into an infinite loop
+    of re-rendering
+
 - fixme: incorrect db writes causing addive values instead of replacing
+- fixme: singleton sql table: setting
 - add: saved query
 - add: category + setting caching into cookie
 - add: location selector
 - useStateManagement: write appropriate dep for each function
-
-
-- Factorising
-- Styling
-- Fix debugging statement, it's all over the place
-- TODO: move the reduce function out into a separate function 
-
-- Cache catogory id for item
-    - Add condition for when to reload category again
-    - When clicking a item category disappear
-
-
-- Save intermediary state for quicker history navigation
-
-- Item entry card could be nicer
-- Change this number perpage into a next and previous system
-- Fetch general category in main page
-
-- Scrape pagination for dynamic loading, the resp.total is unreliable and not recommend by ebay
-- to check if last page. check if offset = current offset
-
-- Allow item location option (partial only AU and US)
-- Frontpage save searches should re-fetch ebay api every x seconds
-- Extract set category and filter in its own function,
-
-- Search lowest price for the searched item
-- take category from the main item to the lowest price search
-- UI: most probably be a right sidebar
-- Have user manually picked the sold item
-and save it for subsequent search as a suggestion
-. But still give them the full search.
-
-- Automated reminder when new item is listed
-- Bid sniping
-- Cleaner prompt when asking for manual ebay login. EbayScraper
-- auction doesn't work
-- listing doesn't show auction items
-
-BUG:
-    - Page refuse to load after fast reset?? mb
-        - Possible cause:
-            - itemLocationCountry gets loaded before the state can receive the useParam
-            - causing it or override useParam which has the essension q=?? parameter
-        - Fix: 
-            Removing self calling async function within itemPage useEffect. 
-            hopefully that will fix it
+- add: saved each item individually
 
 MarketPlaceId: https://developer.ebay.com/api-docs/static/rest-request-components.html#HTTP
 

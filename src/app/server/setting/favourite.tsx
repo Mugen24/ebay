@@ -7,7 +7,7 @@ export type FavouriteQueryType = {
     ebaySearch: EbaySearch
 }
 
-export class FavouriteQueries {
+export class Favourite {
     favouriteQueries: Array<FavouriteQueryType>
     db: Database
     private constructor(database: Database, favouriteQueries: Array<FavouriteQueryType>) {
@@ -15,13 +15,13 @@ export class FavouriteQueries {
         this.db = database
     }
 
-    async add(data: FavouriteQueries) {
+    async addQuery(data: Favourite) {
         return await this.db.run(`
-            insert into favouriteQueries (ebaySearch) values (?)
+            insert or ignore into favouriteQueries (ebaySearch) values (?)
         `, [data])
     }
 
-    async remove (id: string) {
+    async removeQuery(id: string) {
         return await this.db.run(`
             delete from favouriteQueries 
                 where
@@ -43,8 +43,34 @@ export class FavouriteQueries {
 
     }
 
+    async addItem(eId: string) {
+        return await this.db.run(`
+            insert or ignore into favouriteItems (id) values (?)
+        `, [eId]) 
+    }
+
+    async removeItem(eID: string) {
+        return await this.db.run(`
+            delete from favouriteItems 
+                where
+                    id = ? 
+        `, [eID])
+    }
+
+    async getItem(eID: string) {
+        return await this.db.get(`
+            select id from favouriteItems 
+            where id = ?
+        `, [eID])
+    }
+
+    async getItems() {
+        return await this.db.all(`
+            select id from favouriteItems 
+        `)
+    }
     static async init(database: Database) {
-        const queries = await FavouriteQueries.getQueries(database)
-        return new FavouriteQueries(database, queries)
+        const queries = await Favourite.getQueries(database)
+        return new Favourite(database, queries)
     }
 }

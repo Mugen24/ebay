@@ -8,6 +8,7 @@ import { Outcome } from '../../types/Outcome';
 // import { Categories, categoryManager } from '../server/setting/categoryManager';
 import logging from '../../utils/logger';
 import { assert } from 'node:console';
+import { Countries } from './EbaySaverState';
 
 
 class EbayApi {
@@ -26,6 +27,13 @@ class EbayApi {
         return this.ebayApiToken.getItem(itemData, optionalConfig)
     }
 
+    setAddress(country: keyof typeof Countries, postcode: number) {
+        return this.ebayApiToken.setAddress(country, postcode)
+    }
+
+    setMarketplaceID(marketCode: string) {
+        return this.ebayApiToken.setMarketplaceID(marketCode)
+    }
 
     //getCategoryIds(request: GetDefaultCategoryTreeRequest): Outcome<Categories | undefined> {
     //    if (categoryManager && categoryManager.categories) {

@@ -4,14 +4,16 @@ import { SearchBar } from "./components/baseComponents/SearchBar";
 import styles from "./structure.module.css";
 import { SavedQueryGallery } from "./server/SavedQueryGalleryClient";
 import { CategoriesList } from "./components/baseComponents/CategoriesList";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Bold, Italic, Underline } from "lucide-react";
 
 
 
 export default function ClientSideApp({children}: {children?: ReactNode}) {
     return (
-        <div className={styles.main_layout}>
+        <div className="">
           <CategoriesList/>
-          <section className={styles.center_content}>
+          <section className="">
             <SearchBar></SearchBar>
           </section>
           <section>

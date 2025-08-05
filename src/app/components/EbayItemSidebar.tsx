@@ -1,8 +1,6 @@
 'use client'
 import { EbaySaverState } from "../server/EbayApi/EbaySaverState"
 import { extractCategoryDistributions } from "@/app/actions/utils"
-import CategoryContainer from "./QueryOptions/CategoryContainer"
-import styles from "./structure.module.css"
 import { Filter as FilterType} from "../server/EbayApi/EbaySaverState"
 import { Filter } from "./QueryOptions/FilterContainer"
 import { useQueryState } from "../hooks/useQueryState"
@@ -20,7 +18,7 @@ export function EbayItemSideBar() {
 
 
     return (
-        <div className={styles.side_bar}>
+        <div>
             <Filter/>
         </div>
     )

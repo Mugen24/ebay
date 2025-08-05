@@ -2,7 +2,6 @@ import "./globals.css";
 import { Metadata } from "next";
 import { StateContext, StateProvider } from "./hooks/useStateManagement";
 
-
 // import { CategoryProvider } from "./hooks/useCategories";
 import logging from "./utils/logger";
 // import { setting, categories } from "./layout";
@@ -12,7 +11,7 @@ import { Setting } from "./server/setting/settings";
 import { CategoryManager  } from "./server/setting/categoryManager";
 import sqlite3 from 'sqlite3'
 import { open } from 'sqlite'
-import { FavouriteQueries } from "./server/setting/favouriteQueries";
+import { Favourite } from "./server/setting/favourite";
 import { AxiosProvider } from "./hooks/useAxios";
 import { QueryStateProvider } from "./hooks/useQueryState";
 
@@ -39,6 +38,10 @@ const SCHEMA =  `
         id integer primary key autoincrement,
         ebaySearch text
     );
+
+    create table if not exists favouriteItems (
+        id integer primary key
+    );
 `
 
 const db = await open({
@@ -51,7 +54,7 @@ await db.exec(SCHEMA)
 
 export const setting = await Setting.init(db)
 export const categories = await CategoryManager.init(setting, db)
-export const favouriteQueries= await FavouriteQueries.init(db)
+export const favourite= await Favourite.init(db)
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -71,20 +74,19 @@ export default function RootLayout({
 
   return (
     <>
-      <html>
+      <html 
+        className="
+          dark
+        ">
         <body
-          className="
-            bg-gray-900
-            text-gray-400
-          "
         >
-          <AxiosProvider>
-            <StateProvider serverData={serverData}>
-              <QueryStateProvider>
-                  {children}
-              </QueryStateProvider>
-            </StateProvider>
-          </AxiosProvider>
+            <AxiosProvider>
+              <StateProvider serverData={serverData}>
+                <QueryStateProvider>
+                    {children}
+                </QueryStateProvider>
+              </StateProvider>
+            </AxiosProvider>
         </body>
       </html>
     </>

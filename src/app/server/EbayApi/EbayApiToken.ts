@@ -1,18 +1,22 @@
 import EbayAuthToken from "ebay-oauth-nodejs-client"
-import axios, { AxiosInstance, AxiosResponse } from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { EbaySearch, EbaySearchReturn } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import { EbayGetItemReturn, EbayGetItem } from "@/app/types/EbayApiTypes/ebayGetItemTypes";
 import logging from "../../utils/logger";
 import { Outcome } from "../../types/Outcome";
 import { OptionalDataType } from "../../types/clientApiTypes";
 import { GetCategoryTreeRequest, GetCategoryTreeResponse, GetDefaultCategoryTreeRequest, GetDefaultCategoryTreeResponse } from "../../types/EbayApiTypes/CategoryTree";
+import { Countries, EbaySaverState, SEbaySearch } from "./EbaySaverState";
 
 export class EbayApiToken {
     static scopes = ["https://api.ebay.com/oauth/api_scope"];
     token: string;
     axios: AxiosInstance;
+    _optionalHeaders: Record<string, string>
     private constructor (token: string) {
         this.token = token;
+        this._optionalHeaders= {}
+
         this.axios = axios.create({
             baseURL: "https://api.ebay.com",
             headers: {
@@ -20,6 +24,11 @@ export class EbayApiToken {
                 "X-EBAY-C-MARKETPLACE-ID": "EBAY_AU",
                 "Authorization": `Bearer ${this.token}`
             }
+        })
+
+        this.axios.interceptors.request.use((request) => {
+            request.headers = Object.assign(request.headers, this._optionalHeaders)
+            return request
         })
         async function responseErrorHandler(res: AxiosResponse) {
             if (res.status != 200) {
@@ -32,8 +41,8 @@ export class EbayApiToken {
             return res
         }, responseErrorHandler)
     }
-
-    static async authenticate () {
+    
+    static async authenticate() {
         const ebayAuth = new EbayAuthToken(
             {
                 clientId: process.env.CLIENT_ID!,
@@ -50,37 +59,33 @@ export class EbayApiToken {
         return new EbayApiToken(parsed_token.access_token);
     }
 
-    async search( config: EbaySearch | string , optionalConfig: Record<string,any> = {}): Promise<Outcome<EbaySearchReturn>> {
-        let resp: AxiosResponse;
+    async setAddress(country: keyof typeof Countries, postcode: number) {
+        this._optionalHeaders["X-EBAY-C-ENDUSERCTX"] = `contextualLocation=${encodeURIComponent(`country=${country},zip=${postcode}`)}}`
+    }
+
+    async setMarketplaceID(marketCode: string) {
+        // EBAY_AU
+        this._optionalHeaders["X-EBAY-C-MARKETPLACE-ID"] = `${marketCode}`
+    }
+
+    async search(config: SEbaySearch, optionalConfig: Record<string,any> = {}): Promise<Outcome<EbaySearchReturn>> {
         //config is url returned by EbaySeachReturn[next]
         logging.group("Calling EbaySearch")
         logging.debug("Query: " + JSON.stringify(config))
         logging.debug("Optional config", optionalConfig)
+        const ebaySearch = EbaySaverState.parse(config)
 
-        if (typeof config === "string") {
-            resp = await this.axios.get(config, {
-                headers: optionalConfig["headerParam"] ?? {}
-            })
-        }
-        else {
-            resp = await this.axios.get("/buy/browse/v1/item_summary/search", 
-                {
-                    params: config,
-                    // headers: optionalConfig["headerParam"] ?? {}
-                }
-            )
-        }
-        try {
-            logging.debug("Item:", resp.data.itemSummaries[0])
-        } catch {
-            
-        }
-
+        const resp = await this.axios.get("/buy/browse/v1/item_summary/search", 
+            {
+                params: ebaySearch,
+            }
+        )
+        const test: EbaySearchReturn = resp.data
         logging.groupEnd()
         return [resp.status === 200, resp.data]
     }
 
-    async getItem( options: EbayGetItem, optionalConfig?: OptionalDataType): Promise<Outcome<EbayGetItemReturn>> {
+    async getItem(options: EbayGetItem, optionalConfig?: OptionalDataType): Promise<Outcome<EbayGetItemReturn>> {
         const resp = await this.axios.get("/buy/browse/v1/item", {
             params: options
         })

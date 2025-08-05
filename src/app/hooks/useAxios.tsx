@@ -1,6 +1,7 @@
 "use client";
 import { createContext, ReactNode, useRef, MutableRefObject, useContext } from 'react';
 import axios, { Axios, AxiosRequestConfig, InternalAxiosRequestConfig } from "axios";
+import logging from '../utils/logger';
 export type AxiosContextType = {
     updateConfig: (config: AxiosRequestConfig) => void,
     getAxios: () => Axios
@@ -12,6 +13,9 @@ export const AxiosContext = createContext<AxiosContextType | undefined>(undefine
 export function AxiosProvider({children}: {children: ReactNode})  {
     const base_config: MutableRefObject<AxiosRequestConfig> = useRef({
         baseURL: "/server/api/",
+        headers: {
+            "Content-Type": "application/json"
+        }
     })
     const axios = new Axios(base_config.current)
     // axios.defaults.baseURL = base_config.current.baseURL
@@ -19,8 +23,13 @@ export function AxiosProvider({children}: {children: ReactNode})  {
     // TODO: move all the ebay request merging logic in 
     // axios instead ??
     axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+        logging.debug(`${config.method}: ${config.url}`)
         Object.assign(base_config.current, config)
         return config
+    })
+    axios.interceptors.response.use((resp) => {
+        logging.debug(`RESP: ${resp.request.method}: ${resp.request.url} ${resp.status}`)
+        return resp
     })
 
     function updateConfig(config: AxiosRequestConfig) {

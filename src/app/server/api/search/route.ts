@@ -10,8 +10,6 @@ export async function POST(request: Request) {
     // const { query } = URLSearchParamsToJson(url.searchParams)
     const body = await request.json()
     logging.debug("payload: ", body)
-
-
     let response;
     const [outcome, data] = await ebayApi.search(body)
 

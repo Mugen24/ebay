@@ -1,33 +1,35 @@
-import { Countries, EbaySaverState, Filter as FilterType } from "@/app/server/EbayApi/EbaySaverState";
+import { Countries, Filter as FilterType } from "@/app/server/EbayApi/EbaySaverState";
 import { useQueryState } from "@/app/hooks/useQueryState";
 import { ConditionOption, SortField } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import logging from "@/app/utils/logger";
-import React, { useEffect } from "react";
-import { formToJson } from '../../actions/utils';
+import React, { useEffect, useState } from "react";
 import { useStateManager } from "@/app/hooks/useStateManagement";
+import { useAxios } from "@/app/hooks/useAxios";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ToggleLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ToggleInput } from "../baseComponents/ToggleInput";
+import { DropDown } from "../baseComponents/DropDown";
+import { WatchItemButton } from "../baseComponents/WatchItemButton";
+import { WatchQueryButton } from "../baseComponents/WatchQueryButton";
 
-export function Filter({}: {
-    // setFilterState: <T extends keyof FilterType>(filterKey: T, filterValue: FilterType[T]) => void,
-    // setSortState: (choiceArgs: SortField) => void,
-    // saveConfigState: () => void,
-}) {
-    
+export function Filter() {
     const {queryState, queryHandler} = useQueryState();
     const {userData} = useStateManager()
     const setting = userData.setting
+    const {getAxios} = useAxios()
 
-    const userLocationCountryMap = Object.keys(Countries)
 
     // TODO: move all this login into EbaySaverState
-    const buyingOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
-        logging.debug("buyingOptionHandler: ", event)
-        const option: string = event.target.value;
+    function buyingOptionsHandler(option: string)  {
+        logging.debug("buyingOptionHandler: ", option)
         const key = "buyingOptions"
         let value = undefined
-
         switch (option.toLowerCase()) {
             case "all": 
-                // setFilterState("buyingOptions", ["AUCTION", "BEST_OFFER", "FIXED_PRICE"])
                 value = ["AUCTION", "BEST_OFFER", "FIXED_PRICE"]
                 queryHandler({
                     type: "updateFilterOption",
@@ -38,7 +40,6 @@ export function Filter({}: {
                 })
             break;
             case "auction": 
-                // setFilterState("buyingOptions", ["AUCTION"])
                 value = ["AUCTION"]
                 queryHandler({
                     type: "updateFilterOption",
@@ -57,126 +58,161 @@ export function Filter({}: {
 
     }
 
-    const conditionOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
-        if (event.target instanceof HTMLButtonElement) {
-            const param = event.target.value;
+    function conditionOptionsHandler(newState: string) {
             const key =  "conditions"
 
             // setFilterState("conditions", [param as ConditionOption])
-            const value = [param as ConditionOption]
+            const value = newState as ConditionOption
             queryHandler({
                 type: "updateFilterOption",
                 results: {key, value}
             })
-        }
     }
 
-    const sortOptionsHandler: (event: React.MouseEvent<HTMLButtonElement>) => void = (event) => {
-        if (event.target instanceof HTMLButtonElement) {
-            const choice = event.target.value;
+    function sortOptionsHandler(newState: string)  {
             // setSortState(choice as SortField);
             queryHandler({
                 type: "updateSortOption",
-                results: choice as SortField
+                results: newState as SortField
             })
-        }
     }
 
-    const locationOptionsHandler: (event: React.FormEvent<HTMLFormElement>) => void = (event) => {
-        if (event.target?.value) {
-            // setItemLocation(event.target?.value)
-            queryHandler({
-                "type": "updateItemLocation",
-                "results": {
-                    "country": event.target?.value
-                }
-            })
-        }
+    function locationOptionsHandler(country: keyof typeof Countries){
+        // setItemLocation(event.target?.value)
+        queryHandler({
+            "type": "updateItemLocation",
+            "results": {
+                "country": country
+            }
+        })
     }
 
-    const addressHandler: (event: React.FormEvent<HTMLFormElement>) => void = (event) => {
-        event.preventDefault()
-        const formData = new FormData(event.currentTarget)
-        const country = formData.get("country")
-        const postcode= formData.get("postcode")
-        console.log(formToJson(formData))
-        if (country && postcode) {
-            queryHandler({
-                "type": "updateUserAddress",
-                "results": {
-                    "country": country as keyof typeof Countries,
-                    "postcode": Number(postcode)
-                }
-            })
-            // setAddress(country as keyof typeof Countries, Number(postcode))
-        }
+    const countryOptions = Object.keys(Countries)
+    const postcodeOption = 2100
+    const [country, setCountry] = useState<string>(countryOptions[0])
+    const [postcode, setPostcode] = useState(postcodeOption)
+
+    async function updateAddress(country: string, postcode: number) {
+        await axios.put("/setting/setAddress", JSON.stringify({
+            country,
+            postcode
+        })
+    )}
+
+    function handleCountry(country: string) {
+        (async () => {
+            await updateAddress(country, postcode)
+            setCountry(country)
+        })()
     }
+
+    function handlePostcode(postcode: number) {
+        (async () => {
+            await updateAddress(country, postcode)
+            setPostcode(postcode)
+        })()
+    }
+
 
     return (
-    <div>
-        {
-            setting ? 
-            <>
-                <section>
-                    <h1>Delivery Location: </h1>
-                    <form onSubmit={addressHandler}>
-                        <label htmlFor="Country">Country</label>
-                        <select name="country" id="country">
-                            {Object.keys(Countries).map((c) => {
-                                if (c === setting.shippingLocation) {
-                                    return <option selected={true} key={c} value={Countries[c]}>{c}</option>
-                                } else {
-                                    return <option key={c} value={Countries[c as keyof typeof Countries]}>{c}</option>
+        <Card>
+            <CardHeader>
+                <CardTitle>Filters</CardTitle>
+            </CardHeader>
+                <CardContent>
+                    <div>
+                        <ToggleInput
+                            type="single"
+                            options={[
+                                {
+                                    label: "All",
+                                    value: "all",
+                                },
+                                {
+                                    label: "Auction",
+                                    value: "auction",
+                                },
+                                {
+                                    label: "Buy It Now",
+                                    value: "buy it now",
+                                },
+                            ]}  
+                            onClick={buyingOptionsHandler}
+                        />
+                    </div>
+                    <div>
+                        <CardDescription>User location</CardDescription>
+                        <div className="flex flex-row">
+                            <DropDown
+                                label="Item location" 
+                                emptyString="No location"
+                                options={
+                                    Object.keys(Countries).map(
+                                        (c) => {
+                                            return {
+                                                label: c,
+                                                value: c
+                                            }
+                                        }
+                                )}
+                                onChange={locationOptionsHandler}
+                            />
+                            <Input 
+                                type="number"
+                                placeholder="Postcode"
+                            >
+                            </Input>
+
+                        </div>
+                    </div>
+                    <div>
+                        <CardDescription>Conditions</CardDescription>
+                        <ToggleInput
+                            type="multiple"
+                            options={[
+                                {
+                                    label: "New",
+                                    value: "NEW"
+                                },
+                                {
+                                    label: "Used",
+                                    value: "USED"
+                                },
+                                {
+                                    label: "Unspecified",
+                                    value: "UNSPECIFIED"
+                                },
+                            ]}
+                            onClick={conditionOptionsHandler}
+                        />
+                    </div>
+                    <div>
+                        <CardDescription>Date</CardDescription>
+                        <ToggleInput
+                            options={[
+                                {
+                                    label: "New",
+                                    value: "newlyListed"
+                                },
+                                {
+                                    label: "Ending Soon",
+                                    value: "endingSoonest"
+                                },
+                                {
+                                    label: "Lowest",
+                                    value: "price",
                                 }
-                            })}
-                        </select>
+                            ]}  
+                            type="single"
+                            onClick={sortOptionsHandler}
+                        >
 
-                        <label htmlFor="Postcode">Postcode</label>
-                        <input type="text" id="Postcode" name="postcode" defaultValue={setting.shippingPostcode}/>
-
-                        <input type="submit" value={"enter"}/>
-                    </form>
-                </section>
-                <section>
-                    <form onChange={locationOptionsHandler}>
-                        {
-                            Object.keys(Countries).map(country => {
-                                return (
-                                    <div key={`${country}_container`}>
-                                        <label key={`${country}_label`} htmlFor={country} >{country}</label>
-                                        <input type="radio" checked={country === setting.itemLocation} key={country} id={country} name="country" value={country}/>
-                                    </div>
-                                )
-                            })
-                        }
-                    </form>
-                </section>
-            </>
-            : <></>
-        }
-
-        <section>
-            <button className="primary_button" value="All" onClick={buyingOptionsHandler}>All</button>
-            <button className="primary_button" value="Auction" onClick={buyingOptionsHandler}>AUCTION</button>
-            <button className="primary_button" value="Buy it now" onClick={buyingOptionsHandler}>Buy It Now</button>
-        </section>
-
-        <section>
-            <button className="primary_button" value="NEW" onClick={conditionOptionsHandler}>New</button>
-            <button className="primary_button" value="USED" onClick={conditionOptionsHandler}>Used</button>
-            <button className="primary_button" value="UNSPECIFIED" onClick={conditionOptionsHandler}>Other</button>
-        </section>
-
-        <section>
-            <a>Sort: </a>
-            <button className="primary_button" value={"newlyListed"} onClick={sortOptionsHandler}>Time: Newly Listed</button>
-            <button className="primary_button" value={"endingSoonest"} onClick={sortOptionsHandler}>Time: Ending Soonest</button>
-            <button className="primary_button" value={"price"} onClick={sortOptionsHandler}>Price + Postage: Lowest First </button>
-        </section>
-        <section>
-            <a>Save Search: TODO</a>
-            {/* <button className="primary_button" onClick={saveConfigState}>Save Search</button> */}
-        </section>
-    </div>
+                        </ToggleInput>
+                    </div>
+                </CardContent>
+                <CardFooter>
+                    <WatchQueryButton></WatchQueryButton>
+                </CardFooter>
+        </Card>
     )
 }

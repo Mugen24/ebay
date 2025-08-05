@@ -27,13 +27,10 @@ type QueryActionType =
     | {type: 'updateCategory', results: Category["categoryId"]}
     | {type: 'updateFilterOption', results: updateFilterStateType<any>}
     | {type: 'updateSortOption', results: SortField}
-    | {type: 'updateUserAddress', results: {
-        "country": keyof typeof Countries,
-        "postcode": number,
-      }}
     | {type: 'updateItemLocation', results: {
         "country": keyof typeof Countries
       }}
+    | {type: 'replaceQueryState', results: SEbaySearch}
 
 
 export function QueryStateProvider({children}: {children: ReactNode}) {
@@ -53,69 +50,70 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
             const filterKey = action.results["key"]
             const filterValues = action.results["value"]
 
-            if (filterValues.length === 0) {
-                // TODO: fix only convert when actually querying
-                EbaySaverState.addUniqueFilter(newState, filterKey, filterValues[0],  true)
+            // TODO: fix only convert when actually querying
+            // EbaySaverState.addUniqueFilter(newState, filterKey, filterValues[0],  true)
+            if (!newState["filter"]) {
+                newState["filter"] = {}
             }
-            else {
-                // For array for values
-                // First value must clean the previous value
-                EbaySaverState.addUniqueFilter(newState, filterKey, filterValues[0],  true)
-                // Any subsequently should be clear the previous value
-                for (let i = 1; i < filterValues.length; i++) {
-                    EbaySaverState.addUniqueFilter(newState, filterKey, filterValues[i])
-                }
-            }
+            newState["filter"][filterKey] = filterValues
         }
 
         else if (action.type === "updateSortOption") {
             newState.sort = action.results
         }
 
-        else if (action.type === "updateUserAddress") {
-            const [key, value] = EbaySaverState.makeUserAddressHeader(action.results.country, action.results.postcode)
-            const config = getConfig()
-            config.headers = config.headers ?? {}
-            config.headers[key] = value
-            updateConfig(config)
-        }
-
         else if (action.type === "updateItemLocation") {
-            EbaySaverState.setLocation(newState, action.results.country)
+            newState = EbaySaverState.setLocation(newState, action.results.country)
         }
 
         else if (action.type === "updateQuery") {
             newState.q = action.results
         }
 
+        else if (action.type === "replaceQueryState") {
+            newState = action.results
+        }
 
-        const url = new URL(window.location.href)
+
+        // const url = new URL(window.location.href)
         return newState
     }
 
 
-    const [queryState, queryHandler] = useReducer(
-        reducer,
-        useSearchParams(),
-        (params)  => {
-            try {
-                const itemData = params.get("query")
-                if (itemData === null) throw new Error("Invalid query")
+    function fetchFromSearchParam(params: URLSearchParams): SEbaySearch {
+        try {
+            const itemData = params.get("query")
+            if (itemData === null) {
+                logging.warn("No query found")
+                return {}
+            }
+            else {
                 const data = JSON.parse(itemData)
                 return data
             }
-            catch (e) {
-                console.warn(e)
-                router.push("")
-            }
         }
+        catch (e) {
+            console.warn(e)
+            // router.push("/")
+            return {}
+        }
+    }
+    const [queryState, queryHandler] = useReducer(
+        reducer,
+        useSearchParams(),
+        fetchFromSearchParam
     )
 
-    // useEffect(() => {
-    //     const url = new URL(window.location.href)
-    //     url.searchParams.set("query", JSON.stringify(queryState))
-    //     window.history.pushState({}, "", url)
-    // }, [queryState])
+    const searchParam = useSearchParams()
+    useEffect(() => {
+        console.log("new search")
+        console.log(searchParam)
+        const newQueryState = fetchFromSearchParam(searchParam)
+        queryHandler({
+            type: "replaceQueryState",
+            results: newQueryState
+        })
+    }, [searchParam]) 
 
     async function updateResponse() {
         const resp = await axios.post("search", JSON.stringify(queryState))

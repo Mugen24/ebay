@@ -10,18 +10,20 @@ import { CategoriesList } from "@/app/components/baseComponents/CategoriesList";
 
 export function ClientPage() {
     const { queryState, queryHandler, response, updateResponse } = useQueryState()
-    const { getAxios } = useAxios()
-    const axios = getAxios()
-    const searchParam = useSearchParams()
-    const router = useRouter()
-
 
     useEffect(() => {
         const url = new URL(window.location.href)
-        url.searchParams.set("query", JSON.stringify(queryState))
-        window.history.pushState({}, "", url)
-        updateResponse()
+        if (Object.keys(queryState).length) {
+            url.searchParams.set("query", JSON.stringify(queryState))
+
+            // !!Prevent same state from being pushed twice!!
+            if (window.location.href !== url.toString()) {
+                window.history.pushState({}, "", url)
+            }
+            updateResponse()
+        }
     }, [queryState])
+
 
     return (
         <div

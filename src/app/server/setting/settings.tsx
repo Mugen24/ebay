@@ -1,6 +1,5 @@
 import { SettingType, Theme } from '@/app/types/SettingType';
 import { Database } from 'sqlite';
-import { assert } from 'node:console';
 
 
 export class Setting {
@@ -43,10 +42,10 @@ export class Setting {
         this.setting = setting ? setting : Setting.DEFAULTS
     }
 
-    async save(newSetting: SettingType) {
-        this.setting = newSetting
+    async save(newSetting?: SettingType) {
+        this.setting = newSetting ?? this.setting
         await this.db.run(`
-            insert into setting values (:setting)
+            insert into setting values (?)
         `, this.setting)
     }
 
