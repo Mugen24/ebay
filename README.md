@@ -30,4 +30,5 @@ Open [http://localhost:3000](http://localhost:3000) with your browser
     - [x] Sell type
 - [x] Item watch list
 - [x] Query watch list
-- [] Auto bidding
+
+- [ ] Auto bidding
