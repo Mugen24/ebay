@@ -4,10 +4,10 @@
 - You need to sign up for an ebay api key and populate it into .env
 
 ## Example of .env
-CLIENT_ID=xxxx
-CLIENT_SECRET=xxxx
-REDIRECT_URI=xxxx
-BASE_URL=http://localhost:3000
+CLIENT_ID=xxxx \\
+CLIENT_SECRET=xxxx \\
+REDIRECT_URI=xxxx \\
+BASE_URL=http://localhost:3000 \\
 
 ## Installation
 Copy the project directory
@@ -32,3 +32,4 @@ Open [http://localhost:3000](http://localhost:3000) with your browser
 - [x] Query watch list
 
 - [ ] Auto bidding
+
