@@ -1,28 +1,41 @@
 import { clearInterval, setInterval } from "node:timers"
-import { ItemSummary } from "@/app/types/EbayApiTypes/ebaySeachTypes"
-const TIMER = 1000
-// type UpdateEvent = (items: ItemSummary[]) => void
 
-export class EbayEvent<T extends (...args: any[]) => void> {
+export abstract class EbayEvent<T> {
     listeners: Array<T>
     intervalID: any
+    interval: number = 1800000 //30 mins
+    static Instance: undefined | EbayEvent<T>
+
     constructor() {
+        if (!!EbayEvent.Instance) {
+            return EbayEvent.Instance
+        } 
+
+        EbayEvent.Instance = this
         this.listeners = []
-        this.intervalID = setInterval(this.eventLoop, TIMER)
-    }
-    addListener(listener: T) {
-        this.listeners.push(listener)
     }
 
-    async eventLoop() {
-        throw new Error("Need to be implemented")
+
+    removeListener(listener: T) {
+        this.listeners = this.listeners.filter((sub) => {
+            return (sub === listener) 
+        })
+    }
+
+    addListener(listener: T) {
+        this.listeners.push(listener)
     }
 
     stop() {
         clearInterval(this.intervalID)
     }
 
-    notify(...args: Parameters<T>) {
-        this.listeners.forEach(l => l(...args))
+    startLoop() {
+        const loopFunc = this.mainLoop.bind(this)
+        loopFunc()
+        this.intervalID = setInterval(loopFunc, this.interval)
     }
+
+    abstract mainLoop(): void
+    abstract notify(newItems: any): void
 }

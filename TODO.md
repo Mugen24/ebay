@@ -1,6 +1,5 @@
-- fixme: make each entry load independently (WatchItemButton)
-    - Returning promise cause each to go into an infinite loop
-    of re-rendering
+- Better category selector
+- Email notification 
 
 - fixme: incorrect db writes causing addive values instead of replacing
 - fixme: singleton sql table: setting
@@ -26,3 +25,9 @@ Input rough user location of estimate delivery:
     Note: For the best accuracy, always include the contextualLocation values in the X-EBAY-C-ENDUSERCTX request header.
 
     Occurrence: Conditional
+
+## Bugs
+- [ ] TypeError: Response body object should not be disturbed or locked
+    - src/app/server/api/setting/watch/stream/route.tsx:41:11
+    - Specific problem with consuming the body response?
+    - Various sources suggests that it could be a client problem

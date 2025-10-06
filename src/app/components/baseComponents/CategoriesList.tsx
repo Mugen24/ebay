@@ -4,14 +4,27 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
 import { useQueryState } from "@/app/hooks/useQueryState";
+import { cn } from "@/lib/utils";
 
+export type CategoryType = {
+    categoryID: string,
+    categoryName: string
+}
 
-export function CategoriesList() {
+export type CategoriesListType = {
+    staticCategories?: CategoryType[]
+}
+// Current function is dependent too much 
+// on the state of useQueryState
+// Making it difficult to use out of that context
+// --- Override using staticCategories ----
+
+export function CategoriesList({className, override}: {className: string, override?: CategoriesListType}) {
     const { userData } = useStateManager()
-    // const [categoryId, setCategoryIds] = useState()
     const catElements: ReactElement[] = []
     const { queryHandler, response } = useQueryState()
     const rootCategories = userData.categories
+
 
     const MAX_CATEGORIES = 20
 
@@ -22,7 +35,29 @@ export function CategoriesList() {
         })
     }
 
-    if (!response?.refinement.categoryDistributions) {
+    function onRemove(categoryID: string, categoryName: string) {
+        queryHandler({
+            "type": "updateCategory",
+            "results": undefined
+        })
+    }
+
+    if (override?.staticCategories) {
+        for (const category of override.staticCategories)  {
+            catElements.push(
+                <CategoryButton 
+                            key={category.categoryID}
+                            categoryID={category.categoryID}
+                            categoryName={category.categoryName}
+                            onClick={onClick}
+                            onRemove={onRemove}
+                          />
+
+            )
+
+        }
+    }
+    else if(!response?.refinement.categoryDistributions) {
         for (const category of rootCategories.rootCategoryNode.childCategoryTreeNodes){
                 catElements.push(
                     <CategoryButton 
@@ -30,6 +65,7 @@ export function CategoriesList() {
                                 categoryID={category.category.categoryId}
                                 categoryName={category.category.categoryName}
                                 onClick={onClick}
+                                onRemove={onRemove}
                               />
 
                 )
@@ -44,6 +80,7 @@ export function CategoriesList() {
                             categoryID={item.categoryId}
                             categoryName={item.categoryName}
                             onClick={onClick}
+                            onRemove={onRemove}
                         />
             )
             index ++
@@ -55,25 +92,18 @@ export function CategoriesList() {
 
     return (
         <div
-            className="
-                p-2
-                mb-2
-                mx-0
-                mt-0
-                flex
-                flex-wrap
-                gap-1
-            "
+            className={cn("p-2 mb-2 mx-0 mt-0 flex flex-wrap gap-1", className)}
         >
             {catElements}
         </div>
     )
 }
 
-export function CategoryButton({categoryID, categoryName, onClick}: {
+export function CategoryButton({categoryID, categoryName, onClick, onRemove}: {
     categoryID: string,
     categoryName: string
     onClick: (categoryID: string, categoryName: string) => void
+    onRemove: (categoryID: string, categoryName: string) => void
 }) {
     const {queryState} = useQueryState()
 
@@ -82,13 +112,18 @@ export function CategoryButton({categoryID, categoryName, onClick}: {
     return (
         <Button variant={ isCurrentCat ? "default" : "ghost"} 
             onClick={(e) => {
-                onClick(categoryID, categoryName)
+                if (!isCurrentCat) {
+                    onClick(categoryID, categoryName)
+                } else {
+                    onRemove(categoryID, categoryName)
+                }
             }}
             className="
                 border-solid
                 border-2
                 p-1
                 rounded-xl
+                max-h-1/3
             "
         >
             {`${categoryName}`}

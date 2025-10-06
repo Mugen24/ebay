@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Command, CommandInput, CommandList } from "cmdk";
 import { Input } from "@/components/ui/input";
 import { EbaySaverState } from "@/app/server/EbayApi/EbaySaverState";
+import Link from "next/link";
 
 
 
@@ -53,7 +54,27 @@ export function SearchBar() {
                     />
                 </CommandInput>
             </Command>
-            <Button
+            <Link
+                href={"/items"}
+                onNavigate={(e) => {
+                    if (refSearchForm.current && refSearchForm.current.value) {
+                        queryState["q"] = refSearchForm.current.value
+                        EbaySaverState.addCategoryRequest(queryState)
+
+                        router.push(`items?query=${JSON.stringify(queryState)}`, )
+                        queryHandler({
+                            "type": "updateQuery",
+                            "results": refSearchForm.current.value
+                        })
+
+                    } else {
+                        e.preventDefault()
+                    }
+                }}
+            >
+                Search
+            </Link>
+            {/* <Button
                 ref={refLink}
                 href={{
                     pathname: "/items"
@@ -65,6 +86,7 @@ export function SearchBar() {
                     rounded-r-3xl
                     h-full
                 "
+                asChild={true}
                 onClick={(e) => {
                     if (refSearchForm.current && refSearchForm.current.value) {
                         queryState["q"] = refSearchForm.current.value
@@ -82,7 +104,7 @@ export function SearchBar() {
                 }}
             >
                 Search
-            </Button>
+            </Button> */}
         </div>
     )
 }

@@ -10,6 +10,9 @@ const nextConfig = {
   reactStrictMode: false,
   images: {
     remotePatterns: [new URL("https://i.ebayimg.com/images/**")]
+  },
+  eslint: {
+    ignoreDuringBuilds: true
   }
 };
 

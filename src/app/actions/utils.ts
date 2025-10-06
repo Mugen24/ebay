@@ -33,7 +33,6 @@ export function extractCategoryDistributions(result: EbaySearchReturn) {
 export function extractItems(result: EbaySearchReturn) {
     const data = result["itemSummaries"];
     console.log("extracted items")
-    console.log(data)
     if (!data) {
         return []
     }

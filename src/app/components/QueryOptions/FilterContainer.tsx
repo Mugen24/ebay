@@ -141,31 +141,6 @@ export function Filter() {
                         />
                     </div>
                     <div>
-                        <CardDescription>User location</CardDescription>
-                        <div className="flex flex-row">
-                            <DropDown
-                                label="Item location" 
-                                emptyString="No location"
-                                options={
-                                    Object.keys(Countries).map(
-                                        (c) => {
-                                            return {
-                                                label: c,
-                                                value: c
-                                            }
-                                        }
-                                )}
-                                onChange={locationOptionsHandler}
-                            />
-                            <Input 
-                                type="number"
-                                placeholder="Postcode"
-                            >
-                            </Input>
-
-                        </div>
-                    </div>
-                    <div>
                         <CardDescription>Conditions</CardDescription>
                         <ToggleInput
                             type="multiple"

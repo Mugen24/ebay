@@ -2,10 +2,12 @@
 import React, { Context, createContext, Dispatch, ReactElement, ReactNode, useEffect, useState } from "react"
 import { SearchBar } from "./components/baseComponents/SearchBar";
 import styles from "./structure.module.css";
-import { SavedQueryGallery } from "./server/SavedQueryGalleryClient";
 import { CategoriesList } from "./components/baseComponents/CategoriesList";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Bold, Italic, Underline } from "lucide-react";
+import { WatchedItemGallery } from "./components/WatchedItems/WatchedItemsGallery";
+import { SSEProvider } from "./hooks/useSSE";
+import { WatchedCategoriesRoot } from "./components/WatchedCategories/WatchCategoriesGallery";
 
 
 
@@ -17,9 +19,10 @@ export default function ClientSideApp({children}: {children?: ReactNode}) {
             <SearchBar></SearchBar>
           </section>
           <section>
-            {/* <SavedQueryGallery/> */}
+            <WatchedItemGallery></WatchedItemGallery>
           </section>
-          {children}
+          {children} 
+          <WatchedCategoriesRoot/>
         </div > 
     )
 }

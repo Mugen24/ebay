@@ -8,7 +8,7 @@ import { Outcome } from '../../types/Outcome';
 // import { Categories, categoryManager } from '../server/setting/categoryManager';
 import logging from '../../utils/logger';
 import { assert } from 'node:console';
-import { Countries } from './EbaySaverState';
+import { Countries, SEbaySearch } from './EbaySaverState';
 
 
 class EbayApi {
@@ -19,8 +19,8 @@ class EbayApi {
         this.ebayApiScrapper = ebayApiScrapper
     }
 
-    search(ebaySearch: EbaySearch, optionalConfig: OptionalDataType  = {}) {
-        return this.ebayApiToken.search(ebaySearch, optionalConfig)
+    search(ebaySearch: SEbaySearch, optionalConfig: OptionalDataType  = {}, noParse: Boolean = false) {
+        return this.ebayApiToken.search(ebaySearch, optionalConfig, noParse)
     }
 
     getItem(itemData: EbayGetItem, optionalConfig: OptionalDataType = {}) {

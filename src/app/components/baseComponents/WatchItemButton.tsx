@@ -30,7 +30,7 @@ export function WatchItemButton({ebayItem}: {
 
     function onClick() {
         if (state === "Add") {
-            axios.put(`setting/watch/item/${ebayItemNumber}`)
+            axios.put(`setting/watch/item/${ebayItemNumber}`, JSON.stringify(ebayItem))
         } else {
             axios.delete(`setting/watch/item/${ebayItemNumber}`)
         }

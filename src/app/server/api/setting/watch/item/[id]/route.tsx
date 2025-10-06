@@ -23,8 +23,9 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }>}
 ) {
     const {id} = await params
-    await favourite.addItem(id)
-    return Response.json("", {
+    const data = await request.json()
+    const dbID= await favourite.addItem(id, JSON.stringify(data))
+    return Response.json(dbID, {
         status: 200
     })
 }

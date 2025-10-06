@@ -10,11 +10,12 @@ import { WatchItemButton } from './WatchItemButton';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { LoadingButton } from '../loading/LoadingButton';
-import React, { Suspense } from 'react';
+import React, { ReactNode, Suspense } from 'react';
 import { ErrorBoundary } from "react-error-boundary";
+import { CategoriesList, CategoryType } from './CategoriesList';
 
 
-export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
+export function EbayItem({ ebayItem, children }: { ebayItem: ItemSummary, children?: ReactNode }) {
     const itemTypes = ebayItem.buyingOptions
 
     // OPTIONS = FIXED_PRICE BEST_OFFER AUCTION
@@ -42,7 +43,16 @@ export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
 
     const createDate = new Date(ebayItem.itemCreationDate)
     const endDate = new Date(ebayItem.itemEndDate)
-    console.log(ebayItem)
+
+    
+    const categories: CategoryType[] = []
+    for (const cat of ebayItem.categories) {
+        categories.push({
+            categoryName: cat.categoryName,
+            categoryID: cat.categoryId
+        })
+    }
+
 
     return (
         <Card
@@ -51,9 +61,15 @@ export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
                 grid-rows-[30px_auto_20px]
                 w-[200px]
                 h-[410px]
+                gap-0
+                overflow-scroll
+                
             '
         >
-            <CardHeader>
+            <CardHeader
+                className='
+                '
+            >
                 <CardTitle>
                     <Link 
                         href={ebayItem.itemWebUrl}
@@ -67,13 +83,17 @@ export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
             <CardContent 
                 className='
                     grid
-                    grid-rows-[min-content_150px_100px]
-                    gap-2
+                    grid-rows-[fit-content_150px_100px]
+                    gap-0
                 '
             >
+                <CategoriesList className="" override={{
+                    staticCategories: categories
+                }}/>
                 <div
                     className='row-start-1 row-span-1'
                 >
+
                     <Badge  variant={condition === "Used" ? "destructive" : "default"}>{condition}</Badge>
                     <CardDescription>
                         Ebay item number: {ebayItemNumber}
@@ -128,6 +148,7 @@ export function EbayItem({ ebayItem }: { ebayItem: ItemSummary }) {
                 <ErrorBoundary fallback={<h1>fetch has failed</h1>}>
                         <WatchItemButton ebayItem={ebayItem}></WatchItemButton>
                 </ErrorBoundary>
+                {children}
             </CardFooter>
         </Card>
     )

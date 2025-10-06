@@ -1,4 +1,4 @@
-import { EmailNotificationListener } from './src/app/server/EmailNotificationClient';
+// import { EmailNotificationListener } from './src/app/server/EmailNotificationClient';
 // import { getSearchListener } from "./src/app/server/SearchListener";
 export function register() {
     // logging vs perf monitoring called once nextjs is running

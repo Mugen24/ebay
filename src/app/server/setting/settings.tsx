@@ -45,8 +45,9 @@ export class Setting {
     async save(newSetting?: SettingType) {
         this.setting = newSetting ?? this.setting
         await this.db.run(`
-            insert into setting values (?)
-        `, this.setting)
+            insert or replace setting 
+            values (?)
+        `, [Object.values(this.setting)])
     }
 
     static async init(database: Database) {

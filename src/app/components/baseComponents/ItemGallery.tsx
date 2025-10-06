@@ -3,7 +3,6 @@ import { extractItems } from "@/app/actions/utils";
 import { useQueryState } from "@/app/hooks/useQueryState";
 import { EbayItem } from "./EbayItem";
 import { ErrorBoundary } from "react-error-boundary";
-
 export function ItemGallery() {
     const {queryState, response} = useQueryState();
     const ebayItems = [];
@@ -12,10 +11,6 @@ export function ItemGallery() {
             ebayItems.push(<EbayItem key={item.itemId} ebayItem={item}/>)
         }
     }
-    // let items = undefined
-    // if (response) {
-    //     items = extractItems(response!)
-    // }
 
     return (
         <>

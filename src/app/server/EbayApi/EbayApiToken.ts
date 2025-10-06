@@ -68,12 +68,13 @@ export class EbayApiToken {
         this._optionalHeaders["X-EBAY-C-MARKETPLACE-ID"] = `${marketCode}`
     }
 
-    async search(config: SEbaySearch, optionalConfig: Record<string,any> = {}): Promise<Outcome<EbaySearchReturn>> {
+    async search(config: SEbaySearch, optionalConfig: Record<string,any> = {}, noParse: Boolean = false): Promise<Outcome<EbaySearchReturn>> {
         //config is url returned by EbaySeachReturn[next]
         logging.group("Calling EbaySearch")
         logging.debug("Query: " + JSON.stringify(config))
         logging.debug("Optional config", optionalConfig)
-        const ebaySearch = EbaySaverState.parse(config)
+
+        const ebaySearch = noParse ? config : EbaySaverState.parse(config)
 
         const resp = await this.axios.get("/buy/browse/v1/item_summary/search", 
             {

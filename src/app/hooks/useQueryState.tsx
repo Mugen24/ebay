@@ -1,5 +1,4 @@
-'use client';
-import { createContext, ReactElement, ReactNode, useContext, useEffect, useReducer, Reducer, ReducerAction, Dispatch, cache, MutableRefObject, useRef, useState } from 'react';
+'use client'; import { createContext, ReactElement, ReactNode, useContext, useEffect, useReducer, Reducer, ReducerAction, Dispatch, cache, MutableRefObject, useRef, useState } from 'react';
 import { Countries, EbaySaverState, Filter, SEbaySearch } from '../server/EbayApi/EbaySaverState';
 import { Category, EbaySearch, EbaySearchReturn, SortField } from "../types/EbayApiTypes/ebaySeachTypes";
 import logging from "../utils/logger";
@@ -8,11 +7,16 @@ import { useSearchParams } from 'next/navigation';
 import { AxiosContext } from './useAxios';
 import { useRouter } from 'next/navigation';
 
+export type ExtraDataType = {
+    queryID?: string
+}
+
 export type QueryStateType = {
     queryState: SEbaySearch
     queryHandler: Dispatch<ReducerAction<Reducer<SEbaySearch, QueryActionType>>>
     response: EbaySearchReturn | undefined
     updateResponse: () => Promise<void>
+    extraData?: ExtraDataType
 }
 export const QueryStateContext = createContext({});
 
@@ -24,26 +28,36 @@ type updateFilterStateType<G extends keyof Filter> = {
 
 type QueryActionType = 
     | {type: 'updateQuery', results: string}
-    | {type: 'updateCategory', results: Category["categoryId"]}
+    | {type: 'updateCategory', results: Category["categoryId"] | undefined}
     | {type: 'updateFilterOption', results: updateFilterStateType<any>}
     | {type: 'updateSortOption', results: SortField}
     | {type: 'updateItemLocation', results: {
         "country": keyof typeof Countries
       }}
+    | {type: 'updateUserLocation', results: {
+        "country": keyof typeof Countries
+      }}
     | {type: 'replaceQueryState', results: SEbaySearch}
 
 
-export function QueryStateProvider({children}: {children: ReactNode}) {
+export function QueryStateProvider({initialData, children}: {initialData?: EbaySearch, children: ReactNode}) {
     const {getAxios, getConfig, updateConfig} = useContext(AxiosContext)!
     const [response, _setResponse] = useState<EbaySearchReturn | undefined>(undefined)
     const axios = getAxios()
     const router = useRouter()
+    let [extraData, setExtraData] = useState({})
 
     const reducer = (state: SEbaySearch, action: QueryActionType): SEbaySearch => {
         let newState: SEbaySearch = {...state};
 
         if (action.type === "updateCategory") {
-            newState["category_ids"] = action.results
+            if (action.results) {
+                newState["category_ids"] = action.results
+            } else {
+                delete newState["category_ids"]
+            }
+
+
         }
 
         else if (action.type === "updateFilterOption") {
@@ -106,13 +120,17 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
 
     const searchParam = useSearchParams()
     useEffect(() => {
-        console.log("new search")
-        console.log(searchParam)
         const newQueryState = fetchFromSearchParam(searchParam)
         queryHandler({
             type: "replaceQueryState",
             results: newQueryState
         })
+
+        const extraData = searchParam.get("extraData")
+        if (extraData) {
+            setExtraData(JSON.parse(extraData))
+        }
+
     }, [searchParam]) 
 
     async function updateResponse() {
@@ -130,6 +148,7 @@ export function QueryStateProvider({children}: {children: ReactNode}) {
         queryHandler,
         response,
         updateResponse,
+        extraData 
     }
 
 
