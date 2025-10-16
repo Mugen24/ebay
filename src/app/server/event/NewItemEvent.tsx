@@ -1,8 +1,8 @@
 import { EbayEvent } from "./EbayEvent";
-import { db } from "@/app/layout";
 import { ebayApi } from "../EbayApi/EbayApi";
 import logging from "@/app/utils/logger";
 import { EbaySearch, ItemSummary } from "@/app/types/EbayApiTypes/ebaySeachTypes";
+import { db } from "../main";
 
 export type NewItemFormat = {
     "id": string,
@@ -14,7 +14,7 @@ export interface NewItemSubscriber {
     update: (data: NewItemFormat) => Promise<boolean>
 }
 
-export class NewItemEvent<T extends NewItemSubscriber> extends EbayEvent<T>{
+export class NewItemEvent extends EbayEvent<NewItemSubscriber>{
     async notify(newItems: NewItemFormat) {
         const outcomes: Promise<Boolean>[] = []
         for (const listener of this.listeners) {
@@ -55,10 +55,15 @@ export class NewItemEvent<T extends NewItemSubscriber> extends EbayEvent<T>{
                 const newItems: ItemSummary[] = []
                 for (const item of resp.itemSummaries) {
                     const createdTimeEpoch= Date.parse(item.itemCreationDate) / 1000
-                    // if (createdTimeEpoch >= lastCheckedEpoch) {
+                    // console.group("Item")
+                    // console.log("cte", createdTimeEpoch)
+                    // console.log("lce", lastCheckedEpoch)
+                    // console.groupEnd()
+                    if (createdTimeEpoch >= lastCheckedEpoch) {
                         newItems.push(item)
-                    // } 
+                    } 
                 }
+
 
                 const data: NewItemFormat = {
                     "id": id,
@@ -66,7 +71,9 @@ export class NewItemEvent<T extends NewItemSubscriber> extends EbayEvent<T>{
                     "items": newItems
                 }
 
-                this.notify(data) 
+                if (newItems.length) {
+                    this.notify(data) 
+                }
             })()
         }
     }

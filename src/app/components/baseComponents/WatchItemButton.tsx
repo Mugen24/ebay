@@ -8,33 +8,35 @@ import { LoadingButton } from "../loading/LoadingButton";
 import React from "react";
 
 
-export function WatchItemButton({ebayItem}: {
-    ebayItem: ItemSummary
+export function WatchItemButton({ebayItem, savedID}: {
+    ebayItem: ItemSummary,
+    savedID: string | undefined
 }) {
     const {getAxios} = useAxios()
     const axios = getAxios()
-    const ebayItemNumber = ebayItem.itemId.split("|")[1]
-    const [state, setState] = useState<"Loading" | "Add" | "Remove">("Loading")
+    const ebayItemNumber = savedID ?? ebayItem.itemId.split("|")[1]
+    const [state, setState] = useState<"Add" | "Remove">(ebayItemNumber ? "Remove" : "Add")
 
-    async function updateState() {
-        const resp= await axios.get(`setting/watch/item/${ebayItemNumber}`)
-        const state = resp.status !== 200 ? "Add" : "Remove"
-        setState(state)
+    // async function updateState() {
+    //     const resp= await axios.get(`setting/watch/item/${ebayItemNumber}`)
+    //     const state = resp.status !== 200 ? "Add" : "Remove"
+    //     setState(state)
 
-    }
+    // }
 
-    useEffect(() => {
-        updateState()
-    },[])
+    // useEffect(() => {
+    // },[])
 
 
     function onClick() {
         if (state === "Add") {
             axios.put(`setting/watch/item/${ebayItemNumber}`, JSON.stringify(ebayItem))
+            setState("Remove")
         } else {
             axios.delete(`setting/watch/item/${ebayItemNumber}`)
+            setState("Add")
         }
-        updateState()
+        // updateState()
     }
     return (
         <Button 

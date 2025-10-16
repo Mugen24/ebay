@@ -1,5 +1,5 @@
-import { favourite } from "@/app/layout";
 import { NextRequest } from "next/server";
+import { favourite } from "@/app/server/main";
 
 export async function DELETE(
     request: NextRequest,

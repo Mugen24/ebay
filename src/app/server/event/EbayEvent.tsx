@@ -1,3 +1,4 @@
+import logging from "@/app/utils/logger"
 import { clearInterval, setInterval } from "node:timers"
 
 export abstract class EbayEvent<T> {
@@ -18,6 +19,7 @@ export abstract class EbayEvent<T> {
     }
 
     addListener(listener: T) {
+        logging.debug( "Listener added:", listener.constructor.name)
         this.listeners.push(listener)
     }
 
@@ -26,7 +28,20 @@ export abstract class EbayEvent<T> {
     }
 
     startLoop() {
+        const classThis = this
         const loopFunc = this.mainLoop.bind(this)
+        // Doesn't work event will never be fired 
+        // the first time? because listeners will never be attached
+
+        // function conditionalLoop() {
+        //     if (classThis.listeners.length <= 0) {
+        //         logging.debug(classThis.constructor.name, " has no listener")
+        //         return
+        //     }
+        //     loopFunc()
+        // }
+        // conditionalLoop()
+
         loopFunc()
         this.intervalID = setInterval(loopFunc, this.interval)
     }

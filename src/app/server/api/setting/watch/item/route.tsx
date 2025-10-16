@@ -1,4 +1,4 @@
-import { favourite } from "@/app/layout";
+import { favourite } from "@/app/server/main"
 
 export async function GET() {
     const favItems = await favourite.getItems()

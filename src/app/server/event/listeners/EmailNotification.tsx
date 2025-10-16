@@ -119,7 +119,7 @@ export function CssEbayItem({item}: {item: ItemSummary}) {
 
 
 
-export class SendEmailSubscriber implements NewItemSubscriber {
+export class EmailNotification implements NewItemSubscriber {
     async update(data: NewItemFormat): Promise<boolean> {
         const COLUMN_SIZE = 4
         let {id, items, query} = data

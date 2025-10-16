@@ -4,11 +4,7 @@ import { EbayItem } from "../baseComponents/EbayItem";
 import { EbaySearch, ItemSummary } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import { SSEProvider, useSSE } from "@/app/hooks/useSSE";
 import { Gallery, GalleryItem, GalleryList, GalleryTitle } from "../baseComponents/Gallery";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
 import { HyperText } from "../baseComponents/HyperText";
-import Image from "next/image";
 
 function WatchedCategory({id, query} : {id: string, query: any}) {
     const {data} = useSSE()

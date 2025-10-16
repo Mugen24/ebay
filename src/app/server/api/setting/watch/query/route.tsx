@@ -1,6 +1,6 @@
-import { favourite } from "@/app/layout";
 import { EbaySearch } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import { NextRequest } from "next/server";
+import { favourite } from "@/app/server/main";
 
 export async function POST(
     request : NextRequest,

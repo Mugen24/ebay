@@ -1,22 +1,11 @@
-import { newItemStream } from "@/app/server/event/main";
-import { NewItemEvent, NewItemFormat, NewItemSubscriber } from "@/app/server/event/NewItemEvent";
-import { ItemSummary } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import { NextRequest, NextResponse } from "next/server";
-import { setInterval } from "node:timers";
+import { serverEvents } from "@/app/server/main";
+import { NewItemStream } from "@/app/server/event/listeners/NewItemStream";
+
 
 export async function GET(request: NextRequest) {
-    // const DELAY = 1000
-    // const stream = new TransformStream()
-    // const encoder = new TextEncoder()
-    // const writer = stream.writable.getWriter()
-
-    // const intervalID = setInterval(() => {
-    //     // writer.write(encoder.encode(`data: {"test": 10}`))
-    //     writer.write(encoder.encode(`\n\n`))
-    // }, DELAY)
-
-
-
+    const newItemStream = new NewItemStream()
+    serverEvents.newItemEvent.addListener(newItemStream)
     return new Response(newItemStream.apiBody, {
         headers: {
             "Content-Type": "text/event-stream",

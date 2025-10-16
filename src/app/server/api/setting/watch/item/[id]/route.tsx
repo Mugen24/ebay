@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { favourite } from "@/app/layout";
+import { favourite } from "@/app/server/main";
 
 export async function GET(
     request : NextRequest,
