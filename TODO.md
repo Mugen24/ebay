@@ -1,4 +1,4 @@
-- Email notification 
+- fixed problem where server is being restarted multiple time
 
 - fixme: incorrect db writes causing addive values instead of replacing
 - fixme: singleton sql table: setting

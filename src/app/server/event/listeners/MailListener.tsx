@@ -32,7 +32,6 @@ function sendEmail(subject: string, content: string) {
             outcome = true
         }
         outcome = false
-        process.exit()
     })
 
 
@@ -122,7 +121,7 @@ export function CssEbayItem({item}: {item: ItemSummary}) {
 
 export class SendEmailSubscriber implements NewItemSubscriber {
     async update(data: NewItemFormat): Promise<boolean> {
-        const COLUMN_SIZE = 5
+        const COLUMN_SIZE = 4
         let {id, items, query} = data
         const title = query["q"]
 
@@ -136,7 +135,9 @@ export class SendEmailSubscriber implements NewItemSubscriber {
                 styledItems.push((
                     <tr
                         style={{
-                            verticalAlign: "top"
+                            //tr default is "baseline" 
+                            //all child while try to align with each other
+                            verticalAlign: "top" 
                         }}
                     >
                         {Array.from(tempGroup)} 
@@ -161,7 +162,7 @@ export class SendEmailSubscriber implements NewItemSubscriber {
                     >
                         <table
                             style={{
-                                width:"min(800px,80vw)",
+                                width:"90vw",
                                 tableLayout: "fixed",
                                 overflow: "scroll"
 
@@ -174,7 +175,6 @@ export class SendEmailSubscriber implements NewItemSubscriber {
             </html>
         )
         const ReactDOMServer = (await import('react-dom/server')).default
-
         return sendEmail(`Ebay: ${query['q']}`, ReactDOMServer.renderToStaticMarkup(messageBody))
     }
 }

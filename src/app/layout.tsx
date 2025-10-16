@@ -6,58 +6,10 @@ import { StateContext, StateProvider } from "./hooks/useStateManagement";
 import logging from "./utils/logger";
 // import { setting, categories } from "./layout";
 
-
-import { Setting } from "./server/setting/settings";
-import { CategoryManager  } from "./server/setting/categoryManager";
-import sqlite3 from 'sqlite3'
-import { open } from 'sqlite'
-import { Favourite } from "./server/setting/favourite";
 import { AxiosProvider } from "./hooks/useAxios";
 import { QueryStateProvider } from "./hooks/useQueryState";
 
 
-logging.debug("Server started")
-
-const SCHEMA =  `
-    create table if not exists setting (
-        version text primary key, 
-        theme text,
-        watchedItems text,
-        shippingLocation text,
-        shippingPostcode integer,
-        itemLocation text,
-        marketPlaceId text,
-        defaultRefreshIntervalSecond integer
-    );
-
-    create table if not exists categories (
-        version text primary key,
-        categories text
-    );
-
-    create table if not exists favouriteQueries (
-        id integer primary key autoincrement,
-        ebaySearch text,
-        lastCheckedEpoch integer
-    );
-
-    create table if not exists favouriteItems (
-        id integer primary key,
-        data text
-    );
-`
-
-export const db = await open({
-    filename: process.env.DATABASE!,
-    // filename: ":memory:",
-    driver: sqlite3.Database
-})
-
-await db.exec(SCHEMA)
-
-export const setting = await Setting.init(db)
-export const categories = await CategoryManager.init(setting, db)
-export const favourite= await Favourite.init(db)
 
 export const metadata: Metadata = {
   title: "Create Next App",
