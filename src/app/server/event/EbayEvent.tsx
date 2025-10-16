@@ -4,14 +4,9 @@ export abstract class EbayEvent<T> {
     listeners: Array<T>
     intervalID: any
     interval: number = 1800000 //30 mins
-    static Instance: undefined | EbayEvent<T>
+    
 
     constructor() {
-        if (!!EbayEvent.Instance) {
-            return EbayEvent.Instance
-        } 
-
-        EbayEvent.Instance = this
         this.listeners = []
     }
 
@@ -37,5 +32,5 @@ export abstract class EbayEvent<T> {
     }
 
     abstract mainLoop(): void
-    abstract notify(newItems: any): void
+    abstract notify(newItems: any): Promise<void>
 }

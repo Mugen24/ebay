@@ -1,29 +1,8 @@
+import { newItemStream } from "@/app/server/event/main";
 import { NewItemEvent, NewItemFormat, NewItemSubscriber } from "@/app/server/event/NewItemEvent";
 import { ItemSummary } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import { NextRequest, NextResponse } from "next/server";
 import { setInterval } from "node:timers";
-
-export class SSEStream implements NewItemSubscriber {
-    stream: TransformStream<any, any>;
-    encoder: TextEncoder;
-    writer: WritableStreamDefaultWriter<any>;
-    constructor() {
-        this.stream = new TransformStream()
-        this.encoder = new TextEncoder()
-        this.writer = this.stream.writable.getWriter()
-    }
-
-    update(data: NewItemFormat): void {
-        console.log("new item")
-        this.writer.write(this.encoder.encode(`data: ${JSON.stringify(data)}`))
-        this.writer.write(this.encoder.encode(`\n\n`))
-    }
-}
-
-const sseStream = new SSEStream()
-const newItemEvent = new NewItemEvent()
-newItemEvent.addListener(sseStream)
-newItemEvent.startLoop()
 
 export async function GET(request: NextRequest) {
     // const DELAY = 1000
@@ -38,7 +17,7 @@ export async function GET(request: NextRequest) {
 
 
 
-    return new Response(sseStream.stream.readable, {
+    return new Response(newItemStream.apiBody, {
         headers: {
             "Content-Type": "text/event-stream",
             "Cache-Control": "no-store, no-cache",

@@ -54,100 +54,133 @@ export function EbayItem({ ebayItem, children }: { ebayItem: ItemSummary, childr
     }
 
 
+    // text-[clamp(m,20%,20%)]
+
     return (
         <Card
             className='
                 grid
-                grid-rows-[30px_auto_20px]
-                w-[200px]
-                h-[410px]
+                w-[175px]
+                h-[300px]
+                overflow-clip
+                grid-rows-[30px_220px_30px]
+                p-2
                 gap-0
-                overflow-scroll
-                
             '
         >
             <CardHeader
                 className='
+                    overflow-ellipsis
+                    text-[90%]
+                    justify-items-start
+                    items-center
                 '
             >
                 <CardTitle>
                     <Link 
                         href={ebayItem.itemWebUrl}
-                        className='hover:underline'
+                        className='
+                            hover:underline
+                        '
                     >
-                        
                         {ebayItem.title}
                     </Link>
                 </CardTitle> 
             </CardHeader>
             <CardContent 
                 className='
-                    grid
-                    grid-rows-[fit-content_150px_100px]
-                    gap-0
+                    p-0
+                    flex
+                    flex-col
                 '
             >
-                <CategoriesList className="" override={{
-                    staticCategories: categories
-                }}/>
-                <div
-                    className='row-start-1 row-span-1'
-                >
+                <div>
+                    <CategoriesList 
+                        className="
+                            max-w-[100%]
+                            overflow-x-scroll
+                            p-0
+                        " 
+                        override={{
+                        staticCategories: categories
+                        }}
+                    />
+<div>
 
-                    <Badge  variant={condition === "Used" ? "destructive" : "default"}>{condition}</Badge>
+                        <Badge  variant={condition === "Used" ? "destructive" : "default"}>{condition}</Badge>
+                    </div>
+                    <div
+                        className='
+                            flex
+                            my-2
+                        '     
+                    >
+                        {
+                            ebayItem.buyingOptions.map((option) => {
+                                option = option.replace("_", " ").toLowerCase()
+                                option = `${option[0].toUpperCase()}${option.slice(1,)}`
+                                return (
+                                    <Badge 
+                                        key={`${ebayItem.epid}_${option}_${ebayItem.itemId}`} 
+                                        variant={"destructive"}
+                                    >
+                                        {option}
+                                    </Badge>
+                                )
+                            })
+                        }
+                    </div>
                     <CardDescription>
-                        Ebay item number: {ebayItemNumber}
+                        EIN: {ebayItemNumber} 
+                    </CardDescription>
+                    <CardDescription>
+                        Location: {location} Date: {new Date(ebayItem.itemCreationDate).toLocaleDateString()}
                     </CardDescription>
                 </div>
-                {
-                    ebayItem.image?.imageUrl ? 
-                        <Image 
-                            width={300}
-                            height={300} 
-                            src={ebayItem.image?.imageUrl ?? null}
-                            alt={ebayItem.title}
-                            className='h-[100%]'
-                        /> :
-                        <div></div>
-                }
+
                 <div
                     className='
-                        row-start-3
-                        overflow-scroll
-                    '
+                        relative
+                        h-20
+                        grow-2
+                    ' 
                 >
-                    <div style={{
-                        display: "flex"
-                    }}>{
-                        ebayItem.buyingOptions.map((option) => {
-                            option = option.replace("_", " ").toLowerCase()
-                            option = `${option[0].toUpperCase()}${option.slice(1,)}`
-                            return (
-                                <Badge 
-                                    key={`${ebayItem.epid}_${option}_${ebayItem.itemId}`} 
-                                    variant={"destructive"}
-                                >
-                                    {option}
-                                </Badge>
-                            )
-                        })
-                    }</div>
-                    <p>Location: {location}</p>
-                    <p>{originalCurrency} {originalCurrencyPrice}</p>
-                    <p>{currency}: {price}</p>
-                    <p>date: {new Date(ebayItem.itemCreationDate).toLocaleDateString()}</p>
-                    <p>Auction: {originalBidCurrency} {originalBidCurrencyPrice}</p>
-                    <p>         {currentBidPriceCurrency} {currentBidPrice}</p>
+                    {
+                        ebayItem.image?.imageUrl ? 
+                            <Image 
+                                src={ebayItem.image?.imageUrl ?? null}
+                                alt={ebayItem.title}
+                                fill={true}
+                                objectFit='contain'
+                                className='h-2/3 w-auto'
+                            /> :
+                            <div></div>
+                    }
+                </div>
+                <div
+                    className='text-[76%]'
+                >
+                    {
+                        /*
+                        <p>{originalCurrency} {originalCurrencyPrice}</p>
+                        <p>Auction: {originalBidCurrency} {originalBidCurrencyPrice}</p>
+                        <p>         {currentBidPriceCurrency} {currentBidPrice}</p>
 
-                    <p>Shipping</p>
-                    <p>Price: {shippingPrice} {shippingCurrency}</p>
-                    {<Timer startDate={createDate} endDate={endDate}></Timer>}
+                        <p>Shipping</p>
+                        <p>Price: {shippingPrice} {shippingCurrency}</p>
+                        {<Timer startDate={createDate} endDate={endDate}></Timer>}
+                        */
+                    }
                 </div>
             </CardContent>
-            <CardFooter className='flex justify-end'>
-                <ErrorBoundary fallback={<h1>fetch has failed</h1>}>
-                        <WatchItemButton ebayItem={ebayItem}></WatchItemButton>
-                </ErrorBoundary>
+            <CardFooter className='flex flex-row justify-between px-0'>
+                <Badge
+                    variant="default"
+                    className='h-2/3'
+                >
+                    {currency}: {price}
+                </Badge>
+                <WatchItemButton ebayItem={ebayItem}></WatchItemButton>
                 {children}
             </CardFooter>
         </Card>

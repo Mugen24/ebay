@@ -11,13 +11,31 @@ export type NewItemFormat = {
 }
 
 export interface NewItemSubscriber {
-    update: (data: NewItemFormat) => void
+    update: (data: NewItemFormat) => Promise<boolean>
 }
 
 export class NewItemEvent<T extends NewItemSubscriber> extends EbayEvent<T>{
-    notify(newItems: NewItemFormat) {
+    async notify(newItems: NewItemFormat) {
+        const outcomes: Promise<Boolean>[] = []
         for (const listener of this.listeners) {
-            listener.update(newItems)
+            outcomes.push(listener.update(newItems))
+        }
+        let allOutcome = await Promise.allSettled(outcomes)
+        allOutcome.map(o => {
+            if (o.status === "fulfilled") {
+                return o.value
+            }
+            return false
+        })
+        .every((value: Boolean) => value)
+
+        if (allOutcome) {
+            db.run(`
+                update favouriteQueries 
+                    set lastCheckedEpoch = unixepoch()
+                where
+                    id = $id 
+            `, [newItems.id])
         }
     }
 
@@ -37,11 +55,9 @@ export class NewItemEvent<T extends NewItemSubscriber> extends EbayEvent<T>{
                 const newItems: ItemSummary[] = []
                 for (const item of resp.itemSummaries) {
                     const createdTimeEpoch= Date.parse(item.itemCreationDate) / 1000
-                    // if (createdTimeEpoch <= lastCheckedEpoch) {
-                    //     // break
-                    //     skip
+                    // if (createdTimeEpoch >= lastCheckedEpoch) {
+                        newItems.push(item)
                     // } 
-                    newItems.push(item)
                 }
 
                 const data: NewItemFormat = {
@@ -54,6 +70,4 @@ export class NewItemEvent<T extends NewItemSubscriber> extends EbayEvent<T>{
             })()
         }
     }
-
-
 }

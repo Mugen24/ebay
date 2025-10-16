@@ -17,7 +17,7 @@ export function WatchedItemGallery() {
             for (let i = 0; i < rawData.length; i++) {
                 const {id, data} = rawData[i]
                 const ebayItem = JSON.parse(data)
-
+                console.log("CSS",ebayItem)
                 newItems.push(
            <EbayItem ebayItem={ebayItem} key={id}>
                     </EbayItem>

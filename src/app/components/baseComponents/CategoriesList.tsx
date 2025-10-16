@@ -92,7 +92,7 @@ export function CategoriesList({className, override}: {className: string, overri
 
     return (
         <div
-            className={cn("p-2 mb-2 mx-0 mt-0 flex flex-wrap gap-1", className)}
+            className={cn("p-2 mb-2 mx-0 mt-0 flex flex-row gap-1 flex-wrap", className)}
         >
             {catElements}
         </div>
@@ -123,8 +123,10 @@ export function CategoryButton({categoryID, categoryName, onClick, onRemove}: {
                 border-2
                 p-1
                 rounded-xl
-                max-h-1/3
+                w-fit
+                text-[60%]
             "
+            size="sm"
         >
             {`${categoryName}`}
         </Button>

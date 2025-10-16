@@ -1,13 +1,11 @@
-- Better category selector
 - Email notification 
 
 - fixme: incorrect db writes causing addive values instead of replacing
 - fixme: singleton sql table: setting
 - add: saved query
-- add: category + setting caching into cookie
 - add: location selector
-- useStateManagement: write appropriate dep for each function
-- add: saved each item individually
+
+- Revamp website UI
 
 MarketPlaceId: https://developer.ebay.com/api-docs/static/rest-request-components.html#HTTP
 

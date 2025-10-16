@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import { HyperText } from "../baseComponents/HyperText";
+import Image from "next/image";
 
 function WatchedCategory({id, query} : {id: string, query: any}) {
     const {data} = useSSE()
@@ -35,7 +36,7 @@ function WatchedCategory({id, query} : {id: string, query: any}) {
         for (const item of updatedContent) {
             entries.push(
                 <GalleryItem asChild={true} key={item["itemId"]}>
-                    <EbayItem ebayItem={item}></EbayItem>
+                     <EbayItem ebayItem={item}></EbayItem>
                 </GalleryItem>
             )
         }
