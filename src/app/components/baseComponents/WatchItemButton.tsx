@@ -6,15 +6,20 @@ import { CopyMinus, CopyPlus } from "lucide-react";
 import { Suspense, use, useEffect, useRef, useState } from "react";
 import { LoadingButton } from "../loading/LoadingButton";
 import React from "react";
+import { EbayItemServerData } from "./EbayItem";
 
 
-export function WatchItemButton({ebayItem, savedID}: {
+export function WatchItemButton({ebayItem, server}: {
     ebayItem: ItemSummary,
-    savedID: string | undefined
+    server?: EbayItemServerData
 }) {
+
     const {getAxios} = useAxios()
     const axios = getAxios()
+
+    const savedID = server ? server.id : null
     const ebayItemNumber = savedID ?? ebayItem.itemId.split("|")[1]
+
     const [state, setState] = useState<"Add" | "Remove">(ebayItemNumber ? "Remove" : "Add")
 
     // async function updateState() {

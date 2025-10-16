@@ -19,7 +19,7 @@ export type CategoriesListType = {
 // Making it difficult to use out of that context
 // --- Override using staticCategories ----
 
-export function CategoriesList({className, override}: {className: string, override?: CategoriesListType}) {
+export function CategoriesList({className, override}: {className?: string, override?: CategoriesListType}) {
     const { userData } = useStateManager()
     const catElements: ReactElement[] = []
     const { queryHandler, response } = useQueryState()

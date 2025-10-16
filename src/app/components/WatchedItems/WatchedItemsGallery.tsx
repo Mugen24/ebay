@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useState } from "react"
 import { useAxios } from '../../hooks/useAxios';
 // import { WatchedItem } from './WatchedItem';
 import { EbayItem } from "../baseComponents/EbayItem";
+import { FavouriteItemType } from "@/app/server/api/setting/watch/item/route";
 
 export function WatchedItemGallery() {
     const {getAxios} = useAxios()
@@ -12,14 +13,14 @@ export function WatchedItemGallery() {
     useEffect(() => {
         (async () => {
             const resp = await axios.get("setting/watch/item")            
-            const rawData: Array<any> = JSON.parse(resp.data)["items"]
+            const rawData: Array<FavouriteItemType> = JSON.parse(resp.data)["items"]
+
             const newItems = []
             for (let i = 0; i < rawData.length; i++) {
-                const {id, data} = rawData[i]
-                const ebayItem = JSON.parse(data)
-                console.log("CSS",ebayItem)
+                const serverItem = rawData[i]
+                const ebayItem = JSON.parse(serverItem.data)
                 newItems.push(
-           <EbayItem ebayItem={ebayItem} key={id}>
+           <EbayItem server={serverItem} ebayItem={ebayItem} key={serverItem.id}>
                     </EbayItem>
                 )
 

@@ -1,7 +1,7 @@
 "use client";
 // import styled from "styled-components"
 import logging from '@/app/utils/logger';
-import { ItemSummary, CurrentBidPrice, ShippingOption } from '../../types/EbayApiTypes/ebaySeachTypes';
+import { ItemSummary, CurrentBidPrice, ShippingOption, EbaySearch } from '../../types/EbayApiTypes/ebaySeachTypes';
 import Image from 'next/image';
 import { Timer } from './Timer';
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,13 +9,22 @@ import { Button } from '@/components/ui/button';
 import { WatchItemButton } from './WatchItemButton';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { LoadingButton } from '../loading/LoadingButton';
 import React, { ReactNode, Suspense } from 'react';
-import { ErrorBoundary } from "react-error-boundary";
 import { CategoriesList, CategoryType } from './CategoriesList';
 
 
-export function EbayItem({ ebayItem, children }: { ebayItem: ItemSummary, children?: ReactNode }) {
+export type EbayItemServerData = {
+    id: string,
+    data: EbaySearch
+}
+
+export type EbayItemType = {
+    ebayItem: ItemSummary,
+    children?: ReactNode,
+    server?: EbayItemServerData 
+}
+
+export function EbayItem({ ebayItem, children }: EbayItemType) {
     const itemTypes = ebayItem.buyingOptions
 
     // OPTIONS = FIXED_PRICE BEST_OFFER AUCTION
@@ -105,7 +114,7 @@ export function EbayItem({ ebayItem, children }: { ebayItem: ItemSummary, childr
                         staticCategories: categories
                         }}
                     />
-<div>
+                    <div>
 
                         <Badge  variant={condition === "Used" ? "destructive" : "default"}>{condition}</Badge>
                     </div>
