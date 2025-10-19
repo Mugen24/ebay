@@ -52,7 +52,7 @@ function WatchedCategory({id, query} : {id: string, query: any}) {
     return (
         <Gallery>
             <GalleryTitle>
-                <HyperText title={query["q"]} href={`
+                <HyperText title={query["q"] ?? query["category_ids"]} href={`
                     items?query=${JSON.stringify(query)}&extraData=${extraData}`}/>
             </GalleryTitle>
             <GalleryList>

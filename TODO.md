@@ -1,11 +1,12 @@
-- fixed problem where server is being restarted multiple time
+- Enfore ebay AU store only
+- Save query component to display category name as well
 
-- fixme: incorrect db writes causing addive values instead of replacing
+- feature: notification when auction item is ending + show relative date in UI
 - fixme: singleton sql table: setting
-- add: saved query
-- add: location selector
-
 - Revamp website UI
+- query of sub categories of parent when clicked
+- removing category does not refresh the ebay item content
+
 
 MarketPlaceId: https://developer.ebay.com/api-docs/static/rest-request-components.html#HTTP
 

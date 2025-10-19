@@ -68,28 +68,41 @@ export function EbayItem({ ebayItem, children }: EbayItemType) {
     return (
         <Card
             className='
+                p-2
+                gap-0
+                align-top
                 grid
                 w-[175px]
                 h-[300px]
-                overflow-clip
-                grid-rows-[30px_220px_30px]
-                p-2
-                gap-0
+                grid-rows-[30px_minmax(0,1fr)_30px]
+                rounded-xl
+                border
+                shadow-sm
+                overflow-hidden
             '
         >
             <CardHeader
                 className='
                     overflow-ellipsis
-                    text-[90%]
+                    text-[80%]
                     justify-items-start
                     items-center
+                    h-full
                 '
             >
-                <CardTitle>
+                <CardTitle
+                    className='
+                    '
+                >
                     <Link 
                         href={ebayItem.itemWebUrl}
                         className='
+                            w-[133px]
+                            block
+                            truncate
                             hover:underline
+                            text-sm
+                            font-semibold
                         '
                     >
                         {ebayItem.title}

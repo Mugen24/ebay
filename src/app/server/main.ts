@@ -64,8 +64,8 @@ const serverEvents: ServerEvents = {
 Object.values(serverEvents).forEach(event => event.startLoop())
 
 //Listeners
-const mail= new EmailNotification()
-serverEvents.newItemEvent.addListener(mail)
+const mail = new EmailNotification()
+// serverEvents.newItemEvent.addListener(mail)
 
 export {
     setting,

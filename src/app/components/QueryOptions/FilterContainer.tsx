@@ -6,14 +6,7 @@ import React, { useEffect, useState } from "react";
 import { useStateManager } from "@/app/hooks/useStateManagement";
 import { useAxios } from "@/app/hooks/useAxios";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ToggleLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { ToggleInput } from "../baseComponents/ToggleInput";
-import { DropDown } from "../baseComponents/DropDown";
-import { WatchItemButton } from "../baseComponents/WatchItemButton";
 import { WatchQueryButton } from "../baseComponents/WatchQueryButton";
 
 export function Filter() {

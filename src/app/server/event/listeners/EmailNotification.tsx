@@ -39,7 +39,6 @@ function sendEmail(subject: string, content: string) {
 }
 
 export function CssEbayItem({item}: {item: ItemSummary}) {
-    console.log(`CSSITEM: ${item}`)
     const price = item.price?.value
     const currency= item.price?.currency
     return (
@@ -76,10 +75,9 @@ export function CssEbayItem({item}: {item: ItemSummary}) {
                     </h1>
                 </a>
                 <p>condition: {item.condition}</p>
-                <p>date: {new Date(item.itemCreationDate).toUTCString()}</p>
+                <p>date: {relativeTime(new Date(item.itemCreationDate))} - {new Date(item.itemCreationDate).toUTCString()}</p>
                 <p>type: {item.buyingOptions}</p>
                 <p>eid: {item.itemId.split("|")[1]}</p>
-
             </section>
             <section 
                 className="card-content"
@@ -129,6 +127,7 @@ export class EmailNotification implements NewItemSubscriber {
 
         let tempGroup: ReactNode[] = []
         for (const item of items) {
+            console.log(item)
             tempGroup.push(<CssEbayItem key={item.itemId} item={item}/>)
 
             if (tempGroup.length === COLUMN_SIZE) {

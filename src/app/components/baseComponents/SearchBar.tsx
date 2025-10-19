@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryState } from "@/app/hooks/useQueryState";
@@ -16,6 +16,7 @@ export function SearchBar() {
     const refLink= useRef<HTMLAnchorElement>(null);
     const router = useRouter()
     const {queryState, queryHandler} = useQueryState()
+    const [searchQuery, setSearchQuery] = useState(queryState["q"] ?? "")
 
     return (
         <div
@@ -51,29 +52,35 @@ export function SearchBar() {
                                 refLink.current?.click()
                             }
                         }}
+                        value={searchQuery}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value)
+                        }}
+                            
                     />
                 </CommandInput>
             </Command>
-            <Link
-                href={"/items"}
-                onNavigate={(e) => {
-                    if (refSearchForm.current && refSearchForm.current.value) {
-                        queryState["q"] = refSearchForm.current.value
-                        EbaySaverState.addCategoryRequest(queryState)
-
-                        router.push(`items?query=${JSON.stringify(queryState)}`, )
-                        queryHandler({
-                            "type": "updateQuery",
-                            "results": refSearchForm.current.value
-                        })
-
-                    } else {
+            <Button asChild={true}>
+                <Link
+                    href={"/items"}
+                    onNavigate={(e) => {
                         e.preventDefault()
-                    }
-                }}
-            >
-                Search
-            </Link>
+                        if (refSearchForm.current) {
+                            queryState["q"] = refSearchForm.current.value
+                            EbaySaverState.addCategoryRequest(queryState)
+
+                            queryHandler({
+                                "type": "updateQuery",
+                                "results": refSearchForm.current.value
+                            })
+                            router.push(`items?query=${JSON.stringify(queryState)}`, )
+
+                        } 
+                    }}
+                >
+                    Search
+                </Link>
+            </Button>
             {/* <Button
                 ref={refLink}
                 href={{

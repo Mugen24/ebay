@@ -29,14 +29,24 @@ export class NewItemEvent extends EbayEvent<NewItemSubscriber>{
         })
         .every((value: Boolean) => value)
 
+        logging.group("NewItemEvent:")
+        logging.debug(`Outcome: ${allOutcome}`)
+
         if (allOutcome) {
+            const currDate = new Date(Date.now())
+            logging.debug(`Updated time: ${currDate.toUTCString()}`)
+
+            // set lastCheckedEpoch = unixepoch()
             db.run(`
                 update favouriteQueries 
-                    set lastCheckedEpoch = unixepoch()
+                    set lastCheckedEpoch = ?
                 where
-                    id = $id 
-            `, [newItems.id])
+                    id = ?
+            `, [currDate.getTime(), newItems.id])
         }
+
+        logging.groupEnd()
+
     }
 
     async mainLoop() {
@@ -54,13 +64,9 @@ export class NewItemEvent extends EbayEvent<NewItemSubscriber>{
 
                 const newItems: ItemSummary[] = []
                 for (const item of resp.itemSummaries) {
-                    const createdTimeEpoch= Date.parse(item.itemCreationDate) / 1000
-                    // console.group("Item")
-                    // console.log("cte", createdTimeEpoch)
-                    // console.log("lce", lastCheckedEpoch)
-                    // console.groupEnd()
+                    const createdTimeEpoch= new Date(item.itemCreationDate).getTime() 
                     if (createdTimeEpoch >= lastCheckedEpoch) {
-                        newItems.push(item)
+                          newItems.push(item)
                     } 
                 }
 

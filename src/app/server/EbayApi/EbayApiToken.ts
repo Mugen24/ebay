@@ -8,6 +8,13 @@ import { OptionalDataType } from "../../types/clientApiTypes";
 import { GetCategoryTreeRequest, GetCategoryTreeResponse, GetDefaultCategoryTreeRequest, GetDefaultCategoryTreeResponse } from "../../types/EbayApiTypes/CategoryTree";
 import { Countries, EbaySaverState, SEbaySearch } from "./EbaySaverState";
 
+const EBAY_MARKET = "EBAY_AU"
+// Set user delivery fee to this address
+const USER_COUNTRY = "AU"
+const USER_ZIP = "2166"
+// set default item location to australia
+const ITEM_LOCATION = "AU"
+
 export class EbayApiToken {
     static scopes = ["https://api.ebay.com/oauth/api_scope"];
     token: string;
@@ -20,8 +27,8 @@ export class EbayApiToken {
         this.axios = axios.create({
             baseURL: "https://api.ebay.com",
             headers: {
-                "X-EBAY-C-ENDUSERCTX": "contextualLocation=country=AU,zip=2166",
-                "X-EBAY-C-MARKETPLACE-ID": "EBAY_AU",
+                "X-EBAY-C-ENDUSERCTX": `contextualLocation=country=${USER_COUNTRY},zip=${USER_ZIP}`,
+                "X-EBAY-C-MARKETPLACE-ID": `${EBAY_MARKET}`,
                 "Authorization": `Bearer ${this.token}`
             }
         })
@@ -74,8 +81,11 @@ export class EbayApiToken {
         logging.debug("Query: " + JSON.stringify(config))
         logging.debug("Optional config", optionalConfig)
 
-        const ebaySearch = noParse ? config : EbaySaverState.parse(config)
+        // set default item location to australia
+        config.filter = config.filter ?? {}
+        config.filter["itemLocationCountry"] = `${ITEM_LOCATION}`
 
+        const ebaySearch = noParse ? config : EbaySaverState.parse(config)
         const resp = await this.axios.get("/buy/browse/v1/item_summary/search", 
             {
                 params: ebaySearch,
