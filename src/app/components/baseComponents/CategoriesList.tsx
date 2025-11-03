@@ -107,7 +107,6 @@ export function CategoryButton({categoryID, categoryName, onClick, onRemove}: {
 }) {
     const {queryState} = useQueryState()
 
-    console.log(categoryID, categoryName)
     const isCurrentCat = queryState.category_ids == categoryID
 
     return (

@@ -5,12 +5,17 @@ import { EbaySearch, ItemSummary } from "@/app/types/EbayApiTypes/ebaySeachTypes
 import { SSEProvider, useSSE } from "@/app/hooks/useSSE";
 import { Gallery, GalleryItem, GalleryList, GalleryTitle } from "../baseComponents/Gallery";
 import { HyperText } from "../baseComponents/HyperText";
+import { GetCategorySubtreeResponse } from "@/app/types/EbayApiTypes/CategoryTree";
+import { Trash } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { isDeepStrictEqual } from "node:util";
 
 function WatchedCategory({id, query} : {id: string, query: any}) {
     const {data} = useSSE()
     const [updatedContent, setUpdatedContent] = useState<undefined | ItemSummary[]>(undefined)
     const {getAxios} = useAxios()
     const axios = getAxios()
+    const [isDeleted, setIsDeleted] = useState(false)
 
     useEffect(() => {
         if (data && data["id"]) {
@@ -41,6 +46,7 @@ function WatchedCategory({id, query} : {id: string, query: any}) {
     async function deleteCategory() {
         const resp = await axios.delete(`setting/watch/query/${id}`)
         if (resp.status === 200) {
+            setIsDeleted(true)
         }
     }
 
@@ -49,11 +55,36 @@ function WatchedCategory({id, query} : {id: string, query: any}) {
         queryID: id
     })
 
+    const [title, setTitle] = useState(query["q"])
+
+    useEffect(() => {
+        (async () => {
+            if (!query["q"] && query["category_ids"]) {
+                const resp = await axios.get(`categories/getSubCategories/${query["category_ids"]}`)
+                const data: GetCategorySubtreeResponse = JSON.parse(resp.data)
+                setTitle(data.categorySubtreeNode.category.categoryName)
+            }
+        })()
+    }, [query["category_ids"]])
+
+    if (isDeleted) {
+        return <></>
+    }
+
     return (
         <Gallery>
             <GalleryTitle>
-                <HyperText title={query["q"] ?? query["category_ids"]} href={`
-                    items?query=${JSON.stringify(query)}&extraData=${extraData}`}/>
+                <HyperText 
+                    title={title} 
+                    href={`items?query=${JSON.stringify(query)}&extraData=${extraData}`}
+                />
+                <Button
+                    className="inline"
+                    onClick={deleteCategory}
+                    variant="ghost"
+                >
+                    <Trash/>
+                </Button>
             </GalleryTitle>
             <GalleryList>
                 {entries}
@@ -67,7 +98,7 @@ function WatchedCategoriesGallery() {
     const {getAxios} = useAxios()
     const axios = getAxios()
 
-    const [cats, setCats] = useState([])
+    const [cats, setCats] = useState<ReactNode[]>([])
     useEffect(() => {
         (async () => {
             const resp = await axios.get("setting/watch/query")
@@ -77,11 +108,11 @@ function WatchedCategoriesGallery() {
             for (const query of data["data"]) {
                 const ebaySearch = JSON.parse(query.ebaySearch)
                 newCats.push(
-                <WatchedCategory 
-                            key={query.id} 
-                            id={query.id}
-                            query={ebaySearch}
-                          />
+                    <WatchedCategory 
+                                key={query.id} 
+                                id={query.id}
+                                query={ebaySearch}
+                    />
                 )
             }
 

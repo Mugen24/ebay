@@ -1,16 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Bold, Italic, Underline } from "lucide-react";
+import { useState } from "react";
 
-export function ToggleInput({type, options, onClick}: {
+export function ToggleInput({type, options, onClick, value}: {
     type: "single" | "multiple"
     options: Array<Record<string, any>>
     onClick: (value: string) => void
+    value?: any
 }) {
+
     return (
+        //@ts-ignore
         <ToggleGroup 
             type={type}
             onValueChange={onClick}
+            value={value}
         >
             {
                 options.map(i => {

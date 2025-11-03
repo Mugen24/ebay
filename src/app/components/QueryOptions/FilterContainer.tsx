@@ -8,6 +8,9 @@ import { useAxios } from "@/app/hooks/useAxios";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleInput } from "../baseComponents/ToggleInput";
 import { WatchQueryButton } from "../baseComponents/WatchQueryButton";
+import { BuyingOptions } from "../optionWidgets/BuyingOptions";
+import { ConditionOptions } from "../optionWidgets/ConditionOptions";
+import { DateOptions } from "../optionWidgets/DateOptions";
 
 export function Filter() {
     const {queryState, queryHandler} = useQueryState();
@@ -70,41 +73,41 @@ export function Filter() {
             })
     }
 
-    function locationOptionsHandler(country: keyof typeof Countries){
-        // setItemLocation(event.target?.value)
-        queryHandler({
-            "type": "updateItemLocation",
-            "results": {
-                "country": country
-            }
-        })
-    }
+    // function locationOptionsHandler(country: keyof typeof Countries){
+    //     // setItemLocation(event.target?.value)
+    //     queryHandler({
+    //         "type": "updateItemLocation",
+    //         "results": {
+    //             "country": country
+    //         }
+    //     })
+    // }
 
-    const countryOptions = Object.keys(Countries)
-    const postcodeOption = 2100
-    const [country, setCountry] = useState<string>(countryOptions[0])
-    const [postcode, setPostcode] = useState(postcodeOption)
+    // const countryOptions = Object.keys(Countries)
+    // const postcodeOption = 2100
+    // const [country, setCountry] = useState<string>(countryOptions[0])
+    // const [postcode, setPostcode] = useState(postcodeOption)
 
-    async function updateAddress(country: string, postcode: number) {
-        await axios.put("/setting/setAddress", JSON.stringify({
-            country,
-            postcode
-        })
-    )}
+    // async function updateAddress(country: string, postcode: number) {
+    //     await axios.put("/setting/setAddress", JSON.stringify({
+    //         country,
+    //         postcode
+    //     })
+    // )}
 
-    function handleCountry(country: string) {
-        (async () => {
-            await updateAddress(country, postcode)
-            setCountry(country)
-        })()
-    }
+    // function handleCountry(country: string) {
+    //     (async () => {
+    //         await updateAddress(country, postcode)
+    //         setCountry(country)
+    //     })()
+    // }
 
-    function handlePostcode(postcode: number) {
-        (async () => {
-            await updateAddress(country, postcode)
-            setPostcode(postcode)
-        })()
-    }
+    // function handlePostcode(postcode: number) {
+    //     (async () => {
+    //         await updateAddress(country, postcode)
+    //         setPostcode(postcode)
+    //     })()
+    // }
 
 
     return (
@@ -114,68 +117,15 @@ export function Filter() {
             </CardHeader>
                 <CardContent>
                     <div>
-                        <ToggleInput
-                            type="single"
-                            options={[
-                                {
-                                    label: "All",
-                                    value: "all",
-                                },
-                                {
-                                    label: "Auction",
-                                    value: "auction",
-                                },
-                                {
-                                    label: "Buy It Now",
-                                    value: "buy it now",
-                                },
-                            ]}  
-                            onClick={buyingOptionsHandler}
-                        />
+                        <BuyingOptions/>
                     </div>
                     <div>
                         <CardDescription>Conditions</CardDescription>
-                        <ToggleInput
-                            type="multiple"
-                            options={[
-                                {
-                                    label: "New",
-                                    value: "NEW"
-                                },
-                                {
-                                    label: "Used",
-                                    value: "USED"
-                                },
-                                {
-                                    label: "Unspecified",
-                                    value: "UNSPECIFIED"
-                                },
-                            ]}
-                            onClick={conditionOptionsHandler}
-                        />
+                        <ConditionOptions/>
                     </div>
                     <div>
                         <CardDescription>Date</CardDescription>
-                        <ToggleInput
-                            options={[
-                                {
-                                    label: "New",
-                                    value: "newlyListed"
-                                },
-                                {
-                                    label: "Ending Soon",
-                                    value: "endingSoonest"
-                                },
-                                {
-                                    label: "Lowest",
-                                    value: "price",
-                                }
-                            ]}  
-                            type="single"
-                            onClick={sortOptionsHandler}
-                        >
-
-                        </ToggleInput>
+                        <DateOptions/>
                     </div>
                 </CardContent>
                 <CardFooter>

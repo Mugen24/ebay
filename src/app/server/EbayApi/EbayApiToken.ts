@@ -5,7 +5,7 @@ import { EbayGetItemReturn, EbayGetItem } from "@/app/types/EbayApiTypes/ebayGet
 import logging from "../../utils/logger";
 import { Outcome } from "../../types/Outcome";
 import { OptionalDataType } from "../../types/clientApiTypes";
-import { GetCategoryTreeRequest, GetCategoryTreeResponse, GetDefaultCategoryTreeRequest, GetDefaultCategoryTreeResponse } from "../../types/EbayApiTypes/CategoryTree";
+import { GetCategorySubtree, GetCategorySubtreeResponse, GetCategoryTreeRequest, GetCategoryTreeResponse, GetDefaultCategoryTreeRequest, GetDefaultCategoryTreeResponse } from "../../types/EbayApiTypes/CategoryTree";
 import { Countries, EbaySaverState, SEbaySearch } from "./EbaySaverState";
 
 const EBAY_MARKET = "EBAY_AU"
@@ -14,6 +14,8 @@ const USER_COUNTRY = "AU"
 const USER_ZIP = "2166"
 // set default item location to australia
 const ITEM_LOCATION = "AU"
+
+const CATEGORY_ENDPOINT = "/commerce/taxonomy/v1/category_tree"
 
 export class EbayApiToken {
     static scopes = ["https://api.ebay.com/oauth/api_scope"];
@@ -78,8 +80,8 @@ export class EbayApiToken {
     async search(config: SEbaySearch, optionalConfig: Record<string,any> = {}, noParse: Boolean = false): Promise<Outcome<EbaySearchReturn>> {
         //config is url returned by EbaySeachReturn[next]
         logging.group("Calling EbaySearch")
-        logging.debug("Query: " + JSON.stringify(config))
-        logging.debug("Optional config", optionalConfig)
+        // logging.debug("Query: " + JSON.stringify(config))
+        // logging.debug("Optional config", optionalConfig)
 
         // set default item location to australia
         config.filter = config.filter ?? {}
@@ -97,8 +99,10 @@ export class EbayApiToken {
     }
 
     async getItem(options: EbayGetItem, optionalConfig?: OptionalDataType): Promise<Outcome<EbayGetItemReturn>> {
-        const resp = await this.axios.get("/buy/browse/v1/item", {
-            params: options
+        const resp = await this.axios.get(`/buy/browse/v1/item/${options.item_id}`, {
+            params: {
+                fieldgroups: options.fieldgroups
+            }
         })
         return [resp.status === 200, resp.data]
     }
@@ -124,6 +128,17 @@ export class EbayApiToken {
         return [resp.status === 200, resp.data]
     }
 
+    async getSubCategoryTree(data: GetCategorySubtree): Promise<Outcome<GetCategorySubtreeResponse>>{
+        // TODO: generate return type
+        const {category_id, category_tree_id} = data
+        logging.group("Getting sub category tree")
+        const path = CATEGORY_ENDPOINT + "/" + category_tree_id + "/get_category_subtree"
+        const resp = await this.axios.get(`${path}?category_id=${category_id}`)
 
+        logging.debug("Resp: ", resp.data)
+        logging.groupEnd()
+
+        return [resp.status === 200, resp.data]
+    }
 }
 

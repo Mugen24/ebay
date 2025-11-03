@@ -26,7 +26,7 @@ type updateFilterStateType<G extends keyof Filter> = {
     "value": Filter[G]
 }
 
-type QueryActionType = 
+export type QueryActionType = 
     | {type: 'updateQuery', results: string}
     | {type: 'updateCategory', results: Category["categoryId"] | undefined}
     | {type: 'updateFilterOption', results: updateFilterStateType<any>}
@@ -38,6 +38,7 @@ type QueryActionType =
         "country": keyof typeof Countries
       }}
     | {type: 'replaceQueryState', results: SEbaySearch}
+    | {type: 'replaceFromSearchParams', results?: URLSearchParams}
 
 
 export function QueryStateProvider({initialData, children}: {initialData?: EbaySearch, children: ReactNode}) {
@@ -46,6 +47,27 @@ export function QueryStateProvider({initialData, children}: {initialData?: EbayS
     const axios = getAxios()
     const router = useRouter()
     let [extraData, setExtraData] = useState({})
+
+    const searchParam = useSearchParams()
+
+    function fetchFromSearchParam(params: URLSearchParams): SEbaySearch {
+        try {
+            const itemData = params.get("query")
+            if (itemData === null) {
+                logging.warn("No query found")
+                return {}
+            }
+            else {
+                const data = JSON.parse(itemData)
+                return data
+            }
+        }
+        catch (e) {
+            console.warn(e)
+            // router.push("/")
+            return {}
+        }
+    }
 
     const reducer = (state: SEbaySearch, action: QueryActionType): SEbaySearch => {
         let newState: SEbaySearch = {...state};
@@ -88,50 +110,27 @@ export function QueryStateProvider({initialData, children}: {initialData?: EbayS
             newState = action.results
         }
 
+        else if (action.type === "replaceFromSearchParams") {
+            const params = (action.results) ? action.results : searchParam
+
+            newState = fetchFromSearchParam(params)
+            console.log(params)
+            console.log(newState)
+        }
+
 
         // const url = new URL(window.location.href)
         return newState
     }
 
 
-    function fetchFromSearchParam(params: URLSearchParams): SEbaySearch {
-        try {
-            const itemData = params.get("query")
-            if (itemData === null) {
-                logging.warn("No query found")
-                return {}
-            }
-            else {
-                const data = JSON.parse(itemData)
-                return data
-            }
-        }
-        catch (e) {
-            console.warn(e)
-            // router.push("/")
-            return {}
-        }
-    }
+
     const [queryState, queryHandler] = useReducer(
         reducer,
         useSearchParams(),
         fetchFromSearchParam
     )
 
-    const searchParam = useSearchParams()
-    useEffect(() => {
-        const newQueryState = fetchFromSearchParam(searchParam)
-        queryHandler({
-            type: "replaceQueryState",
-            results: newQueryState
-        })
-
-        const extraData = searchParam.get("extraData")
-        if (extraData) {
-            setExtraData(JSON.parse(extraData))
-        }
-
-    }, [searchParam]) 
 
     async function updateResponse() {
         const resp = await axios.post("search", JSON.stringify(queryState))

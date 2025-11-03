@@ -1,11 +1,13 @@
 import { favourite } from "@/app/server/main"
-import { EbaySearch } from "@/app/types/EbayApiTypes/ebaySeachTypes"
+import { EbayGetItemReturn } from "@/app/types/EbayApiTypes/ebayGetItemTypes"
+import { EbaySearch, ItemSummary } from "@/app/types/EbayApiTypes/ebaySeachTypes"
 
 type ItemID = string
 export type FavouriteItemType = {
     id: ItemID, 
-    data: string
+    ebayItem: ItemSummary
 }
+
 export async function GET() {
     const favItems: FavouriteItemType[] = await favourite.getItems()
     return Response.json({

@@ -3,7 +3,7 @@ import { EbayScraper as EbayApiScrapper} from "./EbayApiScrapper";
 import { EbaySearch } from "../../types/EbayApiTypes/ebaySeachTypes";
 import { OptionalDataType } from "../../types/clientApiTypes";
 import { EbayGetItem } from "../../types/EbayApiTypes/ebayGetItemTypes";
-import { GetCategoryTreeRequest, GetDefaultCategoryTreeRequest } from '../../types/EbayApiTypes/CategoryTree';
+import { GetCategorySubtree, GetCategoryTreeRequest, GetDefaultCategoryTreeRequest } from '../../types/EbayApiTypes/CategoryTree';
 import { Outcome } from '../../types/Outcome';
 // import { Categories, categoryManager } from '../server/setting/categoryManager';
 import logging from '../../utils/logger';
@@ -49,6 +49,13 @@ class EbayApi {
 
     async getCategoryTree(request: GetCategoryTreeRequest) {
         return await this.ebayApiToken.getCategoryTree(request)
+    }
+
+    async getSubCategoryTree(request: GetCategorySubtree) {
+        return await this.ebayApiToken.getSubCategoryTree({
+            category_tree_id: request.category_tree_id,
+            category_id: request.category_id 
+        })
     }
 
 

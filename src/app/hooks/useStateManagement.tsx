@@ -2,7 +2,7 @@
 'use strict';
 
 import { createContext, Dispatch, MutableRefObject, ReactNode, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
-import { Favourite, SettingType, Theme } from '../types/SettingType';
+import { SettingType, Theme } from '../types/SettingType';
 import { Countries, SEbaySearch } from '../server/EbayApi/EbaySaverState';
 import { Categories } from "../server/setting/categoryManager";
 

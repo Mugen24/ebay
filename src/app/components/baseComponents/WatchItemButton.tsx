@@ -18,7 +18,7 @@ export function WatchItemButton({ebayItem, server}: {
     const axios = getAxios()
 
     const savedID = server ? server.id : null
-    const ebayItemNumber = savedID ?? ebayItem.itemId.split("|")[1]
+    const ebayItemNumber = savedID ?? ebayItem.itemId
 
     const [state, setState] = useState<"Add" | "Remove">(ebayItemNumber ? "Remove" : "Add")
 

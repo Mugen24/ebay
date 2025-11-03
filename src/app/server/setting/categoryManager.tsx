@@ -1,10 +1,10 @@
 import logging from "@/app/utils/logger"
 import { MarketplaceId } from '../../types/marketplaceIds';
 import { GetCategoryTreeResponse } from "@/app/types/EbayApiTypes/CategoryTree"
-import { ebayApi } from "@/app/server/EbayApi/EbayApi";
 import { Database } from "sqlite";
 import { Setting } from "./settings";
 import { assert } from "console";
+import { ebayApi } from "../EbayApi/EbayApi";
 
 export type CategoryId = number
 export type CategoryName = string

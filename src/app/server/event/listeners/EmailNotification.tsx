@@ -1,42 +1,11 @@
 import logging from "@/app/utils/logger";
-import { NewItemFormat, NewItemSubscriber } from "../NewItemEvent";
+import { NewItemFormat, NewItemSubscriber, NewItemEvent } from '../NewItemEvent';
 import { MessageHeaders, SMTPClient } from "emailjs"
 import { ItemSummary } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import { ReactNode } from "react";
+import { TimerComponent } from "@/app/components/baseComponents/Timer";
+import { ItemWatchListenerType } from "../ItemWatchEvent";
 
-function sendEmail(subject: string, content: string) {
-    logging.debug("Sending email")
-    logging.debug(`Username: ${process.env.EMAIL_USERNAME}`)
-    logging.debug(`ToList: ${process.env.EMAIL_TO_LIST}`)
-    logging.debug("Sending email")
-    const smtpClient = new SMTPClient({
-        user: process.env.EMAIL_USERNAME,
-        password: process.env.APP_PASSWORD,
-        host: "smtp.gmail.com",
-        ssl: true
-    })
-
-
-    const message: MessageHeaders = {
-        from: process.env.EMAIL_USERNAME!,
-        to: process.env.EMAIL_TO_LIST!,
-        subject: subject,
-        "content-type": "text/html",
-        text: content
-    }
-
-    let outcome = false
-    smtpClient.send(message, (err, msg) => {
-        if (err) {
-            logging.error(`Email error: ${err} \n ${JSON.stringify(msg)}`)
-            outcome = true
-        }
-        outcome = false
-    })
-
-
-    return outcome
-}
 
 export function CssEbayItem({item}: {item: ItemSummary}) {
     const price = item.price?.value
@@ -75,7 +44,16 @@ export function CssEbayItem({item}: {item: ItemSummary}) {
                     </h1>
                 </a>
                 <p>condition: {item.condition}</p>
-                <p>date: {relativeTime(new Date(item.itemCreationDate))} - {new Date(item.itemCreationDate).toUTCString()}</p>
+                <p>date: {new Date(item.itemCreationDate).toUTCString()}</p>
+                {
+                    item.buyingOptions.includes("AUCTION")
+                    ?  <TimerComponent 
+                            startDate={new Date(item.itemCreationDate)}
+                            endDate={new Date(item.itemEndDate)}
+                       />
+                    : <></>
+                }
+
                 <p>type: {item.buyingOptions}</p>
                 <p>eid: {item.itemId.split("|")[1]}</p>
             </section>
@@ -116,9 +94,8 @@ export function CssEbayItem({item}: {item: ItemSummary}) {
 }
 
 
-
-export class EmailNotification implements NewItemSubscriber {
-    async update(data: NewItemFormat): Promise<boolean> {
+export class EmailUpdateType {
+    static async newItemEvent(data: NewItemFormat): Promise<string> {
         const COLUMN_SIZE = 4
         let {id, items, query} = data
         const title = query["q"]
@@ -127,7 +104,6 @@ export class EmailNotification implements NewItemSubscriber {
 
         let tempGroup: ReactNode[] = []
         for (const item of items) {
-            console.log(item)
             tempGroup.push(<CssEbayItem key={item.itemId} item={item}/>)
 
             if (tempGroup.length === COLUMN_SIZE) {
@@ -174,7 +150,62 @@ export class EmailNotification implements NewItemSubscriber {
             </html>
         )
         const ReactDOMServer = (await import('react-dom/server')).default
-        return sendEmail(`Ebay: ${query['q']}`, ReactDOMServer.renderToStaticMarkup(messageBody))
+        return ReactDOMServer.renderToStaticMarkup(messageBody)
+
+        // return this.sendEmail(`Ebay: ${query['q']}`, ReactDOMServer.renderToStaticMarkup(messageBody))
     }
+
+    static async ItemWachEvent(data: ItemWatchListenerType) {
+        const ReactDOMServer = (await import('react-dom/server')).default
+        const ebayItem = CssEbayItem({
+            "item": data.ebayGetItemReturn as unknown as ItemSummary
+        })
+
+        return ReactDOMServer.renderToStaticMarkup(ebayItem)
+    }
+}
+
+export class EmailNotification {
+    update: any
+    title: string
+    constructor(title: string, update: (...args: any) => Promise<string>) {
+        this.title = title
+        this.update = (async (...args: any) => {
+            return this.sendEmail(title, await update(...args))
+        })
+    }
+
+    sendEmail(subject: string, content: string) {
+        logging.debug("Sending email")
+        logging.debug(`Username: ${process.env.EMAIL_USERNAME}`)
+        logging.debug(`ToList: ${process.env.EMAIL_TO_LIST}`)
+        logging.debug("Sending email")
+        const smtpClient = new SMTPClient({
+            user: process.env.EMAIL_USERNAME,
+            password: process.env.APP_PASSWORD,
+            host: "smtp.gmail.com",
+            ssl: true
+        })
+
+
+        const message: MessageHeaders = {
+            from: process.env.EMAIL_USERNAME!,
+            to: process.env.EMAIL_TO_LIST!,
+            subject: subject,
+            "content-type": "text/html",
+            text: content
+        }
+
+        let outcome = false
+        smtpClient.send(message, (err, msg) => {
+            if (err) {
+                logging.error(`Email error: ${err} \n ${JSON.stringify(msg)}`)
+            }
+            outcome = true
+        })
+
+        return outcome
+    }
+
 }
 

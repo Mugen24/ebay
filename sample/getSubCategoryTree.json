@@ -1,0 +1,52 @@
+{
+  "categoryTreeId": "0",
+  "categoryTreeVersion": "117",
+  "categoryNode": {
+    "category": {
+      "categoryId": "11450",
+      "categoryName": "Clothing, Shoes & Accessories"
+    },
+    "parentCategoryTreeNodeHref": "https://api.ebay.com/commerce/taxonomy/v2/category_tree/0/get_category_subtree?category_id=11450",
+    "childCategoryTreeNodes": [
+      {
+        "category": {
+          "categoryId": "1059",
+          "categoryName": "Men's Clothing"
+        },
+        "parentCategoryTreeNodeHref": "https://api.ebay.com/commerce/taxonomy/v1/category_tree/0/get_category_subtree?category_id=1059",
+        "childCategoryTreeNodes": [
+          {
+            "category": {
+              "categoryId": "313",
+              "categoryName": "Other Men's Clothing"
+            },
+            "parentCategoryTreeNodeHref": "https://api.ebay.com/commerce/taxonomy/v1/category_tree/0/get_category_subtree?category_id=313",
+            "categoryTreeNodeLevel": 3,
+            "leafCategoryTreeNode": true
+          },
+          {
+            "category": {
+              "categoryId": "155183",
+              "categoryName": "Sweats & Hoodies"
+            },
+            "parentCategoryTreeNodeHref": "https://api.ebay.com/commerce/taxonomy/v1/category_tree/0/get_category_subtree?category_id=155183",
+            "categoryTreeNodeLevel": 3,
+            "leafCategoryTreeNode": true
+          }
+        ],
+        "categoryTreeNodeLevel": 2
+      },
+      {
+        "category": {
+          "categoryId": "3034",
+          "categoryName": "Women's Shoes"
+        },
+        "parentCategoryTreeNodeHref": "https://api.ebay.com/commerce/taxonomy/v1/category_tree/0/get_category_subtree?category_id=3034",
+        "childCategoryTreeNodes": [
+        ],
+        "categoryTreeNodeLevel": 2
+       }
+    ],
+    "categoryTreeNodeLevel": 1
+  }
+}

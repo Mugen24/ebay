@@ -1,10 +1,11 @@
 import logging from "@/app/utils/logger"
 import { clearInterval, setInterval } from "node:timers"
 
-export abstract class EbayEvent<T> {
-    listeners: Array<T>
+export abstract class EbayEvent<ListenerType> {
+    listeners: Array<ListenerType>
     intervalID: any
-    interval: number = 1800000 //30 mins
+    // interval: number = 1800000 //30 mins
+    interval: number = 30 * 60 * 1000 //1 mins
     
 
     constructor() {
@@ -12,13 +13,13 @@ export abstract class EbayEvent<T> {
     }
 
 
-    removeListener(listener: T) {
+    removeListener(listener: ListenerType) {
         this.listeners = this.listeners.filter((sub) => {
             return (sub === listener) 
         })
     }
 
-    addListener(listener: T) {
+    addListener(listener: ListenerType) {
         logging.debug( "Listener added:", listener.constructor.name)
         this.listeners.push(listener)
     }

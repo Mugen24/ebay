@@ -22,6 +22,14 @@ export function ClientPage() {
             }
             updateResponse()
         }
+
+        //TODO: window history check
+        return () => {
+            if (Object.keys(queryState).length) {
+                window.history.back()
+            }
+
+        }
     }, [queryState])
 
 

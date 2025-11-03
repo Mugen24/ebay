@@ -3,7 +3,7 @@ import { ItemSummary } from "../types/EbayApiTypes/ebaySeachTypes";
 import { NewItemFormat } from "../server/event/NewItemEvent";
 
 export type SSEContextType = {
-    data: undefined | NewItemFormat
+    data: undefined | any
 }
 
 export const SSEContext = createContext<SSEContextType | undefined>(undefined) 
@@ -14,7 +14,7 @@ export function SSEProvider(
         children?: ReactNode
     }
 ) {
-    let [data, setData] = useState<undefined | NewItemFormat>(undefined)
+    let [data, setData] = useState<undefined | any>(undefined)
 
     useEffect(() => {
         const eventSource = new EventSource(endpoint)

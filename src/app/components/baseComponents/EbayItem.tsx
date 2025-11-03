@@ -3,7 +3,7 @@
 import logging from '@/app/utils/logger';
 import { ItemSummary, CurrentBidPrice, ShippingOption, EbaySearch } from '../../types/EbayApiTypes/ebaySeachTypes';
 import Image from 'next/image';
-import { Timer } from './Timer';
+import { TimerComponent } from './Timer';
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { WatchItemButton } from './WatchItemButton';
@@ -25,6 +25,8 @@ export type EbayItemType = {
 }
 
 export function EbayItem({ ebayItem, children }: EbayItemType) {
+    // console.log(ebayItem)
+
     const itemTypes = ebayItem.buyingOptions
 
     // OPTIONS = FIXED_PRICE BEST_OFFER AUCTION
@@ -36,8 +38,13 @@ export function EbayItem({ ebayItem, children }: EbayItemType) {
 
     const originalCurrency = ebayItem.price?.convertedFromCurrency;
     const originalCurrencyPrice = ebayItem.price?.convertedFromValue
-    const price = ebayItem.price?.value
-    const currency= ebayItem.price?.currency
+
+    let price = ebayItem.price?.value
+    let currency= ebayItem.price?.currency
+    if (ebayItem["buyingOptions"].includes("AUCTION")) {
+        price = ebayItem.currentBidPrice.value
+        currency = ebayItem.currentBidPrice.currency
+    }
 
     const condition = ebayItem.condition
 
@@ -96,12 +103,13 @@ export function EbayItem({ ebayItem, children }: EbayItemType) {
                 >
                     <Link 
                         href={ebayItem.itemWebUrl}
+                        target='_blank'
                         className='
                             w-[133px]
                             block
                             truncate
                             hover:underline
-                            text-sm
+                            text-xs
                             font-semibold
                         '
                     >
@@ -155,8 +163,17 @@ export function EbayItem({ ebayItem, children }: EbayItemType) {
                     <CardDescription>
                         EIN: {ebayItemNumber} 
                     </CardDescription>
-                    <CardDescription>
-                        Location: {location} Date: {new Date(ebayItem.itemCreationDate).toLocaleDateString()}
+                    <CardDescription
+                        className='text-[0.5rem]'
+                    >
+                        <p>Location: {location}</p>
+                        <p>Date: {createDate.toLocaleString()}</p>
+                        <p>{ebayItem.buyingOptions.includes("AUCTION") ? `End date: ${endDate.toLocaleString()}` : ""}</p>
+                        {
+                            ebayItem.buyingOptions.includes("AUCTION") 
+                                ?  <TimerComponent startDate={createDate} endDate={endDate}/> 
+                                : ""
+                        }
                     </CardDescription>
                 </div>
 

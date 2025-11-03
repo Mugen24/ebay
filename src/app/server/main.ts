@@ -31,7 +31,7 @@ const SCHEMA =  `
     );
 
     create table if not exists favouriteItems (
-        id integer primary key,
+        id integer primary key, --epid
         data text
     );
 `
@@ -46,26 +46,38 @@ await db.exec(SCHEMA)
 
 const setting = await Setting.init(db)
 const categories = await CategoryManager.init(setting, db)
+
 const favourite= await Favourite.init(db)
 
 
 //Events
 import { NewItemEvent } from "./event/NewItemEvent";
-import { EmailNotification } from "./event/listeners/EmailNotification";
+import { ItemWachEvent } from "./event/ItemWatchEvent";
+
+import { EmailNotification, EmailUpdateType } from "./event/listeners/EmailNotification";
 
 export type ServerEvents = {
     "newItemEvent": NewItemEvent
+    "itemWatchEvent": ItemWachEvent
 }
 
 const serverEvents: ServerEvents = {
-    "newItemEvent": new NewItemEvent()
+    "newItemEvent": new NewItemEvent(db),
+    "itemWatchEvent": new ItemWachEvent(favourite)
 }
+
+//Listeners
+const queryMail = new EmailNotification("New Item", EmailUpdateType.newItemEvent)
+serverEvents.newItemEvent.addListener(queryMail)
+
+const itemMail = new EmailNotification("Item Update", EmailUpdateType.ItemWachEvent)
+serverEvents.newItemEvent.addListener(itemMail)
+
+serverEvents.itemWatchEvent.addListener(itemMail)
+
 
 Object.values(serverEvents).forEach(event => event.startLoop())
 
-//Listeners
-const mail = new EmailNotification()
-// serverEvents.newItemEvent.addListener(mail)
 
 export {
     setting,

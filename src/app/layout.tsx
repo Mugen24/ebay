@@ -4,6 +4,7 @@ import { StateContext, StateProvider } from "./hooks/useStateManagement";
 import { AxiosProvider } from "./hooks/useAxios";
 import { QueryStateProvider } from "./hooks/useQueryState";
 import * as server from "./server/main";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -29,13 +30,15 @@ export default function RootLayout({
         ">
         <body
         >
-            <AxiosProvider>
-              <StateProvider serverData={serverData}>
-                <QueryStateProvider>
-                    {children}
-                </QueryStateProvider>
-              </StateProvider>
-            </AxiosProvider>
+            <Suspense>
+              <AxiosProvider>
+                <StateProvider serverData={serverData}>
+                  <QueryStateProvider>
+                      {children}
+                  </QueryStateProvider>
+                </StateProvider>
+              </AxiosProvider>
+            </Suspense>
         </body>
       </html>
     </>

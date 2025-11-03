@@ -2,7 +2,7 @@ import { EbayEvent } from "./EbayEvent";
 import { ebayApi } from "../EbayApi/EbayApi";
 import logging from "@/app/utils/logger";
 import { EbaySearch, ItemSummary } from "@/app/types/EbayApiTypes/ebaySeachTypes";
-import { db } from "../main";
+import { Database } from "sqlite";
 
 export type NewItemFormat = {
     "id": string,
@@ -15,13 +15,19 @@ export interface NewItemSubscriber {
 }
 
 export class NewItemEvent extends EbayEvent<NewItemSubscriber>{
+    db: Database
+    constructor(db: Database) {
+        super()
+        this.db = db
+    }
+
     async notify(newItems: NewItemFormat) {
         const outcomes: Promise<Boolean>[] = []
         for (const listener of this.listeners) {
             outcomes.push(listener.update(newItems))
         }
         let allOutcome = await Promise.allSettled(outcomes)
-        allOutcome.map(o => {
+        const outcome = allOutcome.map(o => {
             if (o.status === "fulfilled") {
                 return o.value
             }
@@ -30,14 +36,15 @@ export class NewItemEvent extends EbayEvent<NewItemSubscriber>{
         .every((value: Boolean) => value)
 
         logging.group("NewItemEvent:")
-        logging.debug(`Outcome: ${allOutcome}`)
+        logging.debug(`Outcome: ${outcome}`)
+        // logging.debug(`Data: ${JSON.stringify(newItems)}`)
 
-        if (allOutcome) {
+        if (outcome) {
             const currDate = new Date(Date.now())
             logging.debug(`Updated time: ${currDate.toUTCString()}`)
 
             // set lastCheckedEpoch = unixepoch()
-            db.run(`
+            this.db.run(`
                 update favouriteQueries 
                     set lastCheckedEpoch = ?
                 where
@@ -50,7 +57,7 @@ export class NewItemEvent extends EbayEvent<NewItemSubscriber>{
     }
 
     async mainLoop() {
-        const queries = await db.all(`
+        const queries = await this.db.all(`
             select id, lastCheckedEpoch, ebaySearch from favouriteQueries
         `)
         for (const query of queries) {
@@ -66,8 +73,9 @@ export class NewItemEvent extends EbayEvent<NewItemSubscriber>{
                 for (const item of resp.itemSummaries) {
                     const createdTimeEpoch= new Date(item.itemCreationDate).getTime() 
                     if (createdTimeEpoch >= lastCheckedEpoch) {
-                          newItems.push(item)
+                           newItems.push(item)
                     } 
+                    newItems.push(item)
                 }
 
 

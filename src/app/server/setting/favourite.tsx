@@ -1,5 +1,7 @@
 import { EbaySearch } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import { Database } from "sqlite";
+import { FavouriteItemType } from "../api/setting/watch/item/route";
+import logging from "@/app/utils/logger";
 type ID = string
 export type FavouriteQueriesType = Record<ID, FavouriteQueryType>
 export type FavouriteQueryType = {
@@ -67,13 +69,21 @@ export class Favourite {
         `, [eID])
     }
 
-    async getItems() {
-        return await this.db.all(`
-            select * from favouriteItems 
+    async getItems(): Promise<FavouriteItemType[]> {
+        const data = await this.db.all(`
+            select id, data from favouriteItems 
         `)
+
+        return data.map(item => {
+            return {
+                id: item["id"],
+                ebayItem: JSON.parse(item["data"])
+            }
+        })
     }
     static async init(database: Database) {
         // const queries = await Favourite.getQueries(database)
+        logging.info("Getting Favourite from DB")
         return new Favourite(database)
     }
 }

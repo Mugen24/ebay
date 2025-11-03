@@ -1,11 +1,15 @@
-- Enfore ebay AU store only
-- Save query component to display category name as well
-
+- item pagination
 - feature: notification when auction item is ending + show relative date in UI
+- fix: ui scaling
+- UI overhaul
+
+
 - fixme: singleton sql table: setting
 - Revamp website UI
 - query of sub categories of parent when clicked
 - removing category does not refresh the ebay item content
+
+// TODO: may need to explicitly translate data from search and getItem call
 
 
 MarketPlaceId: https://developer.ebay.com/api-docs/static/rest-request-components.html#HTTP
