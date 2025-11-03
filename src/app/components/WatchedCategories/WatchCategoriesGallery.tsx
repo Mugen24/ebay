@@ -9,6 +9,7 @@ import { GetCategorySubtreeResponse } from "@/app/types/EbayApiTypes/CategoryTre
 import { Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { isDeepStrictEqual } from "node:util";
+import logging from "@/app/utils/logger";
 
 function WatchedCategory({id, query} : {id: string, query: any}) {
     const {data} = useSSE()
@@ -16,6 +17,8 @@ function WatchedCategory({id, query} : {id: string, query: any}) {
     const {getAxios} = useAxios()
     const axios = getAxios()
     const [isDeleted, setIsDeleted] = useState(false)
+
+    logging.debug("sse: ", data)
 
     useEffect(() => {
         if (data && data["id"]) {
@@ -128,7 +131,7 @@ function WatchedCategoriesGallery() {
 }
 
 export function WatchedCategoriesRoot() {
-    const QueryStreamEndPoint  = "server/api/setting/watch/stream"
+    const QueryStreamEndPoint  = "setting/watch/stream"
 
     return (
         <SSEProvider endpoint={QueryStreamEndPoint}>

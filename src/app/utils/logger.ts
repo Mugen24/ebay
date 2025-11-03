@@ -21,25 +21,46 @@ function trace(classType: logging, methodName: string, propertyDesc: PropertyDes
         console.trace()
     }
 }
+
+
+
+
 export default class logging {
+    static DEBUG_ONLY(state: string) {
+        return (state === "debug") 
+    }
+
+    static condition(state: string) {
+        return true
+    }
+
     // @is_logging
     static warn(...params: any[])  {
-        console.warn('%c [Warn]', 'background: #000; color:rgb(175, 207, 57); font-weight: 600', ...params);
+        if (logging.condition("warn")) {
+            console.warn('%c [Warn]', 'background: #000; color:rgb(175, 207, 57); font-weight: 600', ...params);
+        }
+
     }
 
     // @is_logging
     static debug(...params: any[])  {
-        console.debug('%c [Debug]', 'background: #000; color:rgb(39, 48, 180); font-weight: 600', ...params);
+        if (logging.condition("debug")) {
+            console.debug('%c [Debug]', 'background: #000; color:rgb(39, 48, 180); font-weight: 600', ...params);
+        }
     }
 
     // @is_logging
     static error(...params: any[])  {
-        console.error('%c [Error]', 'background: #000; color:rgb(202, 8, 8); font-weight: 600', ...params);
+        if (logging.condition("error")) {
+            console.error('%c [Error]', 'background: #000; color:rgb(202, 8, 8); font-weight: 600', ...params);
+        }
     }
 
     // @is_logging
     static info(...params: any[])  {
-        console.info('%c [Info]', 'background: #000; color:rgb(24, 209, 24); font-weight: 600', ...params);
+        if (logging.condition("info")) {
+            console.info('%c [Info]', 'background: #000; color:rgb(24, 209, 24); font-weight: 600', ...params);
+        }
     }
 
     // @is_logging

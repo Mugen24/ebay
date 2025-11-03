@@ -1,15 +1,16 @@
-import logging from "@/app/utils/logger";
-import { NewItemFormat, NewItemSubscriber, NewItemEvent } from '../NewItemEvent';
+import { NewItemFormat, NewItemEvent } from '../NewItemEvent';
 import { MessageHeaders, SMTPClient } from "emailjs"
 import { ItemSummary } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import { ReactNode } from "react";
 import { TimerComponent } from "@/app/components/baseComponents/Timer";
-import { ItemWatchListenerType } from "../ItemWatchEvent";
+import { sendEmail } from "@/app/utils/sendEmail";
+import logging from '@/app/utils/logger';
 
 
 export function CssEbayItem({item}: {item: ItemSummary}) {
     const price = item.price?.value
     const currency= item.price?.currency
+
     return (
         <td
             style={{
@@ -64,7 +65,7 @@ export function CssEbayItem({item}: {item: ItemSummary}) {
             >
                 <picture>
                     <img
-                        src={item.image.imageUrl} 
+                        src={item.image?.imageUrl ?? null} 
                         style={{
                             width: "100px",
                             height: "100px",
@@ -94,67 +95,72 @@ export function CssEbayItem({item}: {item: ItemSummary}) {
 }
 
 
-export class EmailUpdateType {
-    static async newItemEvent(data: NewItemFormat): Promise<string> {
-        const COLUMN_SIZE = 4
-        let {id, items, query} = data
-        const title = query["q"]
+export async function sendNewItemsToEmail(data: NewItemFormat): Promise<boolean> {
+    const COLUMN_SIZE = 4
+    let {id, items, query} = data
+    const title = query["q"]
 
-        const styledItems: ReactNode[] = []
+    const styledItems: ReactNode[] = []
 
-        let tempGroup: ReactNode[] = []
-        for (const item of items) {
-            tempGroup.push(<CssEbayItem key={item.itemId} item={item}/>)
+    let tempGroup: ReactNode[] = []
+    for (const item of items) {
+        tempGroup.push(<CssEbayItem key={item.itemId} item={item}/>)
 
-            if (tempGroup.length === COLUMN_SIZE) {
-                styledItems.push((
-                    <tr
-                        style={{
-                            //tr default is "baseline" 
-                            //all child while try to align with each other
-                            verticalAlign: "top" 
-                        }}
-                    >
-                        {Array.from(tempGroup)} 
-                    </tr>
-                ))
-
-                tempGroup = []
-            }
-        }
-
-        const messageBody = (
-            <html>
-                <header>
-                </header>
-                <body
+        if (tempGroup.length === COLUMN_SIZE) {
+            styledItems.push((
+                <tr
+                    key={Date.now()}
                     style={{
-                        
+                        //tr default is "baseline" 
+                        //all child while try to align with each other
+                        verticalAlign: "top" 
                     }}
                 >
-                    <h1>{title}</h1>
-                    <div
-                    >
-                        <table
-                            style={{
-                                width:"90vw",
-                                tableLayout: "fixed",
-                                overflow: "scroll"
+                    {Array.from(tempGroup)} 
+                </tr>
+            ))
 
-                            }}
-                        >
-                            {styledItems} 
-                        </table>
-                    </div>
-                </body>
-            </html>
-        )
-        const ReactDOMServer = (await import('react-dom/server')).default
-        return ReactDOMServer.renderToStaticMarkup(messageBody)
-
-        // return this.sendEmail(`Ebay: ${query['q']}`, ReactDOMServer.renderToStaticMarkup(messageBody))
+            tempGroup = []
+        }
     }
 
+    const messageBody = (
+        <html>
+            <header>
+            </header>
+            <body
+                style={{
+                    
+                }}
+            >
+                <h1>{title}</h1>
+                <div
+                >
+                    <table
+                        style={{
+                            width:"90vw",
+                            tableLayout: "fixed",
+                            overflow: "scroll"
+
+                        }}
+                    >
+                        {styledItems} 
+                    </table>
+                </div>
+            </body>
+        </html>
+    )
+    
+    const ReactDOMServer = (await import('react-dom/server')).default
+    // return ReactDOMServer.renderToStaticMarkup(messageBody)
+    return sendEmail(`Ebay: ${query['q']}`, ReactDOMServer.renderToStaticMarkup(messageBody))
+}
+
+
+
+
+
+/*
     static async ItemWachEvent(data: ItemWatchListenerType) {
         const ReactDOMServer = (await import('react-dom/server')).default
         const ebayItem = CssEbayItem({
@@ -163,49 +169,4 @@ export class EmailUpdateType {
 
         return ReactDOMServer.renderToStaticMarkup(ebayItem)
     }
-}
-
-export class EmailNotification {
-    update: any
-    title: string
-    constructor(title: string, update: (...args: any) => Promise<string>) {
-        this.title = title
-        this.update = (async (...args: any) => {
-            return this.sendEmail(title, await update(...args))
-        })
-    }
-
-    sendEmail(subject: string, content: string) {
-        logging.debug("Sending email")
-        logging.debug(`Username: ${process.env.EMAIL_USERNAME}`)
-        logging.debug(`ToList: ${process.env.EMAIL_TO_LIST}`)
-        logging.debug("Sending email")
-        const smtpClient = new SMTPClient({
-            user: process.env.EMAIL_USERNAME,
-            password: process.env.APP_PASSWORD,
-            host: "smtp.gmail.com",
-            ssl: true
-        })
-
-
-        const message: MessageHeaders = {
-            from: process.env.EMAIL_USERNAME!,
-            to: process.env.EMAIL_TO_LIST!,
-            subject: subject,
-            "content-type": "text/html",
-            text: content
-        }
-
-        let outcome = false
-        smtpClient.send(message, (err, msg) => {
-            if (err) {
-                logging.error(`Email error: ${err} \n ${JSON.stringify(msg)}`)
-            }
-            outcome = true
-        })
-
-        return outcome
-    }
-
-}
-
+*/

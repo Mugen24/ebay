@@ -1,5 +1,5 @@
 import { StreamListener } from "@/app/server/event/listeners/NewItemStream";
-import { serverEvents } from "@/app/server/main";
+import { serverEvents } from "@/app/server/serverEvents";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -7,7 +7,7 @@ export async function GET(
 ) 
 {
     const itemWatch = new StreamListener()
-    serverEvents.itemWatchEvent.addListener(itemWatch)
+    serverEvents.itemWatchEvent.addListener("SSEStream:", itemWatch.update)
 
     const response = Response.json(itemWatch.apiBody, {
         headers: {

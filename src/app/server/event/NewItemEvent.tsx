@@ -10,51 +10,31 @@ export type NewItemFormat = {
     "items": ItemSummary[]
 }
 
-export interface NewItemSubscriber {
-    update: (data: NewItemFormat) => Promise<boolean>
-}
 
-export class NewItemEvent extends EbayEvent<NewItemSubscriber>{
+export class NewItemEvent extends EbayEvent{
     db: Database
     constructor(db: Database) {
-        super()
+        super("NewItemEvent")
         this.db = db
     }
 
-    async notify(newItems: NewItemFormat) {
-        const outcomes: Promise<Boolean>[] = []
-        for (const listener of this.listeners) {
-            outcomes.push(listener.update(newItems))
-        }
-        let allOutcome = await Promise.allSettled(outcomes)
-        const outcome = allOutcome.map(o => {
-            if (o.status === "fulfilled") {
-                return o.value
-            }
-            return false
-        })
-        .every((value: Boolean) => value)
+    async onSuccess(newItems: NewItemFormat) {
+        const currDate = new Date(Date.now())
+        logging.debug(`Updated time: ${currDate.toUTCString()}`)
 
-        logging.group("NewItemEvent:")
-        logging.debug(`Outcome: ${outcome}`)
-        // logging.debug(`Data: ${JSON.stringify(newItems)}`)
-
-        if (outcome) {
-            const currDate = new Date(Date.now())
-            logging.debug(`Updated time: ${currDate.toUTCString()}`)
-
-            // set lastCheckedEpoch = unixepoch()
-            this.db.run(`
-                update favouriteQueries 
-                    set lastCheckedEpoch = ?
-                where
-                    id = ?
-            `, [currDate.getTime(), newItems.id])
-        }
-
-        logging.groupEnd()
-
+        // set lastCheckedEpoch = unixepoch()
+        this.db.run(`
+            update favouriteQueries 
+                set lastCheckedEpoch = ?
+            where
+                id = ?
+        `, [currDate.getTime(), newItems.id])
     }
+
+    addListener(title: string, callback: (newItemFormat: NewItemFormat) => Promise<boolean>): void {
+        super.addListener(title, callback)
+    }
+
 
     async mainLoop() {
         const queries = await this.db.all(`
@@ -75,7 +55,6 @@ export class NewItemEvent extends EbayEvent<NewItemSubscriber>{
                     if (createdTimeEpoch >= lastCheckedEpoch) {
                            newItems.push(item)
                     } 
-                    newItems.push(item)
                 }
 
 

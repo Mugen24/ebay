@@ -1,6 +1,8 @@
 import { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { ItemSummary } from "../types/EbayApiTypes/ebaySeachTypes";
 import { NewItemFormat } from "../server/event/NewItemEvent";
+import { useAxios } from "./useAxios";
+import logging from "../utils/logger";
 
 export type SSEContextType = {
     data: undefined | any
@@ -14,13 +16,19 @@ export function SSEProvider(
         children?: ReactNode
     }
 ) {
-    let [data, setData] = useState<undefined | any>(undefined)
+    const [data, setData] = useState<undefined | any>(undefined)
+
+    const {getAxios} = useAxios()
+    const axios = getAxios()
 
     useEffect(() => {
-        const eventSource = new EventSource(endpoint)
+        const eventSource = new EventSource(axios.defaults.baseURL + endpoint)
         eventSource.onmessage = (e) => {
-            setData(JSON.parse(e.data))
+           setData(JSON.parse(e.data))
         }
+        eventSource.onerror = (error => {
+            logging.error("Client SSE:", error)
+        })
     })
 
     const value = {

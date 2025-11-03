@@ -9,6 +9,22 @@
 - query of sub categories of parent when clicked
 - removing category does not refresh the ebay item content
 
+BUGS:
+- Basically the readerstream created by transformstream is locked
+    - when the api is called this is what we get
+    ```js
+    TypeError: Response body object should not be disturbed or locked
+    at GET (src/app/server/api/setting/watch/stream/route.tsx:16:17)
+  14 |
+  15 |
+> 16 |     const resp = new Response(readableStream, {
+     |                 ^
+  17 |         headers: {
+  18 |             "Content-Type": "text/event-stream",
+  19 |             "Cache-Control": "no-store, no-cache",
+ GET /server/api/setting/watch/stream 500 in 36ms
+    ```
+
 // TODO: may need to explicitly translate data from search and getItem call
 
 

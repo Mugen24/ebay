@@ -46,34 +46,38 @@ await db.exec(SCHEMA)
 
 const setting = await Setting.init(db)
 const categories = await CategoryManager.init(setting, db)
-
 const favourite= await Favourite.init(db)
 
 
 //Events
+import { ItemWatchEvent } from "./event/ItemWatchEvent";
 import { NewItemEvent } from "./event/NewItemEvent";
-import { ItemWachEvent } from "./event/ItemWatchEvent";
-
-import { EmailNotification, EmailUpdateType } from "./event/listeners/EmailNotification";
+import { sendNewItemsToEmail } from "./event/listeners/EmailNotification";
+import { StreamListener } from "./event/listeners/NewItemStream";
 
 export type ServerEvents = {
     "newItemEvent": NewItemEvent
-    "itemWatchEvent": ItemWachEvent
+    "itemWatchEvent": ItemWatchEvent
 }
 
 const serverEvents: ServerEvents = {
     "newItemEvent": new NewItemEvent(db),
-    "itemWatchEvent": new ItemWachEvent(favourite)
+    "itemWatchEvent": new ItemWatchEvent(favourite)
 }
 
 //Listeners
-const queryMail = new EmailNotification("New Item", EmailUpdateType.newItemEvent)
-serverEvents.newItemEvent.addListener(queryMail)
+// serverEvents.newItemEvent.addListener("Email", sendNewItemsToEmail)
 
-const itemMail = new EmailNotification("Item Update", EmailUpdateType.ItemWachEvent)
-serverEvents.newItemEvent.addListener(itemMail)
+// const newItemStream = new StreamListener()
+// serverEvents.newItemEvent.addListener("SSEStream", newItemStream.update)
 
-serverEvents.itemWatchEvent.addListener(itemMail)
+// serverEvents.itemWatchEvent.addListener("Email", async (payload) => {
+//     const {id, ebayGetItemReturn} = payload
+//     const ebayItemRender = CssEbayItem({
+//         item: ebayGetItemReturn as unknown as ItemSummary
+//     })
+//     return sendEmail("NewItem", await reactComponentToString(ebayItemRender))
+// })
 
 
 Object.values(serverEvents).forEach(event => event.startLoop())

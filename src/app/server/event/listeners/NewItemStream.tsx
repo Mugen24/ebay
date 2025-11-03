@@ -1,23 +1,26 @@
 import logging from "@/app/utils/logger";
-import { NewItemSubscriber } from "../NewItemEvent";
 
 export class StreamListener {
     stream: TransformStream<any, any>;
     encoder: TextEncoder;
     writer: WritableStreamDefaultWriter<any>;
     apiBody: any
+    update: (...args: any) => Promise<boolean>
     constructor() {
         this.stream = new TransformStream()
         this.encoder = new TextEncoder()
         this.writer = this.stream.writable.getWriter()
-        this.apiBody = this.stream.readable 
+        this.apiBody = this.stream.readable
+
+        this.update = this._update.bind(this)
     }
 
-    async update(data: any): Promise<boolean>{
+    async _update(data: any): Promise<boolean>{
         console.log("New Item")
         try {
             this.writer.write(this.encoder.encode(`data: ${JSON.stringify(data)}`))
             this.writer.write(this.encoder.encode(`\n\n`))
+
             return true
         } 
         catch(e) {

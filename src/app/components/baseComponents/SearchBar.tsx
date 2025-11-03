@@ -66,9 +66,14 @@ export function SearchBar() {
                     onNavigate={(e) => {
                         e.preventDefault()
                         if (refSearchForm.current) {
-                            queryState["q"] = refSearchForm.current.value
-                            EbaySaverState.addCategoryRequest(queryState)
+                            if (!refSearchForm.current.value) {
+                                delete queryState["q"]
+                            }
+                            else {
+                                queryState["q"] = refSearchForm.current.value
+                            }
 
+                            EbaySaverState.addCategoryRequest(queryState)
                             queryHandler({
                                 "type": "updateQuery",
                                 "results": refSearchForm.current.value
