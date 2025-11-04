@@ -8,12 +8,12 @@ import { Database } from "sqlite";
 import type { Favourite } from "../setting/favourite";
 
 
-type NotifyType = {
+export type NotifyType = {
     id: string
     ebayGetItemReturn: EbayGetItemReturn
 }
 
-type ItemWatchListenerType = (payload: NotifyType) => Promise<boolean>
+export type ItemWatchListenerType = (payload: NotifyType) => Promise<boolean>
 
 
 export class ItemWatchEvent extends EbayEvent {

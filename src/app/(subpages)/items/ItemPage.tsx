@@ -7,6 +7,8 @@ import { useAxios } from "@/app/hooks/useAxios";
 import { ItemGallery } from "@/app/components/baseComponents/ItemGallery";
 import { useQueryState } from "@/app/hooks/useQueryState";
 import { CategoriesList } from "@/app/components/baseComponents/CategoriesList";
+import { PreviousButton } from "@/app/components/ebayComponents/PreviousButton";
+import { NextButton } from "@/app/components/ebayComponents/NextButton";
 
 export function ClientPage() {
     const { queryState, queryHandler, response, updateResponse } = useQueryState()
@@ -17,19 +19,12 @@ export function ClientPage() {
             url.searchParams.set("query", JSON.stringify(queryState))
 
             // !!Prevent same state from being pushed twice!!
-            if (window.location.href !== url.toString()) {
-                window.history.pushState({}, "", url)
-            }
+            window.history.replaceState({}, "", url)
             updateResponse()
         }
 
         //TODO: window history check
-        return () => {
-            if (Object.keys(queryState).length) {
-                window.history.back()
-            }
-
-        }
+        return 
     }, [queryState])
 
 
@@ -80,6 +75,7 @@ export function ClientPage() {
             >
                 <ItemGallery/>
             </div>
+
         </div>
     )
 }

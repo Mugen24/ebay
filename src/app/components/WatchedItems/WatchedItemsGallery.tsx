@@ -4,7 +4,7 @@ import { useAxios } from '../../hooks/useAxios';
 import { EbayItem } from "../baseComponents/EbayItem";
 import type { FavouriteItemType } from "@/app/server/api/setting/watch/item/route";
 import { SSEProvider, useSSE } from "@/app/hooks/useSSE";
-import type { ItemWatchListenerType } from "@/app/server/event/ItemWatchEvent";
+import type { ItemWatchListenerType, NotifyType } from "@/app/server/event/ItemWatchEvent";
 import { ItemSummary } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import { EbayGetItemReturn } from "@/app/types/EbayApiTypes/ebayGetItemTypes";
 import { Gallery, GalleryItem, GalleryList, GalleryTitle } from "../baseComponents/Gallery";
@@ -12,12 +12,13 @@ import { Gallery, GalleryItem, GalleryList, GalleryTitle } from "../baseComponen
 
 type WatchItemType = {
     ebayItem: EbayGetItemReturn
+    serverID: string
     children?: ReactNode
 }
 
 function WatchItem(props: WatchItemType) {
     // Make the typing a bit better
-    const {data}: {data: ItemWatchListenerType} = useSSE() 
+    const {data}: {data: NotifyType} = useSSE() 
     const [ebayItem, setEbayItem] = useState<EbayGetItemReturn>(props.ebayItem as unknown as EbayGetItemReturn)
     useEffect(() => {
         if (data && (data.id === ebayItem.itemId)) {
@@ -26,7 +27,7 @@ function WatchItem(props: WatchItemType) {
     }, [data])
 
     // TODO: may need to explicitly translate data from search and getItem call
-    return <EbayItem ebayItem={ebayItem as unknown as ItemSummary}/>
+    return <EbayItem ebayItem={ebayItem as unknown as ItemSummary} server={{"id": props.serverID}}/>
 }
 
 
@@ -47,7 +48,7 @@ export function WatchedItemGallery() {
     const renderedItems = items.map(i => {
         return (
             <GalleryItem key={i.id} asChild>
-                <WatchItem ebayItem={i.ebayItem as unknown as EbayGetItemReturn}></WatchItem>
+                <WatchItem ebayItem={i.ebayItem as unknown as EbayGetItemReturn} serverID={i.id}></WatchItem>
             </GalleryItem>
         )
     })

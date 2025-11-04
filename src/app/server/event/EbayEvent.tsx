@@ -1,7 +1,7 @@
 import logging from "@/app/utils/logger"
 import { clearInterval, setInterval } from "node:timers"
 
-type EventData = {
+export type EventData = {
     data: any,
     outcomes: Promise<any>[]
 }
@@ -9,9 +9,9 @@ type EventData = {
 export abstract class EbayEvent {
     listeners: Record<string, (...args: any) => Promise<boolean>>
     intervalID: any
-    // interval: number = 1800000 //30 mins
+    interval: number = 1800000 //30 mins
     // interval: number = 30 * 60 * 1000 //1 mins
-    interval: number = 30000 //1 mins
+    // interval: number = 30000 //1 mins
     title: string
     
 

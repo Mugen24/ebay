@@ -31,7 +31,7 @@ const SCHEMA =  `
     );
 
     create table if not exists favouriteItems (
-        id integer primary key, --epid
+        id text primary key, --epid
         data text
     );
 `
@@ -65,8 +65,8 @@ const serverEvents: ServerEvents = {
     "itemWatchEvent": new ItemWatchEvent(favourite)
 }
 
-//Listeners
-// serverEvents.newItemEvent.addListener("Email", sendNewItemsToEmail)
+// Listeners
+serverEvents.newItemEvent.addListener("Email", sendNewItemsToEmail)
 
 // const newItemStream = new StreamListener()
 // serverEvents.newItemEvent.addListener("SSEStream", newItemStream.update)

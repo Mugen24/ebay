@@ -46,14 +46,14 @@ export function CssEbayItem({item}: {item: ItemSummary}) {
                 </a>
                 <p>condition: {item.condition}</p>
                 <p>date: {new Date(item.itemCreationDate).toUTCString()}</p>
-                {
+                {/* {
                     item.buyingOptions.includes("AUCTION")
                     ?  <TimerComponent 
                             startDate={new Date(item.itemCreationDate)}
                             endDate={new Date(item.itemEndDate)}
                        />
                     : <></>
-                }
+                } */}
 
                 <p>type: {item.buyingOptions}</p>
                 <p>eid: {item.itemId.split("|")[1]}</p>
@@ -124,6 +124,23 @@ export async function sendNewItemsToEmail(data: NewItemFormat): Promise<boolean>
         }
     }
 
+    if (tempGroup) {
+        styledItems.push((
+            <tr
+                key={Date.now()}
+                style={{
+                    //tr default is "baseline" 
+                    //all child while try to align with each other
+                    verticalAlign: "top" 
+                }}
+            >
+                {Array.from(tempGroup)} 
+            </tr>
+        ))
+
+        tempGroup = []
+    }
+
     const messageBody = (
         <html>
             <header>
@@ -153,7 +170,7 @@ export async function sendNewItemsToEmail(data: NewItemFormat): Promise<boolean>
     
     const ReactDOMServer = (await import('react-dom/server')).default
     // return ReactDOMServer.renderToStaticMarkup(messageBody)
-    return sendEmail(`Ebay: ${query['q']}`, ReactDOMServer.renderToStaticMarkup(messageBody))
+    return sendEmail(`NewItem Ebay: ${query['q']}`, ReactDOMServer.renderToStaticMarkup(messageBody))
 }
 
 

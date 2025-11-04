@@ -19,8 +19,16 @@ class EbayApi {
         this.ebayApiScrapper = ebayApiScrapper
     }
 
-    search(ebaySearch: SEbaySearch, optionalConfig: OptionalDataType  = {}, noParse: Boolean = false) {
-        return this.ebayApiToken.search(ebaySearch, optionalConfig, noParse)
+    search(ebaySearch: SEbaySearch, optionalConfig: OptionalDataType  = {}) {
+        return this.ebayApiToken.search(ebaySearch, optionalConfig)
+    }
+
+    searchNext(ebaySearch: SEbaySearch, optionalConfig: OptionalDataType  = {}) {
+        return this.ebayApiToken.searchNext(ebaySearch)
+    }
+
+    searchPrevious(ebaySearch: SEbaySearch, optionalConfig: OptionalDataType  = {}) {
+        return this.ebayApiToken.searchPrevious(ebaySearch)
     }
 
     getItem(itemData: EbayGetItem, optionalConfig: OptionalDataType = {}) {

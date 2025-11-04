@@ -6,7 +6,7 @@ import logging from "../../utils/logger";
 import { Outcome } from "../../types/Outcome";
 import { OptionalDataType } from "../../types/clientApiTypes";
 import { GetCategorySubtree, GetCategorySubtreeResponse, GetCategoryTreeRequest, GetCategoryTreeResponse, GetDefaultCategoryTreeRequest, GetDefaultCategoryTreeResponse } from "../../types/EbayApiTypes/CategoryTree";
-import { Countries, EbaySaverState, SEbaySearch } from "./EbaySaverState";
+import { Countries, EbaySaverState, SEbaySearch } from './EbaySaverState';
 
 const EBAY_MARKET = "EBAY_AU"
 // Set user delivery fee to this address
@@ -16,6 +16,8 @@ const USER_ZIP = "2166"
 const ITEM_LOCATION = "AU"
 
 const CATEGORY_ENDPOINT = "/commerce/taxonomy/v1/category_tree"
+
+const LIMIT = 50
 
 export class EbayApiToken {
     static scopes = ["https://api.ebay.com/oauth/api_scope"];
@@ -77,7 +79,7 @@ export class EbayApiToken {
         this._optionalHeaders["X-EBAY-C-MARKETPLACE-ID"] = `${marketCode}`
     }
 
-    async search(config: SEbaySearch, optionalConfig: Record<string,any> = {}, noParse: Boolean = false): Promise<Outcome<EbaySearchReturn>> {
+    async search(config: SEbaySearch, optionalConfig: Record<string,any> = {}): Promise<Outcome<EbaySearchReturn>> {
         //config is url returned by EbaySeachReturn[next]
         logging.group("Calling EbaySearch")
         // logging.debug("Query: " + JSON.stringify(config))
@@ -87,7 +89,7 @@ export class EbayApiToken {
         config.filter = config.filter ?? {}
         config.filter["itemLocationCountry"] = `${ITEM_LOCATION}`
 
-        const ebaySearch = noParse ? config : EbaySaverState.parse(config)
+        const ebaySearch = EbaySaverState.parse(config)
         const resp = await this.axios.get("/buy/browse/v1/item_summary/search", 
             {
                 params: ebaySearch,
@@ -96,6 +98,32 @@ export class EbayApiToken {
         const test: EbaySearchReturn = resp.data
         logging.groupEnd()
         return [resp.status === 200, resp.data]
+    }
+
+    async searchNext(config: SEbaySearch) {
+        const limit = Number(config.limit) 
+        const offset = Number(config.offset)
+
+        const nextOffset = offset + limit
+
+        config.offset = String(nextOffset)
+
+        return this.search(config)
+    }
+
+    async searchPrevious(config: SEbaySearch) {
+        const limit = Number(config.limit) 
+        const offset = Number(config.offset)
+
+        const prevOffset= offset - limit
+        if (prevOffset >= 0) {
+            config.offset = String(prevOffset)
+            return this.search(config)
+        }
+
+        return [false, {
+            error: "Cannot go back any further"
+        }]
     }
 
     async getItem(options: EbayGetItem, optionalConfig?: OptionalDataType): Promise<Outcome<EbayGetItemReturn>> {

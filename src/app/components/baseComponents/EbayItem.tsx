@@ -24,7 +24,7 @@ export type EbayItemType = {
     server?: EbayItemServerData 
 }
 
-export function EbayItem({ ebayItem, children }: EbayItemType) {
+export function EbayItem({ ebayItem, children, server }: EbayItemType) {
     // console.log(ebayItem)
 
     const itemTypes = ebayItem.buyingOptions
@@ -219,7 +219,7 @@ export function EbayItem({ ebayItem, children }: EbayItemType) {
                 >
                     {currency}: {price}
                 </Badge>
-                <WatchItemButton ebayItem={ebayItem}></WatchItemButton>
+                <WatchItemButton ebayItem={ebayItem} server={server}></WatchItemButton>
                 {children}
             </CardFooter>
         </Card>

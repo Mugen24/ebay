@@ -8,7 +8,6 @@ import { HyperText } from "../baseComponents/HyperText";
 import { GetCategorySubtreeResponse } from "@/app/types/EbayApiTypes/CategoryTree";
 import { Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { isDeepStrictEqual } from "node:util";
 import logging from "@/app/utils/logger";
 
 function WatchedCategory({id, query} : {id: string, query: any}) {

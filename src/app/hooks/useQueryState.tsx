@@ -39,6 +39,7 @@ export type QueryActionType =
       }}
     | {type: 'replaceQueryState', results: SEbaySearch}
     | {type: 'replaceFromSearchParams', results?: URLSearchParams}
+    | {type: 'updateOffset', results: Number}
 
 
 export function QueryStateProvider({initialData, children}: {initialData?: EbaySearch, children: ReactNode}) {
@@ -116,6 +117,10 @@ export function QueryStateProvider({initialData, children}: {initialData?: EbayS
             newState = fetchFromSearchParam(params)
             console.log(params)
             console.log(newState)
+        }
+
+        else if (action.type === "updateOffset") {
+            newState.offset = String(action.results)
         }
 
 

@@ -18,9 +18,9 @@ export function WatchItemButton({ebayItem, server}: {
     const axios = getAxios()
 
     const savedID = server ? server.id : null
-    const ebayItemNumber = savedID ?? ebayItem.itemId
 
-    const [state, setState] = useState<"Add" | "Remove">(ebayItemNumber ? "Remove" : "Add")
+    const ebayItemNumber = savedID ?? ebayItem.itemId
+    const [state, setState] = useState<"Add" | "Remove">(savedID ? "Remove" : "Add")
 
     // async function updateState() {
     //     const resp= await axios.get(`setting/watch/item/${ebayItemNumber}`)
@@ -41,7 +41,6 @@ export function WatchItemButton({ebayItem, server}: {
             axios.delete(`setting/watch/item/${ebayItemNumber}`)
             setState("Add")
         }
-        // updateState()
     }
     return (
         <Button 

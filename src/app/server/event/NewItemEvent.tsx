@@ -1,4 +1,4 @@
-import { EbayEvent } from "./EbayEvent";
+import { EbayEvent, EventData } from "./EbayEvent";
 import { ebayApi } from "../EbayApi/EbayApi";
 import logging from "@/app/utils/logger";
 import { EbaySearch, ItemSummary } from "@/app/types/EbayApiTypes/ebaySeachTypes";
@@ -18,9 +18,11 @@ export class NewItemEvent extends EbayEvent{
         this.db = db
     }
 
-    async onSuccess(newItems: NewItemFormat) {
+    async onSuccess(eventData: EventData) {
+        const newItems = eventData.data
+
         const currDate = new Date(Date.now())
-        logging.debug(`Updated time: ${currDate.toUTCString()}`)
+        logging.debug(`Updated time: ${currDate.toLocaleTimeString()}`)
 
         // set lastCheckedEpoch = unixepoch()
         this.db.run(`
@@ -43,7 +45,7 @@ export class NewItemEvent extends EbayEvent{
         for (const query of queries) {
             (async () => {
                 const {id, lastCheckedEpoch, ebaySearch} = query
-                const [outcome, resp] = await ebayApi.search(JSON.parse(ebaySearch), {}, true)
+                const [outcome, resp] = await ebayApi.search(JSON.parse(ebaySearch), {})
                 if (!outcome) {
                     logging.error("Failed event fetch")
                     return
@@ -52,9 +54,10 @@ export class NewItemEvent extends EbayEvent{
                 const newItems: ItemSummary[] = []
                 for (const item of resp.itemSummaries) {
                     const createdTimeEpoch= new Date(item.itemCreationDate).getTime() 
-                    if (createdTimeEpoch >= lastCheckedEpoch) {
+                    if (createdTimeEpoch > lastCheckedEpoch) {
                            newItems.push(item)
                     } 
+                    // newItems.push(item)
                 }
 
 

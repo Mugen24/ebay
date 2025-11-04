@@ -22,13 +22,13 @@ export function SSEProvider(
     const axios = getAxios()
 
     useEffect(() => {
-        const eventSource = new EventSource(axios.defaults.baseURL + endpoint)
-        eventSource.onmessage = (e) => {
-           setData(JSON.parse(e.data))
-        }
-        eventSource.onerror = (error => {
-            logging.error("Client SSE:", error)
-        })
+        // const eventSource = new EventSource(axios.defaults.baseURL + endpoint)
+        // eventSource.onmessage = (e) => {
+        //    setData(JSON.parse(e.data))
+        // }
+        // eventSource.onerror = (error => {
+        //     logging.warn("Client SSE:", error)
+        // })
     })
 
     const value = {
