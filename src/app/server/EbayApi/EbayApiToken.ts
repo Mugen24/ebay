@@ -7,6 +7,7 @@ import { Outcome } from "../../types/Outcome";
 import { OptionalDataType } from "../../types/clientApiTypes";
 import { GetCategorySubtree, GetCategorySubtreeResponse, GetCategoryTreeRequest, GetCategoryTreeResponse, GetDefaultCategoryTreeRequest, GetDefaultCategoryTreeResponse } from "../../types/EbayApiTypes/CategoryTree";
 import { Countries, EbaySaverState, SEbaySearch } from './EbaySaverState';
+import { setInterval } from "timers";
 
 const EBAY_MARKET = "EBAY_AU"
 // Set user delivery fee to this address
@@ -22,10 +23,15 @@ const LIMIT = 50
 export class EbayApiToken {
     static scopes = ["https://api.ebay.com/oauth/api_scope"];
     token: string;
+    tokenData: any;
     axios: AxiosInstance;
     _optionalHeaders: Record<string, string>
-    private constructor (token: string) {
+    private constructor (token: string, tokenData: any) {
         this.token = token;
+        this.tokenData = tokenData
+
+        this.startRefreshTokenInterval()
+
         this._optionalHeaders= {}
 
         this.axios = axios.create({
@@ -52,8 +58,20 @@ export class EbayApiToken {
             return res
         }, responseErrorHandler)
     }
-    
-    static async authenticate() {
+
+    startRefreshTokenInterval() {
+        setInterval(
+            async () => {
+                logging.info("Renewing token")
+                const parsed_token = await EbayApiToken._authenticate()
+                this.token = parsed_token.access_token
+                this.tokenData = parsed_token
+            },
+            this.tokenData["expires_in"] * 1000 - (5 * 60 * 1000)// Renew token 5 mins before expiry
+        )
+    }
+
+    static async _authenticate() {
         const ebayAuth = new EbayAuthToken(
             {
                 clientId: process.env.CLIENT_ID!,
@@ -62,12 +80,18 @@ export class EbayApiToken {
             }
         )
         let token = await ebayAuth.getApplicationToken("PRODUCTION", EbayApiToken.scopes)
-
         const parsed_token= JSON.parse(token);
         if (process.env.ROLLUP_ENV === "DEBUG") {
             console.log(`TOKEN: ${parsed_token}`)
         }
-        return new EbayApiToken(parsed_token.access_token);
+
+        return parsed_token
+    }
+
+    static async init() {
+        const parsed_token = await EbayApiToken._authenticate()
+        const ebayApiToken = new EbayApiToken(parsed_token.access_token, parsed_token);
+        return ebayApiToken
     }
 
     async setAddress(country: keyof typeof Countries, postcode: number) {

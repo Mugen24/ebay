@@ -77,7 +77,7 @@ class EbayApi {
 
     
     static async init() {
-        const ebayApiToken: EbayApiToken = await EbayApiToken.authenticate()
+        const ebayApiToken: EbayApiToken = await EbayApiToken.init()
         // Need this for now
         console.assert(ebayApiToken)
 
