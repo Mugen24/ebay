@@ -1,5 +1,5 @@
 import EbayAuthToken from "ebay-oauth-nodejs-client"
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { EbaySearch, EbaySearchReturn } from "@/app/types/EbayApiTypes/ebaySeachTypes";
 import { EbayGetItemReturn, EbayGetItem } from "@/app/types/EbayApiTypes/ebayGetItemTypes";
 import logging from "../../utils/logger";
@@ -36,11 +36,11 @@ export class EbayApiToken {
 
         this.axios = axios.create({
             baseURL: "https://api.ebay.com",
-            headers: {
-                "X-EBAY-C-ENDUSERCTX": `contextualLocation=country=${USER_COUNTRY},zip=${USER_ZIP}`,
-                "X-EBAY-C-MARKETPLACE-ID": `${EBAY_MARKET}`,
-                "Authorization": `Bearer ${this.token}`
-            }
+            // headers: {
+            //     "X-EBAY-C-ENDUSERCTX": `contextualLocation=country=${USER_COUNTRY},zip=${USER_ZIP}`,
+            //     "X-EBAY-C-MARKETPLACE-ID": `${EBAY_MARKET}`,
+            //     "Authorization": `Bearer ${this.token}`
+            // }
         })
 
         this.axios.interceptors.request.use((request) => {
@@ -57,9 +57,23 @@ export class EbayApiToken {
         this.axios.interceptors.response.use((res: AxiosResponse) => {
             return res
         }, responseErrorHandler)
+
+
+        const injectAuth = (config: InternalAxiosRequestConfig) => {
+            config.headers.set("X-EBAY-C-ENDUSERCTX", `contextualLocation=country=${USER_COUNTRY},zip=${USER_ZIP}`, true)
+            config.headers.set("X-EBAY-C-MARKETPLACE-ID", `${EBAY_MARKET}`, true)
+            config.headers.set("Authorization", `Bearer ${this.token}`, true)
+            return config
+        }
+
+
+        this.axios.interceptors.request.use(
+            injectAuth
+        )
     }
 
     startRefreshTokenInterval() {
+        // Access token by default expires every 7200s or 2hr
         setInterval(
             async () => {
                 logging.info("Renewing token")

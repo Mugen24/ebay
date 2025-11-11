@@ -123,10 +123,8 @@ export function CategoryButton({categoryID, categoryName, onClick, onRemove}: {
                 border-2
                 p-1
                 rounded-xl
-                w-fit
-                text-[60%]
             "
-            size="sm"
+            size="default"
         >
             {`${categoryName}`}
         </Button>

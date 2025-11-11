@@ -27,6 +27,9 @@ export default function RootLayout({
       <html 
         className="
           dark
+          w-full
+          h-full
+          text-[100px]
         ">
         <body
         >

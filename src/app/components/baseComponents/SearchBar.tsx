@@ -21,102 +21,72 @@ export function SearchBar() {
     return (
         <div
             className="
-                grid
                 justify-center
-                h-12
-                grid-cols-[2fr_max-content]
-                px-4
+                h-20
+                px-14
+                flex
+                flex-row
             "
         >
-            <Command
-                className="
-                    col-start-1
-                    col-span-1
-                "
-            >
-                <CommandInput asChild
+                <Input 
                     className="
                         border-2
                         border-solid
                         rounded-l-3xl
                         pl-4
                         h-full
+                        flex-3/4
+                    "
+                    ref={refSearchForm}
+                    type="search"
+                    placeholder="search"
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            refLink.current?.click()
+                        }
+                    }}
+                    value={searchQuery}
+                    onChange={(e) => {
+                        setSearchQuery(e.target.value)
+                    }}
+                        
+                />
+
+                <Button 
+                    asChild={true}
+                    className="
+                        h-full
+                        flex-auto
+                        max-w-40
+                        text-2xl
                     "
                 >
-                    <Input 
-                        ref={refSearchForm}
-                        type="search"
-                        placeholder="search"
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                                refLink.current?.click()
-                            }
+                    <Link
+                        href={"/items"}
+                        onNavigate={(e) => {
+                            e.preventDefault()
+                            if (refSearchForm.current) {
+                                if (!refSearchForm.current.value) {
+                                    delete queryState["q"]
+                                }
+                                else {
+                                    queryState["q"] = refSearchForm.current.value
+                                }
+
+                                EbaySaverState.addCategoryRequest(queryState)
+                                queryHandler({
+                                    "type": "updateQuery",
+                                    "results": refSearchForm.current.value
+                                })
+                                router.push(`items?query=${JSON.stringify(queryState)}`, )
+
+                            } 
                         }}
-                        value={searchQuery}
-                        onChange={(e) => {
-                            setSearchQuery(e.target.value)
-                        }}
-                            
-                    />
-                </CommandInput>
-            </Command>
-            <Button asChild={true}>
-                <Link
-                    href={"/items"}
-                    onNavigate={(e) => {
-                        e.preventDefault()
-                        if (refSearchForm.current) {
-                            if (!refSearchForm.current.value) {
-                                delete queryState["q"]
-                            }
-                            else {
-                                queryState["q"] = refSearchForm.current.value
-                            }
+                    >
+                        Search
+                    </Link>
+                </Button>
 
-                            EbaySaverState.addCategoryRequest(queryState)
-                            queryHandler({
-                                "type": "updateQuery",
-                                "results": refSearchForm.current.value
-                            })
-                            router.push(`items?query=${JSON.stringify(queryState)}`, )
-
-                        } 
-                    }}
-                >
-                    Search
-                </Link>
-            </Button>
-            {/* <Button
-                ref={refLink}
-                href={{
-                    pathname: "/items"
-                }}
-                className="
-                    col-start-3
-                    text-2xl
-                    text-center
-                    rounded-r-3xl
-                    h-full
-                "
-                asChild={true}
-                onClick={(e) => {
-                    if (refSearchForm.current && refSearchForm.current.value) {
-                        queryState["q"] = refSearchForm.current.value
-                        EbaySaverState.addCategoryRequest(queryState)
-
-                        router.push(`items?query=${JSON.stringify(queryState)}`, )
-                        queryHandler({
-                            "type": "updateQuery",
-                            "results": refSearchForm.current.value
-                        })
-
-                    } else {
-                        e.preventDefault()
-                    }
-                }}
-            >
-                Search
-            </Button> */}
         </div>
     )
 }

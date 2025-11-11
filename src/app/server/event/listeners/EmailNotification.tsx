@@ -45,7 +45,7 @@ export function CssEbayItem({item}: {item: ItemSummary}) {
                     </h1>
                 </a>
                 <p>condition: {item.condition}</p>
-                <p>date: {new Date(item.itemCreationDate).toUTCString()}</p>
+                <p>date: {new Date(item.itemCreationDate).toLocaleString()}</p>
                 {/* {
                     item.buyingOptions.includes("AUCTION")
                     ?  <TimerComponent 
